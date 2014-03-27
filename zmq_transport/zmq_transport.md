@@ -4,13 +4,13 @@
 ## Overview
 
 Gazebo's current transport library was designed and implemented in house.
-Although it has been working for years and it's fast, there are quite a few
+Although it has been working for years and it is quite fast, there are quite a few
 existing projects that we could use for replacing our custom approach. The
 main advantage that we will get by using an existing transport alternative is a
 fewer amount of code to maintain in Gazebo.
 
 [ZeroMQ](http://zeromq.org) seems to be a good candidate for implementing the
-core functionality of the transport system. ZeroMQ essentially provides framing
+core functionality of the transport system required in Gazebo. ZeroMQ essentially provides framing
 and portability to sockets. Another interesting features are its large
 collection of bindings, LGPL license, active community, and simplicity of use.
 
@@ -20,7 +20,7 @@ The main requirement of this library is to expose an API for communicating
 with the Gazebo components via topics or service calls. A client of this library
 might be located inside one of the Gazebo processes or in an external process
 (command line tool), even in a different machine. Essentially, this is the main
-functionatility that the transport library should provide:
+functionality that the transport library should provide:
 
 1. Allow a client to advertise, subscribe, and publish a topic.
 1. Allow a client to request/response service calls.
@@ -35,13 +35,13 @@ serialization problems.
 
 Gazebo's current approach is based on a centralized model where a dedicated
 process registers the addresses of the components advertising every topic or
-service call. A distributed approach doesn't rely on this dedicated process
-removing the single point of failure.
+service call. A distributed approach does not rely on this dedicated process
+removing the classical single point of failure of centralized architectures.
 
 We are proposing a transition to a distributed architecture where all components
 create a peer to peer network for distributing the discovery
 information across the network. It will be important to take into consideration
-the performance and scalibility of the distributed approach when the number of
+the performance and scalability of the distributed approach when the number of
 clients grow. Once the clients' location have been discovered, the data
 communication is performed by using the data delivery capabilities of ZeroMQ
 between the interested parties. The rest of clients do not participate in the
@@ -49,15 +49,15 @@ data communication.
 
 ### Discovery
 
-This is the process required to know the adress associated to the
-publisher of a topic or service call. Centralized architectures implemente this
-by quering the master process. In a distributed architecture we need a discovery
+This is the process required to know the address associated to the
+publisher of a topic or service call. Centralized architectures implement this
+by querying the master process. In a distributed architecture we need a discovery
 process. ZeroMQ does not provide a discovery protocol, so we propose a custom
 one.
 
 A discovery message is composed by two main parts: header and body.
 
-**Packet format: Header.**
+**- Packet format: Header -**
 
       0               1               2               3
       0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
@@ -89,7 +89,31 @@ A discovery message is composed by two main parts: header and body.
      |  Flags (cont)  |
      +-+-+-+-+-+-+-+-+-
 
-**Packet format: Body.**
+**Version**: Field used to check that all the clients agree on the same discovery
+protocol version.
+
+**GUID**: Global unique identifier between clients. Two different clients running
+on the same process should share the same GUID, otherwise the GUIDs will be
+different. This is used to choose the appropriate ZeroMQ end point when
+connecting the sockets of the clients to communicate. ZeroMQ offers different
+options (inproc, ipc, tcp), each one with different optimizations implemented.
+In our case, we will choose "inproc" to connect the sockets if the GUID of the
+clients matches, or "tcp" in any other case. "Ipc" will not be used because is
+not supported in all the platforms.
+
+**Topic length**: Specifies the length of the topic name in bytes.
+
+**Topic name**: Name of the topic.
+
+**Type**: The header is just part of a discovery message. This field specifies the
+type of discovery message. The options are Advertisement message (type = 1),
+Advertisement-service-call message (type = 2), Subscription message (type = 3)
+and Subscription-service-call message (type = 4).
+
+**Flags**: Field that allow us to specify different future options
+(compressed data, encrypted data, ...).
+
+**- Packet format: Body -**
 
          0               1               2               3
       0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
@@ -103,14 +127,20 @@ A discovery message is composed by two main parts: header and body.
      |                                                               |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+**Address length**: Specifies the length of the ZeroMQ address in bytes.
+
+**ZeroMQ address**: The ZeroMQ end point that will be used to connect the
+subscribers with the publishers (or the service call requesters with the service
+calls providers). E.g., tcp://10.0.0.1:6000 .
+
 #### Message overview ####
 
 The discovery protocol is composed by two main type of messages: Advertisement
 and Subscription. The Advertisement message is used to advertise the ZeroMQ
 address associated to a topic or service call. The Subscription message is used
 to request the ZeroMQ address information associated to a given topic. An
-Advertisement message can be sent proactively by a publisher when it joints the
-network, periodically as a hearbit, or as an aswer to a Subscription message.
+Advertisement message can be sent pro-actively by a publisher when it joints the
+network, periodically as a heart bit, or as an answer to a Subscription message.
 
 Next are the four available messages for the discovery protocol:
 
@@ -156,10 +186,46 @@ An alternative discovery might be implemented using
 
 #### Transport
 
-ZeroMQ supports the concept of publish/subscribe to a string topic. From the
+ZeroMQ supports the concept of publish/subscribe and request/response. From the
 subscriber's perspective, the subscription is performed by executing a connect()
 call passing the publisher's ZeroMQ address as a parameter. After the connect(),
-the client will receive updates each time the publisher sends new data.
+the client will receive updates each time the publisher sends new data. In
+addition, the subscriber will add a ZeroMQ filter to receive only the updates
+sent by the publisher related with the topic subscribed.
+
+The service call request is performed in a similar way. The requester socket
+must connect to the client proving the service call. Once the connection is
+established, the request is submitted by sending a ZeroMQ request service call
+message. The service call response is executed by just sending a ZeroMQ response
+service call message on the same socket where the request was received. Next is
+the common packet format shared between all the transport messages.
+
+**Packet format: Topic update, request/response service call**
+
+         0               1               2               3
+      0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     .                                                               .
+     .                    Topic name (no size limit)                 .
+     .                                                               .
+     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     .                                                               .
+     .                       ZeroMQ sender address                   .
+     .                                                               .
+     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     .                                                               .
+     .                         Data (no limit)                       .
+     .                                                               .
+     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+**Topic name**: Name of the topic.
+
+**ZeroMQ sender address**: The ZeroMQ end point that will be used to know the
+address of the message sender (or the service call sender).
+E.g., tcp://10.0.0.1:6000 .
+
+**Data**: Data contained in message, parameters from a service call request, or
+result from a service call response.
 
 #### Serialization
 
@@ -171,7 +237,7 @@ serialization step.
 ### Code design ###
 
 The code of the transport library will be stored in a separate repository, and
-will result in a separate and Gazebo-independent debian package.
+will result in a separate and Gazebo-independent Debian package.
 
 The external dependencies will be Google protobufs and ZeroMQ 3.x. We will use
 the C++11 standard.
@@ -201,9 +267,6 @@ protocol.
 * gazebo/transport/zeromq/ZmqTransport.hh/cc: ZeroMQ-based implementation of
 transport public API.
 
-* gazebo/transport/zeromq/ZmqTransport.hh/cc: ZeroMQ-based implementation of
-transport public API.
-
 ## Interfaces
 
 The public transport API will be declared in gazebo/transport/TransportIFace.hh
@@ -225,7 +288,7 @@ and will provide the following methods:
 
     cb(topic, rep)
 
-A msg is defined as protobuf message.
+A msg is defined as a protobuf message.
 
 ## Performance Considerations ##
 
@@ -274,4 +337,4 @@ concurrently.
 Open questions:
 
 1. How to test the communication between different machines on the same LAN?
-1. How to test the commuinication between different machines on different LANs?
+1. How to test the communication between different machines on different LANs?
