@@ -4,15 +4,16 @@
 ## Overview
 
 Gazebo's current transport library was designed and implemented in house.
-Although it has been working for years and it is quite fast, there are quite a few
-existing projects that we could use for replacing our custom approach. The
+Although it has been working for years and it is quite fast, there are quite a
+few existing projects that we could use for replacing our custom approach. The
 main advantage that we will get by using an existing transport alternative is a
 fewer amount of code to maintain in Gazebo.
 
 [ZeroMQ](http://zeromq.org) seems to be a good candidate for implementing the
-core functionality of the transport system required in Gazebo. ZeroMQ essentially provides framing
-and portability to sockets. Another interesting features are its large
-collection of bindings, LGPL license, active community, and simplicity of use.
+core functionality of the transport system required in Gazebo. ZeroMQ
+essentially provides framing and portability to sockets. Another interesting
+features are its large collection of bindings, LGPL license, active community,
+and simplicity of use.
 
 ## Requirements
 
@@ -51,9 +52,9 @@ data communication.
 
 This is the process required to know the address associated to the
 publisher of a topic or service call. Centralized architectures implement this
-by querying the master process. In a distributed architecture we need a discovery
-process. ZeroMQ does not provide a discovery protocol, so we propose a custom
-one.
+by querying the master process. In a distributed architecture we need a
+discovery process. ZeroMQ does not provide a discovery protocol, so we propose a
+custom one.
 
 A discovery message is composed by two main parts: header and body.
 
@@ -89,12 +90,12 @@ A discovery message is composed by two main parts: header and body.
      |  Flags (cont)  |
      +-+-+-+-+-+-+-+-+-
 
-**Version**: Field used to check that all the clients agree on the same discovery
-protocol version.
+**Version**: Field used to check that all the clients agree on the same
+discovery protocol version.
 
-**GUID**: Global unique identifier between clients. Two different clients running
-on the same process should share the same GUID, otherwise the GUIDs will be
-different. This is used to choose the appropriate ZeroMQ end point when
+**GUID**: Global unique identifier between clients. Two different clients
+running on the same process should share the same GUID, otherwise the GUIDs will
+be different. This is used to choose the appropriate ZeroMQ end point when
 connecting the sockets of the clients to communicate. ZeroMQ offers different
 options (inproc, ipc, tcp), each one with different optimizations implemented.
 In our case, we will choose "inproc" to connect the sockets if the GUID of the
@@ -105,8 +106,8 @@ not supported in all the platforms.
 
 **Topic name**: Name of the topic.
 
-**Type**: The header is just part of a discovery message. This field specifies the
-type of discovery message. The options are Advertisement message (type = 1),
+**Type**: The header is just part of a discovery message. This field specifies
+the type of discovery message. The options are Advertisement message (type = 1),
 Advertisement-service-call message (type = 2), Subscription message (type = 3)
 and Subscription-service-call message (type = 4).
 
@@ -184,6 +185,11 @@ message.
 An alternative discovery might be implemented using
 [zbeacon](http://czmq.zeromq.org/manual:zbeacon).
 
+#### Discovery on separate LANs
+
+The currently protocol is based on UDP broadcast, so it will not work on
+machines that are located in different LANs.
+
 #### Transport
 
 ZeroMQ supports the concept of publish/subscribe and request/response. From the
@@ -234,7 +240,7 @@ Gazebo currently uses
 serializing data and this project will keep using protobufs for the
 serialization step.
 
-### Code design ###
+### Code design
 
 The code of the transport library will be stored in a separate repository, and
 will result in a separate and Gazebo-independent Debian package.
@@ -244,13 +250,13 @@ the C++11 standard.
 
 The code will be divided in the next files:
 
-* gazebo/transport/TransportIFace.hh: Public API to be used by the clients of the
-transport library. All the methods will be declared pure virtual and the intent
-is to have an API independent of the implementation. There will be no references
-to ZeroMQ in this file.
+* gazebo/transport/TransportIFace.hh: Public API to be used by the clients of
+the transport library. All the methods will be declared pure virtual and the
+intent is to have an API independent of the implementation. There will be no
+references to ZeroMQ in this file.
 
-* gazebo/transport/NetUtils.hh/cc: Helper class for networking issues (IP address
-of the current machine, check if an IP address is private).
+* gazebo/transport/NetUtils.hh/cc: Helper class for networking issues (IP
+address of the current machine, check if an IP address is private).
 
 * gazebo/transport/TopicsInfo.hh/cc: Class that will maintain the current
 knowledge that a client will have for each topic/service. It will store if the
