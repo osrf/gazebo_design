@@ -3,13 +3,14 @@
 
 ### Overview
 
-The purpose of this project is to create an editor within the Gazebo client gui,
-gzclient, to enable users to create models without having to go and
-manually create and modify SDFs.
+The purpose of this project is to create an editor within the Gazebo gui client,
+namely gzclient, to enable users to create models without having to manually
+create and modify SDFs.
 
 ### Requirements
 
 The GUI should enable users to:
+
 1. create one model at a time.
 1. add links, visuals, collisions, and joints, sensors, plugins to a model
 1. configure properties of each entity listed above.
@@ -46,7 +47,7 @@ for the model editor.
     * contains a collection of model editor specific events that will be fired
     for example when a part is added or a joint is created.
 * Model Editor Palette
-    * A side panel containing a list of part and joint buttons which users
+    * a side panel containing a list of part and joint buttons which users
     can click on to add them to the scene.
 
 **Client-Server communication**
