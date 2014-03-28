@@ -45,6 +45,6 @@ List and describe the tests that will be created. For example:
 
 1. Test: create sim, and 2 users: Bob and Alice
     1. case: Create sim as Bob, check that he is in the list
-    1. case: Add a second user, Alixe . Log in as Alice, verify access.
+    1. case: Add a second user, Alice. Log in as Alice, verify access.
     1. case: Remove Bob, verify Alice can't be removed.
 
