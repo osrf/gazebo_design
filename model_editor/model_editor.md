@@ -57,6 +57,9 @@ created on the server.
 
 ### Interfaces
 
+Please see [ModelEditorSpecs7_2.pdf](ModelEditorSpecs7_2.pdf) for the
+GUI design of the model editor.
+
 **GUI changes**
 
 * A new menu option `Model Editor` will be added to the `Edit` menu in the
