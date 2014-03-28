@@ -9,7 +9,7 @@ The benefits are:
 - When you want to share your simulation, you "add your friends" to the "machine".
 - When you create a contest, you add entire teams to each competition "machine" (as simple contestant users)
 - When you don't care, nothing is different (you "own" your "machines")
-- The Master admin user (TBD) is always in the list, and therefore he "sees" all machines, all the time. 
+- The Master admin user (TBD) is always in the list, and therefore "sees" all machines, all the time. 
 
 ### Requirements
 
@@ -17,7 +17,7 @@ This project must fulfill this set of requirements:
 
 Define roles, and add role checking for the following tasks: 
 - CRUD (Create, Read, Update, Delete) users
-- CRUD simulaions (launch, terminate, set worlds)
+- CRUD simulations (launch, terminate, set worlds)
 
 For example:
 
@@ -26,7 +26,7 @@ For example:
 
 ### Architecture
 
-1. Simulaiton Shema should have an array of users, instead of a user field.
+1. Simulation Shema should have an array of users, instead of a user field.
 1. There must always be at least one user per machine that has the priviledge to terminate it.
 
 ### Interfaces
