@@ -1,4 +1,4 @@
-## Project: Model Editor for Gazebo
+## Model Editor for Gazebo
 ***Gazebo Design Document***
 
 ### Overview
