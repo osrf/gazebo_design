@@ -20,7 +20,7 @@ tool, and the graphical interface.
 
 1. Load a log file from disk.
 1. Play, pause, rewind, and step through a log.
-1. Move to an arbitrary position in the log file using a timestamp or slider.
+1. Move to an arbitrary position in the log file using a time stamp or slider.
 1. Loop a section of a log file. 
 
 ### Architecture
@@ -46,7 +46,7 @@ The graphical interface to log playback is a single widget that will be containe
     * A set of button located above the time line will allow users to play, pause, step forward/back, and move to the beginning or end of the log.
     * A time box next to the buttons will display the current time position in the log file.
 * Zoom and loop tools 
-    * Located below the time line is a tool to control the time line zoom level, and wether playback should loop.
+    * Located below the time line is a tool to control the time line zoom level, and whether playback should loop.
 * Main render window
     * The main render window will be outlined in orange when a log file is in playback.
 
@@ -88,7 +88,7 @@ Note: figure out a way to keep track of performance measurements in Jenkins.
     1. case: Create a world with 1000 falling cubes. Record a log file for
     30 seconds of simulation time. Measure the size of the log file, and
     real-time required to generate the log file.
-    1. case: Create a world with 10 double pendulums. Record a lof file for
+    1. case: Create a world with 10 double pendulums. Record a log file for
     30 seconds of simulation time. Measure the size of the log file, and
     real-time required to generate the log file.
 1. Performance Test: Log play performance
