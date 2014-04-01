@@ -57,7 +57,7 @@ Log playback information will be published over the `~/log/play/info` topic by t
 ### Interfaces
 
 Please see [DataLoggingPlayback.pdf](DataLoggingPlayback.pdf) for the
-GUI design of the model editor.
+GUI design of the logging widget.
 
 **GUI changes**
 
