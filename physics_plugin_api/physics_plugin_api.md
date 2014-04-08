@@ -25,6 +25,17 @@ Pluggable physics engine was motivated by:
   then extend it to support more sophisticated physics operations.
 * We will not try to migrate existing physics engines (Bullet, DART, ODE, Simbody) into plugins.  Instead, we
   will continue to integrate and maintain these engines by hand.
+* Reference OpenGL API for style.
+* Create an OpenPL repository for implementing new physics plugin.
+
+An initial simulation scenarios described below will be constructed:
+
+* Box resting on plane with contact under gravity.
+* A simple pendulum connected to the inertial world.
+* A pioneer 2dx robot.
+* A simple arm model.
+
+#### Open Questions
 
 ### Requirements
 
@@ -34,7 +45,36 @@ Pluggable physics engine was motivated by:
 
 ### Interfaces
 
-#### Functions
+#### Existing High Level Physics Engine Initialization and Shutdown API:
+
+ * [PhysicsEngine::Load](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-54): This function loads physics engine description from SDF without initializing the engine itself.
+ * [PhysicsEngine::Init](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-57): Initialize underlying physics engine.
+ * [PhysicsEngine::Reset](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-63)
+ * [PhysicsEngine::Fini](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-60): Multi-step shutdown behavior.
+ * [PhysicsEngine::InitForThread](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-66): Move this into Load or Init.  Prepare physics engine for multi-threaded access.
+
+
+#### Existing Entity Creation API:
+
+ * CreateModel
+ * CreateLink
+ * CreateCollision
+ * CreateShape
+ * CreateJoint
+
+#### Existing Runtime Modifications, Getters and Setters
+
+ * [PhysicsEngine::SetSeed](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-77): Set seed of engine random seed.
+ * [PhysicsEngine::SetTargetRealTimeFactor](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-97)
+ * GetGravity
+ * ...
+ 
+#### Existing Operational API:
+
+ * [PhyiscsEngine::UpdateCollision](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-69)
+ * [PhysicsEngine::UpdatePhysics](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-108)
+
+#### Existing Runtime Functions
 
 ### Performance Considerations
 
