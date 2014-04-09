@@ -5,13 +5,12 @@
 
 Gazebo's current transport library was designed and implemented in house.
 Although it has been working for years and it is quite fast, there are quite a
-few existing projects that we could use for replacing our custom approach. The
-main advantage that we will get by using an existing transport alternative is a
-fewer amount of code to maintain in Gazebo.
+few existing projects with better transport mechanisms. The
+main advantages for using another transport library are less code to maintain, improved functionality, potentially improved performance, and an active community that will implement new features.
 
 [ZeroMQ](http://zeromq.org) seems to be a good candidate for implementing the
 core functionality of the transport system required in Gazebo. ZeroMQ
-essentially provides framing and portability to sockets. Another interesting
+essentially provides framing and portability to sockets. Other interesting
 features are its large collection of bindings, LGPL license, active community,
 and simplicity of use.
 
@@ -20,8 +19,7 @@ and simplicity of use.
 The main requirement of this library is to expose an API for communicating
 with the Gazebo components via topics or service calls. A client of this library
 might be located inside one of the Gazebo processes or in an external process
-(command line tool), even in a different machine. Essentially, this is the main
-functionality that the transport library should provide:
+(command line tool), even on a different machine. The primary functionality thatthe transport library should provide are:
 
 1. Allow a client to advertise, subscribe, and publish a topic.
 1. Allow a client to request/response service calls.
@@ -35,26 +33,27 @@ serialization problems.
 ### Centralized Vs Distributed architecture
 
 Gazebo's current approach is based on a centralized model where a dedicated
-process registers the addresses of the components advertising every topic or
-service call. A distributed approach does not rely on this dedicated process
-removing the classical single point of failure of centralized architectures.
+process registers the addresses of the components that advertise and
+subscribe topics or service calls. A distributed approach does not rely on
+this dedicated process removing the classical single point of failure of
+centralized architectures.
 
-We are proposing a transition to a distributed architecture where all components
-create a peer to peer network for distributing the discovery
-information across the network. It will be important to take into consideration
-the performance and scalability of the distributed approach when the number of
-clients grow. Once the clients' location have been discovered, the data
-communication is performed by using the data delivery capabilities of ZeroMQ
-between the interested parties. The rest of clients do not participate in the
-data communication.
+We are proposing a transition to a distributed architecture where all
+components create a peer to peer network for distributing the discovery
+information across the network. It will be important to take into
+consideration the performance and scalability of the distributed approach
+when the number of clients grow. Once the clients' locations have been
+discovered, data communication is performed by using the data delivery
+capabilities of ZeroMQ between the interested parties. The rest of clients
+do not participate in the data communication.
 
 ### Discovery
 
-This is the process required to know the address associated to the
-publisher of a topic or service call. Centralized architectures implement this
-by querying the master process. In a distributed architecture we need a
-discovery process. ZeroMQ does not provide a discovery protocol, so we propose a
-custom one.
+This is the mechanism required to know the addresses associated to the
+publishers of a topic or service call. Centralized architectures implement
+this by querying the master process. In a distributed architecture we need
+a discovery process. ZeroMQ does not provide a discovery protocol, so we
+propose a custom one.
 
 A discovery message is composed by two main parts: header and body.
 
