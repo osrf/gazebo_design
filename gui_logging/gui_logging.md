@@ -140,3 +140,24 @@ Note: figure out a way to keep track of performance measurements in Jenkins.
     1. case: Placing the control markers and enabling the loop feature
     should cause log info messages to repeat.
     1. case: Check that the zoom feature causes the slider to scale.
+
+### Implementation Plan
+
+The following list contains the pull-requests that will be made to complete
+this project. Each pull-request will include the appropriate tests.
+
+1. Timeline
+    1. Basic playback slider. It will be possible to load a log file from
+    the GUI, and use the slider to navigate through the log file.
+    1. The play and pause buttons will work.
+    1. The render window will be highlighted in orange.
+1. Step and zoom utilities
+    1. Implement the buttons that move to the beginning & end of the log,
+    step forward & back through the log, and zoom the slider.
+1. Log file format
+    1. Decide on a new log file format, and integrate it into the existing
+    tools.
+    1. `gz log` and the GUI tools should all work.
+1. Example and tutorials
+    1. This will likely be multiple examples and tutorials to cover the new
+    GUI tools and new log file format.
