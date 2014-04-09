@@ -16,6 +16,8 @@ that is designed for fast recording, and random access.
 1. Old and new log files should be accepted by the `gz log` command line
 tool, and the graphical interface.
 
+1. New log file should be fault tolerant. A corrupted section of the log file should still leave the log file usable.
+
 **The GUI should enable users to**
 
 1. Load a log file from disk.
@@ -98,6 +100,8 @@ Note: figure out a way to keep track of performance measurements in Jenkins.
     1. case: Load and playback the double pendulums log file. Measure
     real-time to complete log playback. Check to make sure the correct
     sim-time is reached.
+    1. case: Load a corrupted log file. Make sure playback occurs,
+    potentially skipping the bad chunks.
 1. Regression Test: Old & new file format
     1. case: Record a box moving a predefined distance using both the old
     and new file formats. Check that the new file format size <= current
