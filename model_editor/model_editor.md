@@ -64,9 +64,9 @@ GUI design of the model editor.
 
 * A new menu option `Model Editor` will be added to the `Edit` menu in the
 menu bar.
-* A new palette consisting of editor items (buttons for added different part and
-joint types) will appear on the left side panel when the `Model Editor` mode is
+* A new palette consisting of editor items (buttons for adding different parts) will appear on the left side panel when the `Model Editor` mode is
 enabled.
+* A joint drawing tool will be added to the Toolbar
 
 ### Performance Considerations
 
