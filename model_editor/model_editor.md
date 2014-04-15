@@ -47,7 +47,7 @@ for the model editor.
     * contains a collection of model editor specific events that will be fired
     for example when a part is added or a joint is created.
 * Model Editor Palette
-    * a side panel containing a list of part and joint buttons which users
+    * a side panel containing a list of part and part library buttons which users
     can click on to add them to the scene.
 
 **Client-Server communication**
