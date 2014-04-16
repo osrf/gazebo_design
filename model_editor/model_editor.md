@@ -17,6 +17,7 @@ The GUI should enable users to:
 1. load external meshes, e.g. collada files, and use them as geometry objects
 for collisions and visuals.
 1. save the model in SDF format.
+1. Nice to have: create a copy or an instance of an existing link
 
 ### Architecture
 
