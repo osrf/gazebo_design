@@ -11,7 +11,7 @@ create and modify SDFs.
 
 The GUI should enable users to:
 
-1. create one model at a time.
+1. create and edit one model at a time.
 1. add links, visuals, collisions, and joints, sensors, plugins to a model
 1. configure properties of each entity listed above.
 1. load external meshes, e.g. collada files, and use them as geometry objects
@@ -30,8 +30,8 @@ for the model editor.
 **Main Model Editor components**
 
 * Model Creator
-    * adds `Parts` to the scene. Parts are essentially links in the gazebo
-    language. Supported parts include simple shapes and custom meshes.
+    * adds `Links` to the scene. A link is also referred to as a `Part` of a
+    model. Supported links include simple shapes and custom meshes.
     * generates and saves the final model SDF.
 * Joint Creator
     * creates `Joints` between parts. Supported joint types include revolute,
@@ -45,7 +45,7 @@ for the model editor.
     properties.
 * Model Editor Event
     * contains a collection of model editor specific events that will be fired
-    for example when a part is added or a joint is created.
+    for example when a link is added or a joint is created.
 * Model Editor Palette
     * a side panel containing a list of part and joint buttons which users
     can click on to add them to the scene.
@@ -57,7 +57,7 @@ created on the server.
 
 ### Interfaces
 
-Please see [ModelEditorSpecs7_2.pdf](ModelEditorSpecs7_2.pdf) for the
+Please see [ModelEditor_v4.pdf](ModelEditor_v4.pdf) for the
 GUI design of the model editor.
 
 **GUI changes**
