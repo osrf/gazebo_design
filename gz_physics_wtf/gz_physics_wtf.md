@@ -4,13 +4,18 @@
 ### Overview
 
 #### Need (Motivation) ####
-with the following feedback from Steffi's PAL robotics interview,
+with the following feedback from PAL:
+~~~
+...The simulation was unstable, joint controllers had to be tuned,
+friction and contact parameters of the feet should be tuned to
+avoid the robot started sliding on the ground. The solver or
+physics engine sometimes gets crazy and the robot explodes
+(this still happens).
+~~~
 
-    ...The simulation was unstable, joint controllers had to be tuned, friction and contact parameters of the feet should be tuned to avoid the robot started sliding on the ground. The solver or physics engine sometimes gets crazy and the robot explodes (this still happens).
+Above is definitely a frequently encountered pattern, with similar feedbacks from working with different robot implementers.
 
-Above is definitely a frequently encountered pattern (similar feedbacks from working with different robot implementers: proxi, ubr1, etc.)
-
-The goal of this project is to identifying and eliminating ***bad/exploding physics solutions*** as a suspect to unstable robot behavio.
+The goal of this project will be to identifying and eliminating ***bad/exploding physics solutions*** as a suspect to unstable robot behavior.
 
 #### Approach ####
 One solution to addressing the above issue is by providing run-time diagnostics data from active physics engine.
