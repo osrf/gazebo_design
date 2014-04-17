@@ -3,7 +3,7 @@
 
 ### Overview
 
-#### Need (Motivation) ####
+#### Need / Motivation ####
 with the following feedback from PAL:
 ~~~
 ...The simulation was unstable, joint controllers had to be tuned,
@@ -18,22 +18,17 @@ Above is definitely a frequently encountered pattern, with similar feedbacks fro
 The goal of this project will be to identifying and eliminating ***bad/exploding physics solutions*** as a suspect to unstable robot behavior.
 
 #### Approach ####
-One solution to addressing the above issue is by providing run-time diagnostics data from active physics engine.
+Providing run-time diagnostics data from active physics engine.
 
-The purpose of physics diagnostics is to help the users determine if the ***bad/unstable behavior*** comes from bad physics solutions or from the user specified model+controller.
+Physics diagnostics will help simulation users determine if the ***bad/unstable*** simulation behavior comes from bad physics solutions or comes from the user specified model+controller.
 
-#### Benefits ####
-Doing so reduces our support role in making simulation user friendly, encourages gazebo adoption.
-And we know that typical robot app developers / researchers hates fighting physics engines :). Better to keep them focused on more exciting and meaningful work even if it's modeling related (e.g. tuning model parameters such as joint damping, limit stiffness, contact stiffness, etc or controller gains).
+Console dump of diagnostics using `gz physics --wtf`.
+Physics diagnostics through command line is easier to implement (`gz physics --wtf`),
+  but ultimately some form of visualization will be more user friendly.
 
+Find a way to visualize ***quality of physics solutions*** within `gzclient` GUI.
 
-Tooling for identify bad physics solutions: we need a way of visualizing "quality of physics solutions".
-
-Console dump of diagnostics using `gz physics --wtf` or better yet, visualization through `gzclient` GUI.
-
-Physics diagnostics through command line is easier to do (`gz physics --wtf`), but ultimately some form of visualization will be more user friendly.
-
-A little bit about the quality metric that we need to visualize:
+A little bit about the ***quality metric*** that we need to visualize:
 
  - global RMS constraint error
  - integration discretization error
@@ -42,10 +37,19 @@ A little bit about the quality metric that we need to visualize:
  - energy content for all links in the world
  - energy added by actuators (bonus if we can visualize energy *removed* by dampers, contacts and friction).
 
+#### Benefits ####
+Reduces our support role in making simulation user friendly, encourages gazebo adoption.
+
+Typical robot app developers / researchers hates fighting physics engines :). Better to keep users focused
+  on more exciting and meaningful work even if it's modeling related (e.g. tuning model parameters such as joint damping, limit stiffness, contact stiffness, etc or controller gains).
+
+
 #### Future Benefits ####
 
 Physics diagnostics can be used to construct auto-performance tuning algorithms.
 
+
+# TODO:
 
 ### Requirements
 
