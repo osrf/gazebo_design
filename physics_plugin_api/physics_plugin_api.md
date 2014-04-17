@@ -1,4 +1,4 @@
-## Project: TITLE
+## Project: Physics Plugin and API Design
 ***Gazebo Design Document***
 
 ### Overview
@@ -28,7 +28,9 @@ Pluggable physics engine was motivated by:
 * Reference OpenGL API for style.
 * Create an OpenPL repository for implementing new physics plugin.
 
-An initial simulation scenarios described below will be constructed:
+#### Initial Simulation Scenarios
+
+Initial simulation scenarios to be built for the purpose of scoping out work for physics plugin API.
 
 * Box resting on plane with contact under gravity.
 * A simple pendulum connected to the inertial world.
@@ -37,47 +39,105 @@ An initial simulation scenarios described below will be constructed:
 
 #### Open Questions
 
+* Create a subset of API for multiplexing physics engines.  Potentially resource intensive, so we want to run this in the clouds.
+* API for using engines to validate itself/other engines.  For example, we can run Simbody with different time step sizes to check temporal order of accuracy and numerical consistency.
+
 ### Requirements
 
+* Provide a simple bare minimum API in C, reduce effort to plug a physics engine into gazebo.
+* Provide a wrapper template example for building physics engine as a gazebo plugin.
 
 ### Architecture (System Diagram)
 
+A very nice diagram.
 
-### Interfaces
+### Existing Physics Interfaces
 
-#### Existing High Level Physics Engine Initialization and Shutdown API:
+ *  High Level Physics Engine Initialization and Shutdown API:
+     * [PhysicsEngine::Load](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-54): This function loads physics engine description from SDF without initializing the engine itself.
+     * [PhysicsEngine::Init](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-57): Initialize underlying physics engine.
+     * [PhysicsEngine::Reset](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-63)
+     * [PhysicsEngine::Fini](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-60): Multi-step shutdown behavior.
+     * [PhysicsEngine::InitForThread](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-66): Move this into Load or Init.  Prepare physics engine for multi-threaded access.
 
- * [PhysicsEngine::Load](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-54): This function loads physics engine description from SDF without initializing the engine itself.
- * [PhysicsEngine::Init](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-57): Initialize underlying physics engine.
- * [PhysicsEngine::Reset](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-63)
- * [PhysicsEngine::Fini](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-60): Multi-step shutdown behavior.
- * [PhysicsEngine::InitForThread](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-66): Move this into Load or Init.  Prepare physics engine for multi-threaded access.
+ * Entity Creation API:
+     * [PhysicsEngine::CreateModel](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-110)
+     * [PhysicsEngine::CreateLink](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-114)
+     * [PhysicsEngine::CreateCollision](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-118)
+     * [PhysicsEngine::CreateShape](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-130)
+     * [PhysicsEngine::CreateJoint](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-136)
 
-
-#### Existing Entity Creation API:
-
- * CreateModel
- * CreateLink
- * CreateCollision
- * CreateShape
- * CreateJoint
-
-#### Existing Runtime Modifications, Getters and Setters
-
- * [PhysicsEngine::SetSeed](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-77): Set seed of engine random seed.
- * [PhysicsEngine::SetTargetRealTimeFactor](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-97)
- * GetGravity
- * ...
+ * Runtime Modifications, Getters and Setters
+     * [PhysicsEngine::SetSeed](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-77): Set seed of engine random seed.
+     * [PhysicsEngine::SetTargetRealTimeFactor](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-97)
+     * [PhysicsEngine::GetGravity](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-142)
+     * we will deprecate anything that is not shared across all physics engines in `PhysicsEngine` class.  APIs such as `SetWorldCFM` will be shifted to string key-value parameter setters. 
+     * ...
  
-#### Existing Operational API:
+ * Operational API:
+     * [PhyiscsEngine::UpdateCollision](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-69)
+     * [PhysicsEngine::UpdatePhysics](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-108)
 
- * [PhyiscsEngine::UpdateCollision](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-69)
- * [PhysicsEngine::UpdatePhysics](https://bitbucket.org/osrf/gazebo/src/577847c43d021f7edc838a30c0eafc99ea312571/gazebo/physics/PhysicsEngine.hh?at=default#cl-108)
+ * Runtime Functions
+     * ...
 
-#### Existing Runtime Functions
+
+### New Interface Proposal
+
+Relevant Objects / Entities in Simulation:
+
+ * Base
+ * Entities
+ * PhysicsEngine
+ * Models: abstract collection of Links and Joints.
+ * Links
+   * Inertia
+   * Visual
+   * Collision
+ * Joints
+
+The API will be split into following categories:
+
+ * Load: Initialization of different entities and components of simulation, e.g. Physics, World, Model, Link, etc.
+ * Physics Engine Creation and Building:  E.g. GetParam/SetParam: Get and set model parameter.
+ * Model Creation and Building:  For examples:
+     1. CreateLink: create objects in simulation.
+     1. GetParam/SetParam: Get and set model parameter.
+ * Running simulation.
+
+Details:
+
+ * Simulation Initialization:
+     1. PhysicsEngine::Load
+     1. PhysicsEngine::Init
+     1. PhysicsEngine::SetParam(key, value)
+     1. PhysicsEngine::CreateWorld
+     1. PhysicsEngine::World::Load
+     1. PhysicsEngine::World::Init
+
+ * Model Loading, Construction:
+     1. PhysicsEngine::World::CreateModel
+     1. PhysicsEngine::World::Model::CreateLink
+     1. PhysicsEngine::World::Model::CreateJoint
+     1. PhysicsEngine::World::Model::Link::Load
+     1. PhysicsEngine::World::Model::Link::Init
+     1. PhysicsEngine::World::Model::Joint::Load
+     1. PhysicsEngine::World::Model::Joint::Init
+     1. PhysicsEngine::World::Model::Link::SetParam
+
+ * Run-time Modifications:
+     1. PhysicsEngine::Step
+     1. PhysicsEngine::World::Step
+     1. PhysicsEngine::World::Model::Step
 
 ### Performance Considerations
 
+* Calls that are invoked a lot, such as `MovedCallback` should be bufferred using dirty flags.
+
 ### Tests
 
+* Find a way to run existing integration tests and regression tests against pluggable physics engines.
+
 ### Related Pull Requests
+
+* None yet.  Starting with one for c-based template.
