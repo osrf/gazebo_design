@@ -12,53 +12,103 @@ from the vector of discrete error samples,
 for example, maximum error or root mean-squared error.
 This document outlines helper functions for computing these properties.
 
+![Discrete samples of time-varying signal](discrete_signal.png)
+
 ### Requirements
 
-1. Create a class that 
+1. To avoid large memory requirements, compute statistics incrementally,
+one sample at a time.
+1. Allow computation of multiple statistics per signal
+(i.e. mean, max, root mean-square, etc.).
 1. We want to make it easy to create new physics tests,
-so these statistics should require few lines of code.
-List the set of requirements that this project must fulfill.
-If the list gets too long, consider splitting the project into multiple small projects.
-
-For example:
-
-1. GUI should plot values over time, where values can be joint angles, poses of objects, forces on objects, diagnostic signals, and values from topics.
-1. Up to four values per plot is allowed.
-1. Multiple plots should be supported.
+so these statistics should require minimal lines of code.
 
 ### Architecture
-Include a system architecture diagram.
-This should be a conceptual diagram that describes what components of Gazebo will be utilized or changed, the flow of information, new classes, etc.
+Create a hierarchy of classes starting from the bottom:
+
+* class SignalStatistic: Generic class for computing statistics on a discrete-time signal.
+The statistics should be computed incrementally for each new data point without
+storing the entire time history of the signal.
+The class should be overloaded to implement the specific statistics (mean, max, root mean-square).
+* class SignalStats: Contains multiple SignalStatistic objects and provides an
+interface to pass a single sample to each statistic.
+Should also return the value of each statistic sorted by name ("max", "mean", "rms").
+* class Vector3Stats: Similar to SignalStats but takes a Vector3 instead of a scalar.
+It should compute separate statistics on the scalar components x, y, z,
+and the vector magnitude.
+
+![Signal statistics hierarchy](signal_stats_hierarchy.png)
 
 ### Interfaces
-Describe any new interfaces or modifications to interfaces, where interfaces are protobuf messages, function API changes, SDF changes, and GUI changes. These changes can be notional.
+SignalStatistic class, use Insert to add data, Get to get the current value of the statistic.
+Those are pure virtual, so they should be implemented by derived statistic classes.
+The data and count variables are used to store the current value of the statistic.
+Implement 3 derived classes:
+* SignalMean
+* SignalRootMeanSquare
+* SignalMaxAbsoluteValue
+~~~
+class SignalStatistic
+{
+  public: void Insert(double _data) = 0;
+  public: double Get() = 0;
+  private: double data;
+  private: unsigned int count;
+};
+~~~
 
-For example:
-Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
+SignalStats class, use InsertStatistic to add statistic to a signal,
+InsertData to add a data point, and GetMap to get the current values.
+Contains a vector of SignalStatistic objects.
+~~~
+class SignalStats
+{
+  public: bool InsertStatistic(const std::string &_name);
+  public: void InsertData(double _data);
+  public: std::map<std::string, double> GetMap();
+  private: std::vector<SignalStatistic> stats;
+};
+~~~
 
-Include any UX design drawings.
+Vector3Stats class: contains 4 SignalStats objects (xyz and magnitude),
+use InsertStatistic to add a stat to each scalar component,
+use InsertData(Vector3) to update all 4 signals with a single function call.
+~~~
+class Vector3Stats
+{
+  public: bool InsertStatistic(const std::string &_name);
+  public: void InsertData(const math::Vector3 &_data);
+  public: SignalStats x;
+  public: SignalStats y;
+  public: SignalStats z;
+  public: SignalStats mag;
+};
+~~~
 
 ### Performance Considerations
-Will this project cause changes to performance?
-If so, describe how.
-One or more performance tests may be required.
+Don't store complete time history of signals.
+Compute statistics incrementally to reduce memory requirements.
+This is easy for certain statistics (mean, max)
+but hard or impossible for others (median).
+
+It is anticipated that inserting data points will happen more often
+than getting the statistical values.
 
 ### Tests
-List and describe the tests that will be created. For example:
 
-1. Test: Plot View
-    1. case: Plot window should appear when signaled by QT.
-    1. case: Plot simulation time should produce correct results when save to CSV
-    1. case: Signalling a close should close the plotting window.
-1. Test: Multiple plots
-    1. case: Create two plots with identical data. Saved CSV data from each should be identical
+1. SignalStatistic Unit Test:
+    1. Constructor: without inserting data, expect Get() == 0
+    1. Insert multiple constant values.
+    1. Insert constant magnitude with alternating sign.
+1. SignalStats Unit Test:
+    1. Add mean and rms statistics. Insert multiple constant values.
+    1. Add mean and rms statistics. Insert constant magnitude with alternating sign.
+1. Vector3Stats Unit Test:
+    1. Add mean and rms statistics. Insert Vector3::UnitX, Vector3::UnitY.
 
 ### Pull Requests
-List and describe the pull requests that will be created to merge this project.
-Consider separating large refactoring operations from additions of new code.
-For example, the physics::SurfaceParams class was refactored in
-[pull request #891](https://bitbucket.org/osrf/gazebo/pull-request/891/refactor)
-so that a new FrictionPyramid class could be added in
-[pull request #935](https://bitbucket.org/osrf/gazebo/pull-request/935/create).
+First pull request to implement these classes.
+Include some examples of how existing tests can be simplified by using
+these classes.
 
-Keep in mind that smaller, atomic pull requests are easier to review.
+Subsequent pull requests to implement functionality for physics accuracy tests.
