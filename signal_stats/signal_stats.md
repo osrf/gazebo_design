@@ -12,7 +12,7 @@ from the vector of discrete error samples,
 for example, maximum error or root mean-squared error.
 This document outlines helper functions for computing these properties.
 
-![Discrete samples of time-varying signal](https://bitbucket.org/osrf/gazebo_design/src/69d0c56c8ae18f79cdabcc40a9cedf13e51b480e/signal_stats/discrete_signal.png)
+![Discrete samples of time-varying signal](https://bitbucket.org/osrf/gazebo_design/raw/69d0c56c8ae18f79cdabcc40a9cedf13e51b480e/signal_stats/discrete_signal.png)
 
 ### Requirements
 
@@ -37,7 +37,7 @@ Should also return the value of each statistic sorted by name ("max", "mean", "r
 It should compute separate statistics on the scalar components x, y, z,
 and the vector magnitude.
 
-![Signal statistics hierarchy](https://bitbucket.org/osrf/gazebo_design/src/69d0c56c8ae18f79cdabcc40a9cedf13e51b480e/signal_stats/signal_stats_hierarchy.png)
+![Signal statistics hierarchy](https://bitbucket.org/osrf/gazebo_design/raw/69d0c56c8ae18f79cdabcc40a9cedf13e51b480e/signal_stats/signal_stats_hierarchy.png)
 
 ### Interfaces
 SignalStatistic class, use Insert to add data, Get to get the current value of the statistic.
