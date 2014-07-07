@@ -44,6 +44,7 @@ SignalStatistic class, use Insert to add data, Get to get the current value of t
 Those are pure virtual, so they should be implemented by derived statistic classes.
 The data and count variables are used to store the current value of the statistic.
 Implement 3 derived classes:
+
 * SignalMean
 * SignalRootMeanSquare
 * SignalMaxAbsoluteValue
