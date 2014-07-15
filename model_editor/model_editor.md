@@ -66,7 +66,7 @@ provide a more convenient and intuitive way of accomplishing these tasks.
 * Alignment Tool
     * aligns multiple models with different configurations.
     * Position alignment: Option to align at the minimum/center/maximum position
-    of he target model's bounding box along the x, y, and/or z axis.
+    of the target model's bounding box along the x, y, and/or z axis.
     * Nice to have: Orientation alignment.
 
 * Snap Tool
