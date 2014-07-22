@@ -81,7 +81,7 @@ class SignalStatistic
 {
   public: void InsertData(double _data) = 0;
   public: double Get() = 0;
-  public: double GetShortName() = 0;
+  public: std::string GetShortName() = 0;
   private: double data;
   private: unsigned int count;
 };
