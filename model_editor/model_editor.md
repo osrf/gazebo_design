@@ -51,6 +51,31 @@ for the model editor.
     * a side panel containing a list of part and part library buttons which users
     can click on to add them to the scene.
 
+**New GUI Tools**
+
+To assist users in creating models in gazebo, a few new gui tools will be added.
+For example, creating a vehicle can be challenging without an easy way of
+cloning wheels and aligning them with the chassis. The new gui tools aim to
+provide a more convenient and intuitive way of accomplishing these tasks.
+
+* Copy and Paste
+    * adds copy and paste icons in the gazebo toolbar that enables users to
+    copy and paste models/lights.
+    * Keyboard shortcuts (`Ctrl+C` and `Ctrl+V`) will also be supported.
+
+* Alignment Tool
+    * aligns multiple models with different configurations.
+    * Position alignment: Option to align at the minimum/center/maximum position
+    of the target model's bounding box along the x, y, and/or z axis.
+    * Nice to have: Orientation alignment.
+
+* Snap Tool
+    * provides a fast and easy way to snap two models together. For example,
+    snapping the flat face of the cylindrical wheel to the side of the vehicle
+    chassis.
+    * Snapping moves the model only and does not create a joint between the
+    models.
+
 **Client-Server communication**
 
 The final model SDF will be published to the `~/factory` topic so that it can be
