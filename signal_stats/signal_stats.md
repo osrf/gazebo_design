@@ -137,8 +137,10 @@ than getting the statistical values.
     1. Add mean and rms statistics. Insert Vector3::UnitX, Vector3::UnitY.
 
 ### Pull Requests
-First pull request to implement these classes.
-Include some examples of how existing tests can be simplified by using
+This design was implemented in
+[gazebo pull request 1198](https://bitbucket.org/osrf/gazebo/pull-request/1198/new-math-class-signalstats/diff),
+though some changes to the API were made in response to the pull request comments.
+It modified the `INTEGRATION_physics_inertia_ratio` test to use
 these classes.
 
-Subsequent pull requests to implement functionality for physics accuracy tests.
+A subsequent pull request will be submitted to ignition-math.
