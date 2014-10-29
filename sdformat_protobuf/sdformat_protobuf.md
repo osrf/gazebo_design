@@ -65,6 +65,11 @@ sdf::ElementPtr ToSDF(const msgs::Link &_msg)
 }
 ~~~
 
+Consider using Google Protobuf's
+ [reflection interface](https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.message#Reflection),
+ which is currently used by gzweb to
+ [convert protobuf messages to json](https://bitbucket.org/osrf/gzweb/src/bf45f825f953dac563b20c021c1b6f5241e49f9c/gzbridge/pb2json.cc?at=default).
+
 ### Performance Considerations
 These helper functions will be convenient for spawning models,
 which tends to happen at the beginning of tests in our test suite.
