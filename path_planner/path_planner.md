@@ -23,8 +23,8 @@ disappears and reappears at point along the path with rough granularity, to
 more complex movement schemes that may be specified by the user.
 
 This plugin is intended to first offer basic functionality, initially handling 
-only basic movement options and 2D path planning, but will be extended over time
-to allow for more complex planning and customization.
+only basic movement options and 2D path planning in a static world, but will be
+extended over time to allow for more complex planning and customization.
 
 
 ## Requirements ##
@@ -70,7 +70,9 @@ map. Our current approach will build off the ray tracing method detailed
 [here](http://gazebosim.org/tutorials?tut=custom_messages#CollisionMapCreatorPlugin),
 which rasterizes 3D world information, then uses 
 [ray intersection](https://bitbucket.org/osrf/gazebo/src/f41484ce1fe3451075a61311d4b7e14c086a5f4e/gazebo/physics/RayShape.cc?at=default)
-to generate a 2D collision map.
+to generate a 2D collision map. Again, we will, at least initially, only
+support planning in a static world, so collision map generation will be
+based on only the current positions of entities in the world.
 
 After instantiating a path planner interface, passing the cost map and other
 required parameters, the plugin receives the calculated path from the planner
