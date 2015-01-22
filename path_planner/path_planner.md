@@ -63,7 +63,8 @@ Input Parameters
 
 Once we implement the OMPL or any complex planner interfaces, the plugin may
 require more input parameters. For example, OMPL offers many optimization
-options that users should eventually be able to choose between.
+options that users should eventually be able to choose between. Cost map
+resolution may be another optional parameter.
 
 Before instantiating the path planner class, the plugin will generate a cost
 map. Our current approach will build off the ray tracing method detailed
@@ -72,7 +73,11 @@ which rasterizes 3D world information, then uses
 [ray intersection](https://bitbucket.org/osrf/gazebo/src/f41484ce1fe3451075a61311d4b7e14c086a5f4e/gazebo/physics/RayShape.cc?at=default)
 to generate a 2D collision map. Again, we will, at least initially, only
 support planning in a static world, so collision map generation will be
-based on only the current positions of entities in the world.
+based on only the current positions of entities in the world. The resolution
+of this cost map will be set at a default value based on the size of the model,
+although we plan to make resolution an optional parameter. If the planner is unable
+to find a valid path at a higher resolution, it can recalculate using a finer-grained
+map.
 
 After instantiating a path planner interface, passing the cost map and other
 required parameters, the plugin receives the calculated path from the planner
