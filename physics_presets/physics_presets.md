@@ -2,32 +2,32 @@
 ***Gazebo Design Document***
 
 ### Overview
-Currently, Gazebo only supports one <physics> tag specified in SDF. Furthermore, if a user desires to change simulation properties, they must write a plugin to change physics engine parameters individually via the physics API.
+Currently, Gazebo only supports one `<physics>` in SDF.. Furthermore, if a user desires to change simulation properties after the world file is loaded, they must write a plugin to change physics engine parameters individually via the physics API. If a user has multiple physics profiles in mind for a world--for example, one tuned for performance and the other tuned for accuracy--the current method for switching between them is clunky and verbose.
 
 This design document proposes a small change to SDF to support multiple physics blocks in SDF, as well as an API to manage switching between these preset physics profiles.
 
 ### Requirements
 Via world file SDF, the user must be able to specify:
 
-Multiple physics blocks for different physics engines, with different simulation properties, etc.
+- Multiple physics blocks for different physics engines, with different simulation properties, etc.
 
-The name of a particular physics block.
+- The name of a particular physics block.
 
-The name of the default physics block for a particular world.
+- The name of the default physics block for a particular world.
 
 While Gazebo is running, a developer can use the API to do the following:
 
-Switch between the different physics profiles specified in SDF. Switching to a new profile must affect changes to the physics engine.
+- Switch between the different physics profiles specified in SDF. Switching to a new profile must affect changes to the physics engine.
 
-Read the name and parameters of any profile known to the simulation.
+- Read the name and parameters of any profile known to the simulation.
 
-Read the name and parameters of the current profile.
+- Read the name and parameters of the current profile.
 
-Create a new profile and specify physics parameters programmatically.
+- Create a new profile and specify physics parameters programmatically.
 
-Save a new profile to an SDF file.
+- Save a new profile to SDF.
 
-Load a new profile from an SDF file.
+- Load a new profile from SDF.
 
 ### Architecture
 The new SDF architecture includes a new attribute under the `world` element, `name`. The `physics` element also has a new `name` attribute.
@@ -53,9 +53,9 @@ During runtime, the physics profiles will be managed by a new physics class, `Pr
 
 `PresetManager` parses the world SDF and collects all of the physics blocks in a map for easy and fast access. Its data members will include a map structure to store all known preset profiles and a pointer to the `PhysicsEngine` for its world.
 
-For the sake of cleaner code, a Preset class will also be introduced. This abstraction helps reduce the complexity of managing individual physics profiles. However, the Preset class is not visible to the user, since the PresetManager interface should be adequate for their purposes. Preset is merely an internal convenience for PresetManager.
+For the sake of cleaner code, a `Preset` class will also be introduced. This abstraction helps reduce the complexity of managing individual physics profiles. However, the `Preset` class is not visible to the user, since the `PresetManager` interface should be adequate for their purposes. `Preset` is merely an internal convenience for `PresetManager`.
 
-PresetManager provides an interface for loading and saving physics profiles as SDF. However, the process of choosing, opening, and reading/writing a file is up to the user. Thus, PresetManager receives `sdf::Element` pointers as input, stores them, modifies them, and outputs them to the user. The user decides where the load the SDF from and how to save it (insert it into an existing world file, create a new world file, etc.).
+`PresetManager` provides an interface for loading and saving physics profiles as SDF. However, the process of choosing, opening, and reading/writing a file is up to the user. Thus, `PresetManager` receives `sdf::Element` pointers as input, stores them, modifies them, and outputs them to the user. The user decides where the load the SDF from and how to save it (insert it into an existing world file, create a new world file, etc.).
 
 ### Interfaces
 
@@ -101,9 +101,13 @@ class PresetManager
 
 ### Tests
 1. Physics Presets Integration Test (each sub-item represents one test case):
+
   - Initialize a world with several preset blocks. Expect that `PhysicsEngine` reports the default physics parameters.
+
   - Set one parameter using `SetCurrentProfileParam`. Expect that this parameter and only this parameter changed in `PhysicsEngine`.
+
   - Switch to a different preset profile using `PresetManager::SetCurrentProfile`. Expect `PhysicsEngine` reports different physics parameters.
+
   - Create a new profile from SDF using `CreateProfile(sdf::ElementPtr)`. Switch to the new profile. Expect that `PhysicsEngine` reports the new physics parameters.
 
 It's possible to write a unit test for `PresetManager`, but it doesn't seem particularly helpful, since so many of its operations effect the state of the physics engine.
