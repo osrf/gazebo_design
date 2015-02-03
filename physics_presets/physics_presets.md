@@ -100,7 +100,7 @@ class PresetManager
 ~~~
 
 ### Tests
-1. Physics Presets Integration Test (each sub-item represents one test case):
+Physics Presets Integration Test (each sub-item represents one test case):
 
   - Initialize a world with several preset blocks. Expect that `PhysicsEngine` reports the default physics parameters.
 
@@ -109,8 +109,6 @@ class PresetManager
   - Switch to a different preset profile using `PresetManager::SetCurrentProfile`. Expect `PhysicsEngine` reports different physics parameters.
 
   - Create a new profile from SDF using `CreateProfile(sdf::ElementPtr)`. Switch to the new profile. Expect that `PhysicsEngine` reports the new physics parameters.
-
-It's possible to write a unit test for `PresetManager`, but it doesn't seem particularly helpful, since so many of its operations effect the state of the physics engine.
 
 ### Pull Requests
 This implementation will require one pull request to sdformat and at least one pull request to gazebo.
