@@ -30,7 +30,7 @@ While Gazebo is running, a developer can use the API to do the following:
 - Load a new profile from SDF.
 
 ### Architecture
-The new SDF architecture includes a new attribute under the `world` element, `name`. The `physics` element also has a new `name` attribute.
+The new SDF architecture includes a new attribute under the `world` element, `default_physics`. The `physics` element also has a new `name` attribute. `default_physics` specifies the name of the default physics profile to load.
 
 ~~~
 <sdf version="1.5">
@@ -62,10 +62,10 @@ For the sake of cleaner code, a `Preset` class will also be introduced. This abs
 ~~~
 class Preset
 {
-  public: std::string GetName();
-  public: boost::any _value GetParam(const std::string& _key);
+  public: std::string GetName() const;
+  public: boost::any _value GetParam(const std::string& _key) const;
   public: void SetParam(const std::string& _key, boost::any _value);
-  public: sdf::ElementPtr GetSDF();
+  public: sdf::ElementPtr GetSDF() const;
   public: void SetSDF(sdf::ElementPtr _sdfElement);
 }
 
@@ -81,7 +81,7 @@ class PresetManager
                                const std::string& _key,
                                const boost::any &_value);
 
-  public: boost::any GetProfileParam(const std::string &_name);
+  public: boost::any GetProfileParam(const std::string &_name) const;
 
   public: bool SetCurrentProfileParam(const std::string& _key,
                                       const boost::any &_value);
@@ -109,6 +109,8 @@ Physics Presets Integration Test (each sub-item represents one test case):
   - Switch to a different preset profile using `PresetManager::SetCurrentProfile`. Expect `PhysicsEngine` reports different physics parameters.
 
   - Create a new profile from SDF using `CreateProfile(sdf::ElementPtr)`. Switch to the new profile. Expect that `PhysicsEngine` reports the new physics parameters.
+
+  - Initialize a world with a legacy `<world>` and `<physics>` blocks without `default_physics` or `name` attributes. The world should assign a default name to a profile based on the given physics parameters, and set it as current profile.
 
 ### Pull Requests
 This implementation will require one pull request to sdformat and at least one pull request to gazebo.
