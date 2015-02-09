@@ -30,17 +30,17 @@ While Gazebo is running, a developer can use the API to do the following:
 - Load a new profile from SDF.
 
 ### Architecture
-The new SDF architecture includes a new attribute under the `world` element, `default_physics`. The `physics` element also has a new `name` attribute. `default_physics` specifies the name of the default physics profile to load.
+The new SDF architecture includes `name` attribute for the `physics` element. Another `physics` attribute, `default`, is a boolean value that is true if this physics block is the default profile for the world.
 
 ~~~
 <sdf version="1.5">
-  <world name="..." default_physics="preset1">
+  <world name="default">
     ...
     <physics name="preset1">
       <iterations>1000</iterations>
       ...
     </physics>
-    <physics name="preset2">
+    <physics name="preset2" default="true">
       <iterations>100</iterations>
       ...
     </physics>
@@ -62,28 +62,28 @@ For the sake of cleaner code, a `Preset` class will also be introduced. This abs
 ~~~
 class Preset
 {
-  public: std::string GetName() const;
-  public: boost::any _value GetParam(const std::string& _key) const;
-  public: void SetParam(const std::string& _key, boost::any _value);
-  public: sdf::ElementPtr GetSDF() const;
-  public: void SetSDF(sdf::ElementPtr _sdfElement);
+  public: std::string Name() const;
+  public: boost::any _value Param(const std::string& _key) const;
+  public: void Param(const std::string& _key, boost::any _value);
+  public: sdf::ElementPtr SDF() const;
+  public: void SDF(sdf::ElementPtr _sdfElement);
 }
 
 class PresetManager
 {
-  public: bool SetCurrentProfile(const std::string& _name);
+  public: bool CurrentProfile(const std::string& _name);
 
-  public: std::string GetCurrentProfile() const;
+  public: std::string CurrentProfile() const;
 
-  public: std::vector<std::string> GetAllProfiles() const;
+  public: std::vector<std::string> AllProfiles() const;
 
-  public: bool SetProfileParam(const std::string& _profileName,
+  public: bool ProfileParam(const std::string& _profileName,
                                const std::string& _key,
                                const boost::any &_value);
 
-  public: boost::any GetProfileParam(const std::string &_name) const;
+  public: boost::any ProfileParam(const std::string &_name) const;
 
-  public: bool SetCurrentProfileParam(const std::string& _key,
+  public: bool CurrentProfileParam(const std::string& _key,
                                       const boost::any &_value);
 
   public: void CreateProfile(const std::string& _name);
@@ -92,9 +92,9 @@ class PresetManager
 
   public: void RemoveProfile(const std::string& _name);
 
-  public: sdf::ElementPtr GetProfileSDF(const std::string &_name) const;
+  public: sdf::ElementPtr ProfileSDF(const std::string &_name) const;
 
-  public: void SetProfileSDF(const std::string &_name,
+  public: void ProfileSDF(const std::string &_name,
               sdf::ElementPtr _sdf);
 };
 ~~~
@@ -104,13 +104,13 @@ Physics Presets Integration Test (each sub-item represents one test case):
 
   - Initialize a world with several preset blocks. Expect that `PhysicsEngine` reports the default physics parameters.
 
-  - Set one parameter using `SetCurrentProfileParam`. Expect that this parameter and only this parameter changed in `PhysicsEngine`.
+  - Set one parameter using `CurrentProfileParam`. Expect that this parameter and only this parameter changed in `PhysicsEngine`.
 
-  - Switch to a different preset profile using `PresetManager::SetCurrentProfile`. Expect `PhysicsEngine` reports different physics parameters.
+  - Switch to a different preset profile using `PresetManager::CurrentProfile`. Expect `PhysicsEngine` reports different physics parameters.
 
   - Create a new profile from SDF using `CreateProfile(sdf::ElementPtr)`. Switch to the new profile. Expect that `PhysicsEngine` reports the new physics parameters.
 
-  - Initialize a world with a legacy `<world>` and `<physics>` blocks without `default_physics` or `name` attributes. The world should assign a default name to a profile based on the given physics parameters, and set it as current profile.
+  - Initialize a world with a legacy `<world>` and `<physics>` blocks without `default` or `name` attributes. The world should assign a default name to a profile based on the given physics parameters, and set it as current profile.
 
 ### Pull Requests
 This implementation will require one pull request to sdformat and at least one pull request to gazebo.
