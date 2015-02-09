@@ -59,6 +59,8 @@ For the sake of cleaner code, a `Preset` class will also be introduced. This abs
 
 ### Interfaces
 
+The C++ interface is as follows:
+
 ~~~
 class Preset
 {
@@ -98,6 +100,24 @@ class PresetManager
               sdf::ElementPtr _sdf);
 };
 ~~~
+
+The command line interface allows the user to change between profiles quickly during runtime without interacting with a GUI or writing a plugin, or specify a profile besides the default on startup.
+
+To specify a profile on starting gzserver (or gazebo):
+
+~~~
+gzserver -o [ --profile ] arg
+~~~
+
+where `arg` is the name of a profile in the world file.
+
+To change the profile during runtime:
+
+~~~
+gz physics --profile arg
+~~~
+
+where `arg` is the name of a profile in the current `PresetManager`.
 
 ### Tests
 Physics Presets Integration Test (each sub-item represents one test case):
