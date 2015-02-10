@@ -8,9 +8,41 @@ Currently Gazebo's math libraries support 3x3 and 4x4 matrices
 In order to support
  [Jacobian matrices](https://bitbucket.org/osrf/gazebo/issue/1165/api-for-extracting-generalized-inertia),
  Gazebo should support
- matrices of arbitrary size as well.
+ matrices of arbitrary size as well (`gazebo::math::Matrix`).
+Vectors of arbitrary length can be handled as well as a special case
+ of the matrix class.
+
+Also, many physics engines have their own implementations of matrix and
+ vector math.
+With regard to the Jacobian matrices in particular,
+ [it has been suggested](https://bitbucket.org/osrf/gazebo/issue/1165/api-for-extracting-generalized-inertia),
+ that performance may be enhanced by providing operators that multiply
+ by the given matrix rather than returning a copy of the matrix.
+This idea will be considered while attempting to maintain
+ a simple API.
 
 ### Requirements
+
+The `Matrix` class should satisfy the following requirements:
+
+* Support both floating point and integer data types.
+* Provide the following operators:
+  * `+` Addition
+  * `-` Subtraction
+  * `*` Multiplication
+  * `~` Transpose
+* Allow optional functions
+
+Now I'm not sure about this. Should the optional functions be in the Jacobian
+ level or on the Matrix level?
+
+~~~
+template<typename T>
+class Matrix
+{
+  Matrix(unsigned int rows, unsigned int cols);
+}
+~~~
 
 https://github.com/chrisdembia/simbody/blob/operational-space-ex/Simbody/include/simbody/internal/TaskSpace.h#L77-L122
 
