@@ -30,7 +30,7 @@ While Gazebo is running, a developer can use the API to do the following:
 - Load a new profile from SDF.
 
 ### Architecture
-The new SDF architecture includes `name` attribute for the `physics` element. Another `physics` attribute, `default`, is a boolean value that is true if this physics block is the default profile for the world.
+The new SDF architecture includes `name` attribute for the `physics` element. Another `physics` attribute, `default`, is a boolean value that is true if this physics block is the default profile for the world. The default value of `default` is `false`. If multiple `physics` elements have `default` set to `true`, then the first one marked as default is chosen as the default, with a warning to the user. If no `physics` elements have `default` set to `true`, then the first physics element is chosen.
 
 ~~~
 <sdf version="1.5">
