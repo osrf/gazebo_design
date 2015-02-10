@@ -2,7 +2,7 @@
 ***Gazebo Design Document***
 
 ### Overview
-Currently, Gazebo only supports one `<physics>` in SDF.. Furthermore, if a user desires to change simulation properties after the world file is loaded, they must write a plugin to change physics engine parameters individually via the physics API. If a user has multiple physics profiles in mind for a world--for example, one tuned for performance and the other tuned for accuracy--the current method for switching between them is clunky and verbose.
+Currently, Gazebo only supports one `<physics>` element in SDF. Furthermore, if a user desires to change simulation properties after the world file is loaded, they must write a plugin to change physics engine parameters individually via the physics API. If a user has multiple physics profiles in mind for a world--for example, one tuned for performance and the other tuned for accuracy--the current method for switching between them is clunky and verbose.
 
 This design document proposes a small change to SDF to support multiple physics blocks in SDF, as well as an API to manage switching between these preset physics profiles.
 
