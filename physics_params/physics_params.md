@@ -40,6 +40,11 @@ meaning, and units of parameters.
 
 ### Architecture
 
+This proposal doesn't contain significant architecture changes,
+but rather, mainly interface changes.
+
+### Interfaces
+
 The primary data structure for storing parameters will
 be a new protobuf message with a string field for
 the name of a parameter and optional fields of
@@ -59,25 +64,15 @@ message NamedParameter
 
 Any gazebo class could offer parameter set and get functions:
 ~~~
-void GetParam(msgs::NamedPtr &_msg);
+bool GetParam(msgs::NamedPtr &_msg);
 bool SetParam(const msgs::NamedPtr &_msg);
 ~~~
 
-Include a system architecture diagram.
-This should be a conceptual diagram that describes what components of Gazebo will be utilized or changed, the flow of information, new classes, etc.
-
-### Interfaces
-Describe any new interfaces or modifications to interfaces, where interfaces are protobuf messages, function API changes, SDF changes, and GUI changes. These changes can be notional.
-
-For example:
-Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
-
-Include any UX design drawings.
-
 ### Performance Considerations
-Will this project cause changes to performance?
-If so, describe how.
-One or more performance tests may be required.
+
+If there are large numbers of parameters, it may require
+many string comparisons.
+The performance of these interfaces should be profiled.
 
 ### Tests
 List and describe the tests that will be created. For example:
