@@ -82,9 +82,8 @@ I'm not sure how important performance is for these functions.
     properties match.
 
 ### Pull Requests
-This could be done incrementally, as there are many messages that would
-need to be converted.
-There are many nested messages though
-(model, link, collision, surface, friction),
-so those should be done in the same pull request.
+This was implemented incrementally,
+in [pull request 1315](https://bitbucket.org/osrf/gazebo/pull-request/1315/some-protobuf-to-sdf-conversion-code),
+[pull request 1415](https://bitbucket.org/osrf/gazebo/pull-request/1415/add-msgs-visualtosdf-materialtosdf-and),
+and [pull request 1429](https://bitbucket.org/osrf/gazebo/pull-request/1429/add-msgs-modeltosdf-and-simple-shape/activity).
 
