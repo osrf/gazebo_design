@@ -43,6 +43,8 @@ meaning, and units of parameters.
 This proposal doesn't contain significant architecture changes,
 but rather, mainly interface changes.
 
+What about a generic parameter map in PhysicsEngine?
+
 ### Interfaces
 
 The primary data structure for storing parameters will
@@ -68,11 +70,34 @@ bool GetParam(msgs::NamedPtr &_msg);
 bool SetParam(const msgs::NamedPtr &_msg);
 ~~~
 
+Can also offer Get/SetParam methods for primitives.
+
+~~~
+template typename<Type> bool GetParam(std::string _key, Type &_value);
+~~~
+
+which probably calls:
+
+~~~
+template typename<Type> bool GetParam(EnumParam _key, Type &_value);
+~~~
+
+SetParam already works for primitives because boost::any will automatically
+cast an input primitive
+
 ### Performance Considerations
 
 If there are large numbers of parameters, it may require
 many string comparisons.
 The performance of these interfaces should be profiled.
+
+^ Internally, physics engines should reference parameters by enumeration types.
+ (See ODEPhysics::ODEParam for an example of enumerations.) An optimization
+could be made by creating a map of <ParamEnum, value> pairs and accessing the
+parameters in the map, rather than iterating through a list of enums, which is
+better because map access is logarithmic, not linear.
+
+(this is an architectural change)
 
 ### Tests
 List and describe the tests that will be created. For example:
