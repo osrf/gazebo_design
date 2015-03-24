@@ -46,6 +46,8 @@ be a new protobuf message with a string field for
 the name of a parameter and optional fields of
 various types corresponding to the parameter value.
 
+The `param` message can also be nested. 
+
 ~~~
 message Param
 {
@@ -98,6 +100,9 @@ are stored as `string`.
   </world>
 </sdf>
 ```
+
+`param` could also be a child/descendant of model, joint, or link.
+
 
 #### API
 
