@@ -38,52 +38,169 @@ Allow parameters to have a variety of types
 Define conventions for documenting the names, types,
 meaning, and units of parameters.
 
-### Architecture
-
-This proposal doesn't contain significant architecture changes,
-but rather, mainly interface changes.
-
-What about a generic parameter map in PhysicsEngine?
-
 ### Interfaces
 
+#### Protobuf
 The primary data structure for storing parameters will
 be a new protobuf message with a string field for
 the name of a parameter and optional fields of
 various types corresponding to the parameter value.
 
 ~~~
-message NamedParameter
+message NamedParam
 {
+  enum Type {DOUBLE = 1; FLOAT = 2; INT = 3; STRING = 4 ... }
+
   required string  name    = 1;
-  optional double  Double  = 2;
-  optional float   Float   = 3;
-  optional string  String  = 4;
-  optional vector3 Vector3 = 5;
+
+  optional double  double_value = 3;
+  optional int     int_value    = 5;
+  optional string  string_value = 6;
+  optional Vector3 vector3      = 7;
 ... etc.
 }
 ~~~
 
+The existing `physics` protobuf message will be changed to contain a variable
+number of NamedParameters:
+
+~~~
+import "namedparam.proto"
+
+message Physics
+{
+  enum Type
+  {
+    ODE = 1;
+    ...
+  }
+
+  optional Type type = 1[default=ODE];
+
+  optional repeated NamedParam = 2;
+}
+~~~
+
+#### SDF
+A new `param` SDF element keeps consistency between the Protobuf messages,
+Gazebo runtime state, and SDF.
+
+The `param` element contains three attributes: `name`, `type`, and `value`.
+Its role is to store a generic key-value pair, where `name` is the key and
+`value` is the value.
+Because SDF does not allow variably-typed elements, we also store the type of
+the parameter and cast it to the correct type during runtime. `param` values
+are stored as `string`.
+
+```
+<sdf>
+  <world>
+    <physics type="ode">
+      <ode>
+        <param name="extra_friction_iterations" type="double" value="10"/>
+        ...
+      </ode>
+    </physics>
+    ...
+  </world>
+</sdf>
+```
+
+#### API
+
 Any gazebo class could offer parameter set and get functions:
-~~~
-bool GetParam(msgs::NamedPtr &_msg);
-bool SetParam(const msgs::NamedPtr &_msg);
-~~~
-
-Can also offer Get/SetParam methods for primitives.
 
 ~~~
-template typename<Type> bool GetParam(std::string _key, Type &_value);
+bool GetParam(msgs::NamedParam &_msg);
+bool SetParam(const msgs::NamedParam &_msg);
 ~~~
 
-which probably calls:
+These functions would be accompanied by templated set/get functions that call the
+convenience conversion functions:
 
 ~~~
-template typename<Type> bool GetParam(EnumParam _key, Type &_value);
+template<typename T> bool GetParam(const std::string &_key, T &_value);
+template<typename T> bool SetParam(const msgs::NamedParam &_msg, const T &_value);
 ~~~
 
-SetParam already works for primitives because boost::any will automatically
-cast an input primitive
+### Architecture
+The new 
+
+
+### Example Usage
+Suppose Erwin wants to expose a new Bullet parameter, `academy_awards_won`,
+and use it in a Gazebo world. Previously, he would have to complete several steps before the
+change would be propagated to the stable Gazebo release:
+
+1. Submit an SDF pull request to make new element `academy_awards_won`,
+a child of `bullet` (needed to specify parameter in SDF).
+2. Add a new field to the `physics.proto` message (needed for client/server communication,
+including visualization of physics parameters). Add update logic for message in
+transport callbacks, `BulletPhysics::OnPhysicsMsg` and `BulletPhysics::OnRequest`.
+3. Add update logic to `BulletPhysics::[G/S]etParam` for the new key.
+4. Update world to include new parameter.
+
+```
+message Physics
+{
+  optional Type type = 1;
+  optional string solver_type = 2;
+  optional double min_step_size = 3;
+  ...
+  optional academy_awards_won = 42;
+}
+
+BulletPhysics::GetParam()
+{
+  ... else if (_key == "academy_awards_won")
+  {
+    return bulletAcademyAwardsWon;
+  }
+  ...
+}
+
+<sdf>
+  <world name="oscars">
+    <physics type="bullet">
+      <bullet>
+        <academy_awards_won>1</academy_awards_won>
+      </bullet>
+    </physics>
+  </world>
+</sdf>
+```
+
+With the changes proposed in this document, Erwin only needs to do two things,
+and neither one violates backward compatibility of Protobuf messages or SDF:
+
+1. Add update logic to `BulletPhysics::[G/S]etParam` for the new key.
+2. Update world to include new parameter.
+
+```
+BulletPhysics::GetParam()
+{
+  ... else if (_key == "academy_awards_won")
+  {
+    return bulletAcademyAwardsWon;
+  }
+  ...
+}
+
+<sdf>
+  <world name="oscars">
+    <physics type="bullet">
+      <bullet>
+        <param name="academy_awards_won" type="int" value="1"/>
+      </bullet>
+    </physics>
+  </world>
+</sdf>
+```
+
+Erwin can still submit major pull requests Gazebo and SDF if he
+wants to make his new parameter a first-class citizen and stop using the `param`
+syntax in SDF. In the meantime, we've saved both Erwin and ourselves lots of time,
+effort, and pain related to testing, reviewing and packaging new PRs.
 
 ### Performance Considerations
 
@@ -91,30 +208,23 @@ If there are large numbers of parameters, it may require
 many string comparisons.
 The performance of these interfaces should be profiled.
 
-^ Internally, physics engines should reference parameters by enumeration types.
+Internally, physics engines could reference parameters by enumeration types.
  (See ODEPhysics::ODEParam for an example of enumerations.) An optimization
 could be made by creating a map of <ParamEnum, value> pairs and accessing the
 parameters in the map, rather than iterating through a list of enums, which is
-better because map access is logarithmic, not linear.
+marginally better because map access keyed on integers is logarithmic, not linear.
 
-(this is an architectural change)
+An optional Type field could be added to optimize accessing the `NamedParam` message.
+
+Storing SDF `param` elements as `string` might be wasteful, is there a leaner implementation?
 
 ### Tests
-List and describe the tests that will be created. For example:
 
-1. Test: Plot View
-    1. case: Plot window should appear when signaled by QT.
-    1. case: Plot simulation time should produce correct results when save to CSV
-    1. case: Signalling a close should close the plotting window.
-1. Test: Multiple plots
-    1. case: Create two plots with identical data. Saved CSV data from each should be identical
 
 ### Pull Requests
-List and describe the pull requests that will be created to merge this project.
-Consider separating large refactoring operations from additions of new code.
-For example, the physics::SurfaceParams class was refactored in
-[pull request #891](https://bitbucket.org/osrf/gazebo/pull-request/891/refactor)
-so that a new FrictionPyramid class could be added in
-[pull request #935](https://bitbucket.org/osrf/gazebo/pull-request/935/create).
-
-Keep in mind that smaller, atomic pull requests are easier to review.
+1. Gazebo: Add `namedparam.proto` protobuf message. Add `NamedParams` to `physics.proto`.
+Add conversion functions and integrate physics engines with new message structure.
+2. SDF: New `param.sdf` element.
+3. Gazebo: Add support for parsing `param.sdf` element with tests for each physics engine.
+4. Replace `sdf` storage element in physics engines with `physics` protobuf structure.
+5. Replace `boost::any` abstraction with type-variable `namedparam` protobuf structure.
