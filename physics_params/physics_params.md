@@ -69,14 +69,8 @@ import "namedparam.proto"
 
 message Physics
 {
-  enum Type
-  {
-    ODE = 1;
-    ...
-  }
-
   optional Type type = 1[default=ODE];
-
+  ... 
   optional repeated NamedParam = 2;
 }
 ~~~
@@ -124,10 +118,11 @@ template<typename T> bool SetParam(const msgs::NamedParam &_msg, const T &_value
 ~~~
 
 ### Architecture
-The new 
+The new protobuf structure will allow for several architectural changes to the physics
+library.
 
 
-### Example Usage
+### Use Case
 Suppose Erwin wants to expose a new Bullet parameter, `academy_awards_won`,
 and use it in a Gazebo world. Previously, he would have to complete several steps before the
 change would be propagated to the stable Gazebo release:
@@ -150,11 +145,12 @@ message Physics
   optional academy_awards_won = 42;
 }
 
-BulletPhysics::GetParam()
+bool BulletPhysics::GetParam(std::string key, boost::any value)
 {
   ... else if (_key == "academy_awards_won")
   {
-    return bulletAcademyAwardsWon;
+    value = bulletAcademyAwardsWon;
+    return true;
   }
   ...
 }
@@ -171,17 +167,18 @@ BulletPhysics::GetParam()
 ```
 
 With the changes proposed in this document, Erwin only needs to do two things,
-and neither one violates backward compatibility of Protobuf messages or SDF:
+and neither break API/ABI in Gazebo. He does not need to change SDF.
 
 1. Add update logic to `BulletPhysics::[G/S]etParam` for the new key.
 2. Update world to include new parameter.
 
 ```
-BulletPhysics::GetParam()
+bool BulletPhysics::GetParam(std::string key, boost::any value)
 {
   ... else if (_key == "academy_awards_won")
   {
-    return bulletAcademyAwardsWon;
+    value = bulletAcademyAwardsWon;
+    return true;
   }
   ...
 }
@@ -198,9 +195,10 @@ BulletPhysics::GetParam()
 ```
 
 Erwin can still submit major pull requests Gazebo and SDF if he
-wants to make his new parameter a first-class citizen and stop using the `param`
-syntax in SDF. In the meantime, we've saved both Erwin and ourselves lots of time,
-effort, and pain related to testing, reviewing and packaging new PRs.
+wants to make his new parameter a first-class citizen,
+but he doesn't have to.
+This saves a lot of time and effort expended in pull request review and ABI/API
+changes.
 
 ### Performance Considerations
 
@@ -219,12 +217,15 @@ An optional Type field could be added to optimize accessing the `NamedParam` mes
 Storing SDF `param` elements as `string` might be wasteful, is there a leaner implementation?
 
 ### Tests
+The new tests for this functionality can be formulated as unit tests and will be added
+incrementally to `PhysicsEngine` and its respective child classes.
 
+1.
 
 ### Pull Requests
 1. Gazebo: Add `namedparam.proto` protobuf message. Add `NamedParams` to `physics.proto`.
 Add conversion functions and integrate physics engines with new message structure.
 2. SDF: New `param.sdf` element.
 3. Gazebo: Add support for parsing `param.sdf` element with tests for each physics engine.
-4. Replace `sdf` storage element in physics engines with `physics` protobuf structure.
-5. Replace `boost::any` abstraction with type-variable `namedparam` protobuf structure.
+4. Gazebo: Replace `sdf` storage element in physics engines with `physics` protobuf structure.
+5. Gazebo: Replace `boost::any` abstraction with type-variable `namedparam` protobuf structure.
