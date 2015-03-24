@@ -47,7 +47,7 @@ the name of a parameter and optional fields of
 various types corresponding to the parameter value.
 
 ~~~
-message NamedParam
+message Param
 {
   enum Type {DOUBLE = 1; FLOAT = 2; INT = 3; STRING = 4 ... }
 
@@ -62,16 +62,16 @@ message NamedParam
 ~~~
 
 The existing `physics` protobuf message will be changed to contain a variable
-number of NamedParameters:
+number of Params:
 
 ~~~
-import "namedparam.proto"
+import "param.proto"
 
 message Physics
 {
   optional Type type = 1[default=ODE];
   ... 
-  optional repeated NamedParam = 2;
+  optional repeated Param = 2;
 }
 ~~~
 
@@ -79,9 +79,8 @@ message Physics
 A new `param` SDF element keeps consistency between the Protobuf messages,
 Gazebo runtime state, and SDF.
 
-The `param` element contains three attributes: `name`, `type`, and `value`.
-Its role is to store a generic key-value pair, where `name` is the key and
-`value` is the value.
+The `param` element contains two attributes: `name` and `type`.
+Its role is to store a generic key-value pair, where `name` is the key.
 Because SDF does not allow variably-typed elements, we also store the type of
 the parameter and cast it to the correct type during runtime. `param` values
 are stored as `string`.
@@ -91,7 +90,7 @@ are stored as `string`.
   <world>
     <physics type="ode">
       <ode>
-        <param name="extra_friction_iterations" type="double" value="10"/>
+        <param name="extra_friction_iterations" type="double">10</param>
         ...
       </ode>
     </physics>
@@ -105,8 +104,8 @@ are stored as `string`.
 Any gazebo class could offer parameter set and get functions:
 
 ~~~
-bool GetParam(msgs::NamedParam &_msg);
-bool SetParam(const msgs::NamedParam &_msg);
+bool GetParam(msgs::Param &_msg);
+bool SetParam(const msgs::Param &_msg);
 ~~~
 
 These functions would be accompanied by templated set/get functions that call the
@@ -114,13 +113,25 @@ convenience conversion functions:
 
 ~~~
 template<typename T> bool GetParam(const std::string &_key, T &_value);
-template<typename T> bool SetParam(const msgs::NamedParam &_msg, const T &_value);
+template<typename T> bool SetParam(const msgs::Param &_msg, const T &_value);
 ~~~
 
 ### Architecture
 The new protobuf structure will allow for several architectural changes to the physics
 library.
 
+`boost::any` is currently used to for generic type handling in the physics library.
+The `Param` protobuf message could replace `boost::any` to simplify the code and
+migrate away from reliance on Boost. To settle this design choice, the relative performance
+of protobuf messages vs. boost::any could be profiled in
+order to determine which has superior speed.
+
+With a mechanism finally in place to keep the physics parameters enumerated in SDF
+consistent with the parameters in protobuf, the physics Protobuf message can be used
+as the primary storage data structure for physics engines. This will increase performance,
+since Protobuf is a more efficient storage mechanism.
+
+Note: Protobuf 3 will release such features as map and Any types, which would be of 
 
 ### Use Case
 Suppose Erwin wants to expose a new Bullet parameter, `academy_awards_won`,
@@ -144,7 +155,9 @@ message Physics
   ...
   optional academy_awards_won = 42;
 }
+```
 
+```
 bool BulletPhysics::GetParam(std::string key, boost::any value)
 {
   ... else if (_key == "academy_awards_won")
@@ -154,7 +167,9 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
   }
   ...
 }
+```
 
+```
 <sdf>
   <world name="oscars">
     <physics type="bullet">
@@ -182,12 +197,14 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
   }
   ...
 }
+```
 
+```
 <sdf>
   <world name="oscars">
     <physics type="bullet">
       <bullet>
-        <param name="academy_awards_won" type="int" value="1"/>
+        <param name="academy_awards_won" type="int">1</param>
       </bullet>
     </physics>
   </world>
@@ -212,7 +229,7 @@ could be made by creating a map of <ParamEnum, value> pairs and accessing the
 parameters in the map, rather than iterating through a list of enums, which is
 marginally better because map access keyed on integers is logarithmic, not linear.
 
-An optional Type field could be added to optimize accessing the `NamedParam` message.
+An optional Type field could be added to optimize accessing the `Param` message.
 
 Storing SDF `param` elements as `string` might be wasteful, is there a leaner implementation?
 
@@ -223,9 +240,9 @@ incrementally to `PhysicsEngine` and its respective child classes.
 1.
 
 ### Pull Requests
-1. Gazebo: Add `namedparam.proto` protobuf message. Add `NamedParams` to `physics.proto`.
+1. Gazebo: Add `param.proto` protobuf message. Add `Params` to `physics.proto`.
 Add conversion functions and integrate physics engines with new message structure.
 2. SDF: New `param.sdf` element.
 3. Gazebo: Add support for parsing `param.sdf` element with tests for each physics engine.
 4. Gazebo: Replace `sdf` storage element in physics engines with `physics` protobuf structure.
-5. Gazebo: Replace `boost::any` abstraction with type-variable `namedparam` protobuf structure.
+5. Gazebo: Replace `boost::any` abstraction with type-variable `param` protobuf structure.
