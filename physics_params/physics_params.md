@@ -43,25 +43,34 @@ meaning, and units of parameters.
 #### Protobuf
 The primary data structure for storing parameters will
 be a new protobuf message with a string field for
-the name of a parameter and optional fields of
+the name of a parameter and optional data fields of
 various types corresponding to the parameter value.
-
-The `param` message can also be nested. 
 
 ~~~
 message Param
 {
-  enum Type {DOUBLE = 1; FLOAT = 2; INT = 3; STRING = 4 ... }
+  required string   name           = 1;
+  optional Any      value          = 2;
+  map<string, Param> children = 3;
+}
 
-  required string  name    = 1;
-
-  optional double  double_value = 3;
-  optional int     int_value    = 5;
-  optional string  string_value = 6;
-  optional Vector3 vector3      = 7;
-... etc.
+message Any
+{
+  oneof value
+  {
+    double  double_value = 1;
+    int     int_value    = 2;
+    string  string_value = 3;
+    Vector3 vector3      = 4;
+    bool    bool_value   = 5;
+  }
 }
 ~~~
+
+Only one data field of the Any message can be filled at a time. The Gazebo
+side of the API must enforce this.
+
+The `param` message can also be nested. 
 
 The existing `physics` protobuf message will be changed to contain a variable
 number of Params:
@@ -72,10 +81,29 @@ import "param.proto"
 message Physics
 {
   optional Type type = 1[default=ODE];
+  option double real_time_factor = 2;
   ... 
-  optional repeated Param = 2;
+  map<string, Param> parameters = 16;
 }
 ~~~
+
+#### Migration to Protobuf 3
+Protobuf 3 will introduce Any types, which eliminate the need for the union structure
+described above in the structure of `Param`.
+
+Additionally, Protobuf 3 introduces
+
+Once Protobuf 3 is released and integrated with Gazebo, Param should be changed
+to:
+
+```
+message Param
+{
+  required string name        = 1;
+  optional Any value          = 2;
+  map<string, Param> children = 3;
+}
+```
 
 #### SDF
 A new `param` SDF element keeps consistency between the Protobuf messages,
@@ -103,10 +131,26 @@ are stored as `string`.
 
 `param` could also be a child/descendant of model, joint, or link.
 
-
 #### API
+New conversion functions will be added for switching between SDF and Protobuf
+representations of a Param, adding a primitive as a Param to a Physics message, and
+converting a primitive to a Param Protobuf message:
 
-Any gazebo class could offer parameter set and get functions:
+```
+template<typename T> msgs::Param ConvertParamSDF(const sdf::ElementPtr _elem);
+template<typename T> sdf::ElementPtr ConvertParamSDF(const msgs::Param &_msg);
+template<typename T> msgs::Param ConvertParam(const std::String &_key,
+    const T &_value);
+template<typename T> bool ConvertParam(const msgs::Param &_msg, T _value);
+template<typename T> bool AddToPhysicsMsg(const std::string &_key,
+    const T &_value, msgs::Physics &_physics);
+template<typename T> bool PhysicsMsgParam(const msgs::Physics &_physics,
+    const std::string &_key, T &_value);
+```
+
+The new Param message could also replace `boost::any` to accomplish the generic
+typing used in the Physics library. Any gazebo class could offer parameter set
+and get functions:
 
 ~~~
 bool GetParam(msgs::Param &_msg);
@@ -135,8 +179,6 @@ With a mechanism finally in place to keep the physics parameters enumerated in S
 consistent with the parameters in protobuf, the physics Protobuf message can be used
 as the primary storage data structure for physics engines. This will increase performance,
 since Protobuf is a more efficient storage mechanism.
-
-Note: Protobuf 3 will release such features as map and Any types, which would be of 
 
 ### Use Case
 Suppose Erwin wants to expose a new Bullet parameter, `academy_awards_won`,
