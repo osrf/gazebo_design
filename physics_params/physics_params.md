@@ -1,6 +1,5 @@
 ## Project: API for generic physics parameters
 ***Gazebo Design Document***
-
 ### Overview
 
 Each of gazebo's physics engines has many parameters for setting
@@ -262,10 +261,11 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
 Alice can still submit major pull requests Gazebo and SDF if she
 wants to make her new parameter a first-class citizen,
 but she doesn't have to.
-This saves a lot of time and effort expended in pull request review and ABI/API
-changes.
+This saves a lot of time and effort expended in pull request review. It reduces
+the number of API/ABI changes made to the code since Protobuf messages do not
+need to be changed, which makes the release process smoother.
 
-### Performance Considerations
+### Performance Considerations/Questions
 
 If there are large numbers of parameters, it may require
 many string comparisons.
@@ -282,15 +282,15 @@ An optional Type field could be added to optimize accessing the `Param` message.
 Storing SDF `param` elements as `string` might be wasteful, is there a leaner implementation?
 
 ### Tests
-Tests will be added to SDF for different cases of parsing the `<param>` element.
 
-The new tests for this functionality can be formulated as unit tests and will be added
-incrementally to `PhysicsEngine` and its respective child classes.
+1. SDF: Test parsing the `<param>` element.
+1. Gazebo: Parameterized tests for physics engine parsing of `physics` protobuf
+messages with `params` structure.
 
 ### Pull Requests
-1. Gazebo: Add `param.proto` protobuf message. Add `Params` to `physics.proto`.
+1. SDF: New `param.sdf` element.
+2. Gazebo: Add `param.proto` protobuf message. Add `Params` to `physics.proto`.
 Add conversion functions and integrate physics engines with new message structure.
-2. SDF: New `param.sdf` element.
 3. Gazebo: Add support for parsing `param.sdf` element with tests for each physics engine.
 4. Gazebo: Replace `sdf` storage element in physics engines with `physics` protobuf structure.
 5. Gazebo: Replace `boost::any` abstraction with type-variable `param` protobuf structure.
