@@ -55,46 +55,66 @@ message Param
 
 message Any
 {
-  optional double  double_value = 1;
-  optional int     int_value    = 2;
-  optional string  string_value = 3;
-  optional Vector3 vector3      = 4;
+  optional double  double_value  = 1;
+  optional int     int_value     = 2;
+  optional string  string_value  = 3;
+  optional Vector3 vector3_value = 4;
+  optional Color color_value = 5;
+  optional Pose pose_value = 6;
+  optional Quaternion quaternion_value = 7;
   optional bool    bool_value   = 5;
 }
 ~~~
 
-The Gazebo side of the implementation must enforce several 
-Only one data field of the Any message can be filled at a time.
+The Gazebo side of the implementation must enforce several constraints on the
+Param messages:
 
-The `param` message can also be nested. 
+* Only one data field of the Any message can be filled at a time.
+
+* The `param` message is hierarchical. Each `param` message can contain a list of
+`param` children. A `param` cannot contain multiple children with the same name.
+
+Hierarchical parameters are represented within Gazebo with scoped names.
+For example, the ODE-specific physics parameter `sor` is a child of the element
+`solver`, which is a child of `ode`, which is a child of `physics`. The scoped name
+of this parameter is `physics::ode::solver::sor`. This allows elements
+of the same name in different namepsaces. For example, an identically-named
+parameter exists in Bullet, but it would set using the key `physics::bullet::solver::sor`
+in Gazebo. The scoped names are determined by the structure of Protobuf messages (which is
+determined by SDF); however, the scoped names are *not* used in the Protobuf representation
+of the messages.
 
 The existing `physics` protobuf message will be changed to contain a variable
-number of Params:
+number of `param`s. This field will obey the same constraints described above.
 
 ~~~
 import "param.proto"
 
 message Physics
 {
-  optional Type  type             = 1[default=ODE];
-  option double  real_time_factor = 2;
+  optional Type  type              = 1[default=ODE];
+  optional double real_time_factor = 2;
   ...
-  repeated Param parameters       = 16;
+  repeated Param parameters        = 16;
 }
 ~~~
 
 #### Migration to future Protobuf versions
-Map message types are supported in Protobuf 2.6. A map would be the idea way of
-implementing the "children" field of the Param message type. The highest Protobuf
-that is packaged with Ubuntu Trusty is 2.5.0, so maps would likely not be
-integratable until Gazebo 7, which does not support Trusty. Protobuf 2.6 also
-supports the "oneof" construct, which would simplify 
+Map message types are supported in Protobuf 2.6. A map is the ideal way of
+implementing the "children" field of the Param message type.
 
-Protobuf 3 will introduce Any types, which eliminate the need for the union structure
-described above in the structure of `Param`.
+Protobuf 2.6 also supports the "oneof" construct, which would simplify enforcing the
+union structure of `Any`. Furthermore, Protobuf 3 will introduce Any types, which
+eliminates entirely the need for the custom union structure described above in the
+structure of `Param`.
 
-Once Protobuf 3 is released and integrated with Gazebo, Param should be changed
-to:
+However, the highest Protobuf
+that is packaged with [Ubuntu Trusty](http://packages.ubuntu.com/trusty/libdevel/libprotobuf-dev)
+or [Ubuntu Utopic](http://packages.ubuntu.com/utopic/libdevel/libprotobuf-dev) is 2.5.0.
+Protobuf 2.6.1 is not supported until [Ubuntu Vivid](http://packages.ubuntu.com/vivid/libdevel/libprotobuf-dev).
+Therefore, it is unlikely that these features will be used to implement the Gazebo `param`
+message until Gazebo 8, which will drop support for Utopic (unless we want to package
+Gazebo with a custom-packaged or PPA version of Protobuf 2.6 for Trusty and Vivid).
 
 ```
 message Param
@@ -137,13 +157,25 @@ representations of a Param, adding a primitive as a Param to a Physics message, 
 converting a primitive to a Param Protobuf message:
 
 ```
-template<typename T> msgs::Param ConvertParamSDF(const sdf::ElementPtr _elem);
-template<typename T> sdf::ElementPtr ConvertParamSDF(const msgs::Param &_msg);
+
+template<typename T> bool ConvertParamFromSDF(const sdf::ElementPtr _elem,
+    msgs::Param &_msg);
+// Call "bool ConvertParamFromSDF", throw an exception if it returns false
+template<typename T> msgs::Param ConvertParamFromSDF(const sdf::ElementPtr _elem);
+
+template<typename T> bool ConvertParamToSDF(const msgs::Param &_msg,
+    sdf::ElementPtr _elem);
+// Call "bool ConvertParamToSDF", throw an exception if it returns false
+template<typename T> sdf::ElementPtr ConvertParamToSDF(const msgs::Param &_msg);
+
+template<typename T> bool ConvertParam(const msgs::Param &_msg, T _value);
+// Call "bool ConvertParam", throw an exception if it returns false
 template<typename T> msgs::Param ConvertParam(const std::String &_key,
     const T &_value);
-template<typename T> bool ConvertParam(const msgs::Param &_msg, T _value);
+
 template<typename T> bool AddToPhysicsMsg(const std::string &_key,
     const T &_value, msgs::Physics &_physics);
+
 template<typename T> bool PhysicsMsgParam(const msgs::Physics &_physics,
     const std::string &_key, T &_value);
 ```
@@ -218,7 +250,7 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
 
 ```
 <sdf>
-  <world name="oscars">
+  <world name="wonderland">
     <physics type="bullet">
       <bullet>
         <shrink_factor>1</shrink_factor>
@@ -248,7 +280,7 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
 
 ```
 <sdf>
-  <world name="oscars">
+  <world name="wonderland">
     <physics type="bullet">
       <bullet>
         <param name="shrink_factor" type="int">1</param>
@@ -272,8 +304,8 @@ many string comparisons.
 The performance of these interfaces should be profiled.
 
 Internally, physics engines could reference parameters by enumeration types.
- (See ODEPhysics::ODEParam for an example of enumerations.) An optimization
-could be made by creating a map of <ParamEnum, value> pairs and accessing the
+ (See `ODEPhysics::ODEParam` for an example of enumerations.) An optimization
+could be made by creating a map of `<ParamEnum, value>` pairs and accessing the
 parameters in the map, rather than iterating through a list of enums, which is
 marginally better because map access keyed on integers is logarithmic, not linear.
 
