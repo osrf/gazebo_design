@@ -320,9 +320,14 @@ Storing SDF `param` elements as `string` might be wasteful, is there a leaner im
 messages with `params` structure.
 
 ### Pull Requests
-1. SDF: New `param.sdf` element.
+The last two items on this list are optional and may require further forethought before implementation.
+
+1. SDF: New `param.sdf` element integrated, with tests.
 2. Gazebo: Add `param.proto` protobuf message. Add `Params` to `physics.proto`.
-Add conversion functions and integrate physics engines with new message structure.
-3. Gazebo: Add support for parsing `param.sdf` element with tests for each physics engine.
-4. Gazebo: Replace `sdf` storage element in physics engines with `physics` protobuf structure.
-5. Gazebo: Replace `boost::any` abstraction with type-variable `param` protobuf structure.
+Add conversion functions and tests.
+3. Gazebo: Integrate each physics engine with `param` messages, with parameterized tests.
+4. Gazebo: Integrate links for each physics engine with `param` messages, with tests.
+5. Gazebo: Integrate joints for each physics engine with `param` messages, with tests.
+6. Gazebo: Update GUI to reflect custom parameters in the left-hand menu.
+7. Gazebo: Replace `sdf` storage element in physics engines with `physics` protobuf structure.
+8. Gazebo: Replace `boost::any` abstraction with type-variable `param` protobuf structure.
