@@ -86,8 +86,7 @@ Sense(), Act() and UpdateGameState() at the given frequency.
 
 Each class must have its own unit tests. Next are some examples of test cases:
 
-* Server: Basic communication with the server using sockets and
-parsing/unparsing S-expressions.
+* Server: Basic communication with the server using sockets.
 
 * GameState: The game state will have its own internal variables to store the
 position of the ball, last team that touched the ball, player positions and
