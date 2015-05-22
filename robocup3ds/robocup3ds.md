@@ -92,10 +92,12 @@ Each class must have its own unit tests. Next are some examples of test cases:
 position of the ball, last team that touched the ball, player positions and
 time. We should cover most of the game situations that happen during a game. Example:
 
-  Initial state: play
-  Action: Ball enters the Team1 goal.
-  Result: The new state should be goalTeam2, after n seconds the new state should
-  be kickoff, and then, the ball should be in the middle of the field.
+```
+Initial state: play
+Action: Ball enters the Team1 goal.
+Result: The new state should be goalTeam2, after n seconds the new state should
+        be kickoff, and then, the ball should be in the middle of the field.
+```
 
 * Effector: Unit tests to guarantee that the accessor methods are correct.
 Another interesting test might be to test the conversion from an S-expression to
