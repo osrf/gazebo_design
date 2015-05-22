@@ -78,9 +78,35 @@ say that updates must be executed at 50 Hz. Probably we will have to run faster
 than 50 Hz to maintain the simulation stability. In any case, we will always run
 Sense(), Act() and UpdateGameState() at the given frequency.
 
-
 ## Models and worlds
 
 ## Testing
+
+Each class must have its own unit tests. Next are some examples of test cases:
+
+* Server: Basic communication with the server using sockets and
+parsing/unparsing S-expressions.
+
+* GameState: The game state will have its own internal variables to store the
+position of the ball, last team that touched the ball, player positions and
+time. We should cover most of the game situations that happen during a game. Example:
+
+  Initial state: play
+  Action: Ball enters the Team1 goal.
+  Result: The new state should be goalTeam2, after n seconds the new state should
+  be kickoff, and then, the ball should be in the middle of the field.
+
+* Effector: Unit tests to guarantee that the accessor methods are correct.
+Another interesting test might be to test the conversion from an S-expression to
+an Effector object. This will be used by the server to populate new effectors.
+
+* Perceptor: Unit tests to guarantee that the accessor methods are correct. We
+will also test the conversion from a perceptor object to an S-expression. This
+feature will be exercised by the Robocup3dsPlugin during the Act() phase.
+
+When the basic functionality is in place, we could have a basic team of agents
+and execute some integration test that will spawn Gazebo with the
+RoboCup3dsPlugin and will exercise a subset of the functionality. This will
+probably require to have access to some of the teams codebase.
 
 ## Pull requests
