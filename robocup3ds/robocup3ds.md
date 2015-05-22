@@ -54,15 +54,16 @@ server.start() for start receiving external requests. The plugin will also
 register the Update() callback. Update() will perform the main simulation update
 loop in the following way:
 
-
-Sense()
-
-Act()
-
-UpdatePhysics()
-
-UpdateGameState()
-
+```
+...
+{
+  Sense()
+  Act()
+  UpdatePhysics()
+  UpdateGameState()
+}
+...
+```
 
 Sense() will generate the perceptions for all the players connected to the
 server. The perceptions will be stored in a data structure shared by the plugin
