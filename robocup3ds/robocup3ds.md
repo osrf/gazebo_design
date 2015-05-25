@@ -30,6 +30,9 @@ All the functionality will be contained in a world plugin named
 `Robocup3dsPlugin`. The functionality inside the plugin will be divided in several
 files:
 
+![Architecture](./robocup3ds/architecture.png)
+
+
 * `Server.cc`: A class named `Server` will initialize some sockets and will listen
 in TCP ports 3100 and 3200 for agent and monitor communication respectively. We'll try to use
 an S-expression library to parse the incoming messages and to generate the outgoing
@@ -40,57 +43,57 @@ update the state machine with all the different game situations: `beforeKickOff`
 `kickoff`, `play`, `corner`, `goal`, etc.
 
 * `Perceptor.cc`: We will include in this file all the `Perceptor` classes.
-Following the different type of [perceptors available](http://simspark.sourceforge.net/wiki/index.php/Perceptors), 
+Following the different type of [perceptors available](http://simspark.sourceforge.net/wiki/index.php/Perceptors),
 we'll create the following clases:
 
     + `GyroRatePerceptor`
-   
+
     + `HingeJointPerceptor`
-   
+
     + `UniversalJointPerceptor`
-   
+
     + `TouchPerceptor`
-   
+
     + `ForceResistancePerceptor`
-   
+
     + `AccelerometerPerceptor`
-   
+
     + `VisionPerceptor`
-   
+
     + `RestrictedVisionPerceptor`
-   
+
     + `GameStatePerceptor`
-   
+
     + `RestrictedVisionPerceptor`
-   
+
     + `HearPerceptor`
-   
+
 All of them will inherit from the `Perceptor` class.
 
 * `Effector.cc`: This file will include all the `Efector` classes.
-Following the different type of [effectors available](http://simspark.sourceforge.net/wiki/index.php/Effectors), 
+Following the different type of [effectors available](http://simspark.sourceforge.net/wiki/index.php/Effectors),
 we'll create the following clases:
 
     + `CreateEffector`
 
     + `HingeJointEffector`
-   
+
     + `UniversalJointEffector`
-   
+
     + `SynchronizeEffector`
 
     + `InitEffector`
-    
+
     + `BeamEffector`
-    
+
     + `SayEffector`
 
 All of them will inherit from the `Effector` class.
 
-* `Robocup3dsPlugin.cc`: The plugin will create one instance of a `Server` and a `GameState`. 
-It will create a separate thread that will execute the method `server.start()` 
-to start receiving external requests. The plugin will also register the `Update()` 
-callback. `Update()` will perform the main simulation update loop in the 
+* `Robocup3dsPlugin.cc`: The plugin will create one instance of a `Server` and a `GameState`.
+It will create a separate thread that will execute the method `server.start()`
+to start receiving external requests. The plugin will also register the `Update()`
+callback. `Update()` will perform the main simulation update loop in the
 following way:
 
 ```
@@ -121,15 +124,15 @@ than 50 Hz to maintain the simulation stability. In any case, we will always run
 
 ## Models and worlds
 
-The simulation will need a few robot models in SDF. Ultimately, the new NAO robot 
+The simulation will need a few robot models in SDF. Ultimately, the new NAO robot
 should be used and can be taken from [here](https://github.com/osrf/robocup_3d_simulation/tree/master/robocup_model_resources/nao_models).
-It could also be interesting to model the old NAO used in previous competitions 
-to verify if existing agent code works. These models can be added to the models 
-directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/models/?at=default)` 
+It could also be interesting to model the old NAO used in previous competitions
+to verify if existing agent code works. These models can be added to the models
+directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/models/?at=default)`
 or to `[gazebo_models](https://bitbucket.org/osrf/gazebo_models)`.
 
-Other models will be needed to compose the soccer world, such as the field, 
-the goals and the ball. Many of these already exist in gazebo_models and 
+Other models will be needed to compose the soccer world, such as the field,
+the goals and the ball. Many of these already exist in gazebo_models and
 can be arranged in world files in the world directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/worlds/?at=default)`.
 
 ## Testing
@@ -164,9 +167,9 @@ probably require to have access to some of the teams codebase.
 
 ## Development
 
-All the files will be hosted at the [robocup3ds](https://bitbucket.org/osrf/robocup3ds) 
-repository. Functionality will be added in self-contained small chunks through pull 
-requests. Each pull-request should introduce one or a few classes, with unit tests all 
+All the files will be hosted at the [robocup3ds](https://bitbucket.org/osrf/robocup3ds)
+repository. Functionality will be added in self-contained small chunks through pull
+requests. Each pull-request should introduce one or a few classes, with unit tests all
 of them and making sure everything passes the code checker. As the number of classes
 increases, it might be interesting to also add integration tests.
 
