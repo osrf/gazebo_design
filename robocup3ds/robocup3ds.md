@@ -27,32 +27,71 @@ the monitor updates in Ruby Scene Graph format.
 ## Architecture
 
 All the functionality will be contained in a world plugin named
-Robocup3dsPlugin. The functionality inside the plugin will be divided in several
+`Robocup3dsPlugin`. The functionality inside the plugin will be divided in several
 files:
 
-* Server.cc: A class named Server will initialize some sockets and will listen
-in TCP ports 3100 and 3200 for agent and monitor communication. We'll try to use
-an S-expression library to parse the incoming messages and to send the outgoing
+* `Server.cc`: A class named `Server` will initialize some sockets and will listen
+in TCP ports 3100 and 3200 for agent and monitor communication respectively. We'll try to use
+an S-expression library to parse the incoming messages and to generate the outgoing
 messages.
 
-* GameState.cc: A class named GameState will keep track of the time and will
-update the state machine with all the different game situations: beforeKickOff,
-kickoff, play, corner, goal, etc.
+* `GameState.cc`: A class named `GameState` will keep track of the time and will
+update the state machine with all the different game situations: `beforeKickOff`,
+`kickoff`, `play`, `corner`, `goal`, etc.
 
-* Perceptor.cc: We will include in this file all the Perceptor classes.
-Following the different type of [perceptors available](http://simspark.sourceforge.net/wiki/index.php/Perceptors), we'll create the following clases:
-GyroRatePerceptor, HingeJointPerceptor, UniversalJointPerceptor,
-TouchPerceptor, ForceResistancePerceptor, AccelerometerPerceptor,
-VisionPerceptor, RestrictedVisionPerceptor, GameStatePerceptor,
-RestrictedVisionPerceptor and HearPerceptor. All of them will inherit from a
-Perceptor class.
+* `Perceptor.cc`: We will include in this file all the `Perceptor` classes.
+Following the different type of [perceptors available](http://simspark.sourceforge.net/wiki/index.php/Perceptors), 
+we'll create the following clases:
 
-* Effector.cc:
+    + `GyroRatePerceptor`
+   
+    + `HingeJointPerceptor`
+   
+    + `UniversalJointPerceptor`
+   
+    + `TouchPerceptor`
+   
+    + `ForceResistancePerceptor`
+   
+    + `AccelerometerPerceptor`
+   
+    + `VisionPerceptor`
+   
+    + `RestrictedVisionPerceptor`
+   
+    + `GameStatePerceptor`
+   
+    + `RestrictedVisionPerceptor`
+   
+    + `HearPerceptor`
+   
+All of them will inherit from the `Perceptor` class.
 
-* Robocup3dsPlugin.cc: The plugin will create one instance of a Server and a GameState. It will create a separate thread that will execute the method
-server.start() for start receiving external requests. The plugin will also
-register the Update() callback. Update() will perform the main simulation update
-loop in the following way:
+* `Effector.cc`: This file will include all the `Efector` classes.
+Following the different type of [effectors available](http://simspark.sourceforge.net/wiki/index.php/Effectors), 
+we'll create the following clases:
+
+    + `CreateEffector`
+
+    + `HingeJointEffector`
+   
+    + `UniversalJointEffector`
+   
+    + `SynchronizeEffector`
+
+    + `InitEffector`
+    
+    + `BeamEffector`
+    
+    + `SayEffector`
+
+All of them will inherit from the `Effector` class.
+
+* `Robocup3dsPlugin.cc`: The plugin will create one instance of a `Server` and a `GameState`. 
+It will create a separate thread that will execute the method `server.start()` 
+to start receiving external requests. The plugin will also register the `Update()` 
+callback. `Update()` will perform the main simulation update loop in the 
+following way:
 
 ```
 ...
@@ -65,30 +104,41 @@ loop in the following way:
 ...
 ```
 
-Sense() will generate the perceptions for all the players connected to the
+`Sense()` will generate the perceptions for all the players connected to the
 server. The perceptions will be stored in a data structure shared by the plugin
 and the server thread. The plugin will produce new perceptor data, while the
 server will consume it.
 
-Following the Sense() approach but in the opposite direction, the server will
+Following the `Sense()` approach but in the opposite direction, the server will
 update a shared data structure with effector commands to be executed in the next
-update. Act() will consume all the efector commands: move joints, spawn new
+update. `Act()` will consume all the efector commands: move joints, spawn new
 robots, move the ball, etc.
 
-UpdatePhysics() will move forward the world. The RoboCup 3D simulation rules
+`UpdatePhysics()` will move forward the world. The RoboCup 3D simulation rules
 say that updates must be executed at 50 Hz. Probably we will have to run faster
 than 50 Hz to maintain the simulation stability. In any case, we will always run
-Sense(), Act() and UpdateGameState() at the given frequency.
+`Sense()`, `Act()` and `UpdateGameState()` at the given frequency.
 
 ## Models and worlds
+
+The simulation will need a few robot models in SDF. Ultimately, the new NAO robot 
+should be used and can be taken from [here](https://github.com/osrf/robocup_3d_simulation/tree/master/robocup_model_resources/nao_models).
+It could also be interesting to model the old NAO used in previous competitions 
+to verify if existing agent code works. These models can be added to the models 
+directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/models/?at=default)` 
+or to `[gazebo_models](https://bitbucket.org/osrf/gazebo_models)`.
+
+Other models will be needed to compose the soccer world, such as the field, 
+the goals and the ball. Many of these already exist in gazebo_models and 
+can be arranged in world files in the world directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/worlds/?at=default)`.
 
 ## Testing
 
 Each class must have its own unit tests. Next are some examples of test cases:
 
-* Server: Basic communication with the server using sockets.
+* `Server`: Basic communication with the server using sockets.
 
-* GameState: The game state will have its own internal variables to store the
+* `GameState`: The game state will have its own internal variables to store the
 position of the ball, last team that touched the ball, player positions and
 time. We should cover most of the game situations that happen during a game. Example:
 
@@ -99,17 +149,25 @@ Result: The new state should be goalTeam2, after n seconds the new state should
         be kickoff, and then, the ball should be in the middle of the field.
 ```
 
-* Effector: Unit tests to guarantee that the accessor methods are correct.
+* `Effector`: Unit tests to guarantee that the accessor methods are correct.
 Another interesting test might be to test the conversion from an S-expression to
-an Effector object. This will be used by the server to populate new effectors.
+an `Effector` object. This will be used by the server to populate new effectors.
 
-* Perceptor: Unit tests to guarantee that the accessor methods are correct. We
+* `Perceptor`: Unit tests to guarantee that the accessor methods are correct. We
 will also test the conversion from a perceptor object to an S-expression. This
-feature will be exercised by the Robocup3dsPlugin during the Act() phase.
+feature will be exercised by the `Robocup3dsPlugin` during the `Act()` phase.
 
 When the basic functionality is in place, we could have a basic team of agents
 and execute some integration test that will spawn Gazebo with the
-RoboCup3dsPlugin and will exercise a subset of the functionality. This will
+`RoboCup3dsPlugin` and will exercise a subset of the functionality. This will
 probably require to have access to some of the teams codebase.
 
-## Pull requests
+## Development
+
+All the files will be hosted at the [robocup3ds](https://bitbucket.org/osrf/robocup3ds) 
+repository. Functionality will be added in self-contained small chunks through pull 
+requests. Each pull-request should introduce one or a few classes, with unit tests all 
+of them and making sure everything passes the code checker. As the number of classes
+increases, it might be interesting to also add integration tests.
+
+
