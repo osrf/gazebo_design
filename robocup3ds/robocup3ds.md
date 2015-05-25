@@ -30,7 +30,7 @@ All the functionality will be contained in a world plugin named
 `Robocup3dsPlugin`. The functionality inside the plugin will be divided in several
 files:
 
-![Architecture](./architecture.png?at=robocup3ds)
+![Architecture](https://bytebucket.org/osrf/gazebo_design/raw/2c6ca990a6ee4d1adb5ca89ed8178a5f248d1f29/robocup3ds/architecture.png)
 
 
 * `Server.cc`: A class named `Server` will initialize some sockets and will listen
