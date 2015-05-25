@@ -32,65 +32,74 @@ files:
 
 ![Architecture](https://bytebucket.org/osrf/gazebo_design/raw/2c6ca990a6ee4d1adb5ca89ed8178a5f248d1f29/robocup3ds/architecture.png)
 
+### `Server.cc`
 
-* `Server.cc`: A class named `Server` will initialize some sockets and will listen
+A class named `Server` will initialize some sockets and will listen
 in TCP ports 3100 and 3200 for agent and monitor communication respectively. We'll try to use
 an S-expression library to parse the incoming messages and to generate the outgoing
 messages.
 
-* `GameState.cc`: A class named `GameState` will keep track of the time and will
+###`GameState.cc` 
+
+A class named `GameState` will keep track of the time and will
 update the state machine with all the different game situations: `beforeKickOff`,
 `kickoff`, `play`, `corner`, `goal`, etc.
 
-* `Perceptor.cc`: We will include in this file all the `Perceptor` classes.
+### `Perceptor.cc` 
+
+We will include in this file all the `Perceptor` classes.
 Following the different type of [perceptors available](http://simspark.sourceforge.net/wiki/index.php/Perceptors),
 we'll create the following clases:
 
-    + `GyroRatePerceptor`
++ `GyroRatePerceptor`
 
-    + `HingeJointPerceptor`
++ `HingeJointPerceptor`
 
-    + `UniversalJointPerceptor`
++ `UniversalJointPerceptor`
 
-    + `TouchPerceptor`
++ `TouchPerceptor`
 
-    + `ForceResistancePerceptor`
++ `ForceResistancePerceptor`
 
-    + `AccelerometerPerceptor`
++ `AccelerometerPerceptor`
 
-    + `VisionPerceptor`
++ `VisionPerceptor`
 
-    + `RestrictedVisionPerceptor`
++ `RestrictedVisionPerceptor`
 
-    + `GameStatePerceptor`
++ `GameStatePerceptor`
 
-    + `RestrictedVisionPerceptor`
++ `RestrictedVisionPerceptor`
 
-    + `HearPerceptor`
++ `HearPerceptor`
 
 All of them will inherit from the `Perceptor` class.
 
-* `Effector.cc`: This file will include all the `Efector` classes.
+### `Effector.cc` 
+
+This file will include all the `Efector` classes.
 Following the different type of [effectors available](http://simspark.sourceforge.net/wiki/index.php/Effectors),
 we'll create the following clases:
 
-    + `CreateEffector`
++ `CreateEffector`
 
-    + `HingeJointEffector`
++ `HingeJointEffector`
 
-    + `UniversalJointEffector`
++ `UniversalJointEffector`
 
-    + `SynchronizeEffector`
++ `SynchronizeEffector`
 
-    + `InitEffector`
++ `InitEffector`
 
-    + `BeamEffector`
++ `BeamEffector`
 
-    + `SayEffector`
++ `SayEffector`
 
 All of them will inherit from the `Effector` class.
 
-* `Robocup3dsPlugin.cc`: The plugin will create one instance of a `Server` and a `GameState`.
+### `Robocup3dsPlugin.cc`
+
+The plugin will create one instance of a `Server` and a `GameState`.
 It will create a separate thread that will execute the method `server.start()`
 to start receiving external requests. The plugin will also register the `Update()`
 callback. `Update()` will perform the main simulation update loop in the
@@ -128,18 +137,19 @@ The simulation will need a few robot models in SDF. Ultimately, the new NAO robo
 should be used and can be taken from [here](https://github.com/osrf/robocup_3d_simulation/tree/master/robocup_model_resources/nao_models).
 It could also be interesting to model the old NAO used in previous competitions
 to verify if existing agent code works. These models can be added to the models
-directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/models/?at=default)`
-or to `[gazebo_models](https://bitbucket.org/osrf/gazebo_models)`.
+directory in [robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/models/?at=default)
+or to [gazebo_models](https://bitbucket.org/osrf/gazebo_models).
 
 Other models will be needed to compose the soccer world, such as the field,
 the goals and the ball. Many of these already exist in gazebo_models and
-can be arranged in world files in the world directory in `[robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/worlds/?at=default)`.
+can be arranged in world files in the world directory in [robocup3ds](https://bitbucket.org/osrf/robocup3ds/src/e356d61f1f7f4cc8c851ecfcda439ab7427ceeb5/worlds/?at=default).
 
 ## Testing
 
 Each class must have its own unit tests. Next are some examples of test cases:
 
 * `Server`: Basic communication with the server using sockets.
+
 
 * `GameState`: The game state will have its own internal variables to store the
 position of the ball, last team that touched the ball, player positions and
@@ -152,13 +162,16 @@ Result: The new state should be goalTeam2, after n seconds the new state should
         be kickoff, and then, the ball should be in the middle of the field.
 ```
 
+
 * `Effector`: Unit tests to guarantee that the accessor methods are correct.
 Another interesting test might be to test the conversion from an S-expression to
 an `Effector` object. This will be used by the server to populate new effectors.
 
+
 * `Perceptor`: Unit tests to guarantee that the accessor methods are correct. We
 will also test the conversion from a perceptor object to an S-expression. This
 feature will be exercised by the `Robocup3dsPlugin` during the `Act()` phase.
+
 
 When the basic functionality is in place, we could have a basic team of agents
 and execute some integration test that will spawn Gazebo with the
@@ -172,5 +185,3 @@ repository. Functionality will be added in self-contained small chunks through p
 requests. Each pull-request should introduce one or a few classes, with unit tests all
 of them and making sure everything passes the code checker. As the number of classes
 increases, it might be interesting to also add integration tests.
-
-
