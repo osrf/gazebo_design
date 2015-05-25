@@ -32,20 +32,20 @@ files:
 
 ![Architecture](https://bytebucket.org/osrf/gazebo_design/raw/2c6ca990a6ee4d1adb5ca89ed8178a5f248d1f29/robocup3ds/architecture.png)
 
-### `Server.cc`
+### Server.cc
 
 A class named `Server` will initialize some sockets and will listen
 in TCP ports 3100 and 3200 for agent and monitor communication respectively. We'll try to use
 an S-expression library to parse the incoming messages and to generate the outgoing
 messages.
 
-###`GameState.cc` 
+### GameState.cc
 
 A class named `GameState` will keep track of the time and will
 update the state machine with all the different game situations: `beforeKickOff`,
 `kickoff`, `play`, `corner`, `goal`, etc.
 
-### `Perceptor.cc` 
+### Perceptor.cc
 
 We will include in this file all the `Perceptor` classes.
 Following the different type of [perceptors available](http://simspark.sourceforge.net/wiki/index.php/Perceptors),
@@ -75,7 +75,7 @@ we'll create the following clases:
 
 All of them will inherit from the `Perceptor` class.
 
-### `Effector.cc` 
+### Effector.cc
 
 This file will include all the `Efector` classes.
 Following the different type of [effectors available](http://simspark.sourceforge.net/wiki/index.php/Effectors),
@@ -97,7 +97,7 @@ we'll create the following clases:
 
 All of them will inherit from the `Effector` class.
 
-### `Robocup3dsPlugin.cc`
+### Robocup3dsPlugin.cc
 
 The plugin will create one instance of a `Server` and a `GameState`.
 It will create a separate thread that will execute the method `server.start()`
