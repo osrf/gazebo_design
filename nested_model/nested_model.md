@@ -57,13 +57,13 @@ nested models and model states accordingly.
 **Gazebo Rendering**
 
 * `Scene`
-  * add support for parsing nested model messages and create visuals with
-  the corresponding hierarchical structure.
+    * add support for parsing nested model messages and create visuals with
+    the corresponding hierarchical structure.
 
 **Gazebo Msgs**
 
 * `model.proto`
-  * add a repeated `Model` field.
+    * add a repeated `Model` field.
 
 **Gazebo Model Editor**
 
