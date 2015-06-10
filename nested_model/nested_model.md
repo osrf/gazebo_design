@@ -4,9 +4,6 @@
 ### Overview
 
 The purpose of this project is to support nested models in Gazebo.
-
-### Requirements
-
 Currently SDF supports `<include>` elements that allow users to embed models
 inside one another. This is useful as it enables existing SDF's to be reused
 when build a more complex model consisting of several parts.
@@ -15,7 +12,12 @@ links of the included model and appending them to the new model. The
 information on the nesting of models is then lost once loaded into Gazebo.
 Consequently, the process can not be reversed.
 
-The new proposed approach for creating nested models involves:
+The new approach will enable users to specifiy `<model>` elements inside
+another `<model>` element.
+
+### Requirements
+
+To support nested models, the proposed approach will involve:
 
 1. modifying SDF to support nesting of `<model>` elements.
 1. updating Gazebo physics component to support loading and saving of
