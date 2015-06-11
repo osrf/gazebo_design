@@ -78,7 +78,7 @@ Hierarchical parameters are represented within Gazebo with scoped names.
 For example, the ODE-specific physics parameter `sor` is a child of the element
 `solver`, which is a child of `ode`, which is a child of `physics`. The scoped name
 of this parameter is `physics::ode::solver::sor`. This allows elements
-of the same name in different namepsaces. For example, an identically-named
+of the same name in different namespaces. For example, an identically-named
 parameter exists in Bullet, but it would set using the key `physics::bullet::solver::sor`
 in Gazebo. The scoped names are determined by the structure of Protobuf messages (which is
 determined by SDF); however, the scoped names are *not* used in the Protobuf representation
