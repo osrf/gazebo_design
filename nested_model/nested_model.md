@@ -12,7 +12,7 @@ links of the included model and appending them to the new model. The
 information on the nesting of models is then lost once loaded into Gazebo.
 Consequently, the process can not be reversed.
 
-The new approach will enable users to specifiy `<model>` elements inside
+The new approach will enable users to specify `<model>` elements inside
 another `<model>` element.
 
 ### Requirements
@@ -56,6 +56,9 @@ nested models and model states accordingly.
 * `World`
     * update publication of model pose data to include nested models.
 
+Joints to be created between nested models will need the parent link name
+and the child link name to be fully scoped.
+
 **Gazebo Rendering**
 
 * `Scene`
@@ -82,6 +85,12 @@ are in the editor.
 * The Schematic View will create a new node to represent a nested model. The
 child models and links of a nested model will not be shown.
 
+* The 3D view will visualize the whole nested model and all child
+components (links, joints, collisions, visuals, etc) but they can not be
+edited. Similar to SolidWorks, modifications to a nested model (analogous to
+an assembly in SolidWorks) will need to be performed in a separate session of
+the model editor.
+
 **Gazebo GUI**
 
 The following GUI tools will be extended in order to interact with nested
@@ -91,6 +100,43 @@ models:
 * Align
 * Snap
 * Copy & Paste
+
+The `World` tab in the left panel will also be updated. Specifically, each
+model listed under the `Model` category will need to be extended to include
+nested models in addition to links. The list will be hierarchical to reflect
+nested models at different levels. This also makes it easier for users to
+browse and select models and links at each level.
+
+In addition to allowing users to select nested models via the model tree in the
+left panel. It is possible to extend the current multi-click entity selection
+method in the 3D view to include nested models, i.e. first click selects the
+top level model, then subsequent clicks select further into the hierarchy.
+
+The context menu needs to be updated to show different options according to
+the nested model's level:
+
+* Top level model
+    * Move To
+    * Follow
+    * Edit model
+    * View
+    * Copy/Paste
+    * Delete
+* Intermediate models
+    * Move To
+    * Follow
+    * View
+    * Delete
+* Lowest level model
+    * Move To
+    * Follow
+    * Apply Force/Torque
+    * View
+    * Delete
+* Link
+    * Move To
+    * Follow
+    * Apply Force/Torque
 
 ### Performance Considerations
 
@@ -108,7 +154,7 @@ in the world.
     1. case: Load a world file with a nested model and verify that the nested
     model and its child models are loaded.
     1. case: Load a world file with a nested model then save the simulation.
-    Verify the the nested model and its child models are saved.
+    Verify that the nested model and its child models are saved.
     1. case: Load a world file with a nested model. Move the nested model then
     save the simulation. Verify the nested model is saved with the correct pose.
 1. Test: Canonical link
@@ -127,6 +173,8 @@ in the world.
     alignment by comparing the extents of the two bounding boxes.
     1. case: Snap a nested model to another nested model. Verify the pose of the
     two nested models.
+    1. case: Snap two nested models which share the same root model. Verify
+    that it is not possible and the pose of the nested models remain the same.
     1. case: Snap a nested model to a normal model (not nested) and verify the
     the pose of the two models.
     1. case: Move a nested model and verify its new pose. Rotate it and
