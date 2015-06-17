@@ -56,6 +56,11 @@ nested models and model states accordingly.
 * `World`
     * update publication of model pose data to include nested models.
 
+The World's `GetModel` function can be used to retrieve a pointer to a nested
+model. To get a unique nested model, pass its scoped name as an argument to the
+function, otherwise the first nested model with the specified name will be
+returned.
+
 Joints to be created between nested models will need the parent link name
 and the child link name to be fully scoped.
 
