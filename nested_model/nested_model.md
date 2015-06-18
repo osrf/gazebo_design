@@ -34,8 +34,8 @@ SDF 1.5 description will need to be extended but will remain backwards
 compatible.
 
 * `model.sdf`
-    * add a new custom element, e.g. `nested_sdf`, to indicate that it can be
-    nested.
+    * add a new custom element, e.g. `nested_sdf`, in the sdf description
+    to indicate that it can be nested.
 * `state.sdf`
     * similar to `model.sdf` - add an element to indicate that it can be nested.
 
@@ -47,6 +47,8 @@ nested models and model states accordingly.
 * `Model`
     * enable loading and initialization of nested models and their plugins.
     * add support for packing nested model data into model msgs.
+    * Add functions to retrieve nested models, e.g. `Model::GetModels()` and
+    `Model::GetModel(const std::string & | unsigned int)`
 * `ModelState`
     * maintain and update states of nested models.
 * `Entity`
