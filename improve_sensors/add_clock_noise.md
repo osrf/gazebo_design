@@ -16,7 +16,7 @@ this error is that clocks are driven by an oscillator that suffers random noise,
 
 ### Architecture
 
-
+![Clock noise architecture](https://bytebucket.org/asymingt/gazebo_design/raw/64c4864a193551098cd0fb4e7ae1edc4269c7608/improve_sensors/clocknoise.png "Clock noise architecture")
 
 ### Interfaces
 
