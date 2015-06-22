@@ -1,9 +1,9 @@
-## Project: Timestamp sensor measurements using common noise-corrupted clocks 
+## Project: Bring the IMU sensor inline with the generic noise model architecture
 ***Gazebo Design Document***
 
 ### Overview
 
-Gazebo sensors currently time stamp their measurements with global time. However, in reality, as aresult of imperfect clocks
+Gazebo sensors currently time stamp their measurements with global time. However, in reality, as a result of imperfect clocks
 time stamps often differ across platforms -- even when a clock disciplining method like NTP is used. The underlying reason for 
 this error is that clocks are driven by an oscillator that suffers random noise, as well as temperature and age related error.
 
@@ -22,7 +22,29 @@ The architectural diagram below illustrates the clock noise architecture. Two cl
 
 ### Interfaces
 
-Addi
+#### SDF changes ####
+
+Addition of ```clock.sdf```
+
+```
+<element name="clock" required="0">
+  <description>These elements define a clock source</description>
+  <include filename="noise.sdf" required="0"/>
+</element>
+```
+
+Changes to ```link.sdf```
+
+```
+<element name="link" required="+">
+
+  ...
+
+  <include filename="clock.sdf" required="*"/>
+
+</element>
+
+```
 
 Changes to ```sensor.sdf```
 
@@ -39,6 +61,76 @@ Changes to ```sensor.sdf```
 
 </element>
 ```
+#### API changes ####
+
+Sensors currentl generate time stamps by obtaining a pointer to the world at load
+time and then accessing the ```World::GetSimTime()``` when time is needed: 
+
+For example, ```GpsPlugin``` time stamps in this way:
+
+```
+this->lastMeasurementTime = this->world->GetSimTime();
+```
+
+While, the ```CameraSensor``` time stamps in this way:
+
+```
+msgs::Set(msg.mutable_time(), this->scene->GetSimTime());
+```
+
+Having discrete events generated according a custom time basis will significantly 
+complicate the simulation core. So, we'll just assume that the sensor is triggered
+along the global time axis. The only difference is that, with a noisy clock,
+the time stamps associated with each measurement are noise corrupted.
+
+To do this we'll added some initialization code to ```Link::Load``` which sets
+up a clock noise model for the sensor. We'll implement ```Sensor::GetClockTime``` 
+as a proxy through which sensors access time. This method will add on a small
+component of error that represents the difference between the local clock and
+the global time obtained from ```World::GetSimTime()```.
+
+For example in ```Link.hh``` we'd define a map of clock noise models
+
+```
+class GZ_PHYSICS_VISIBLE Link : public Entity
+{
+  protected: std::map<std::string,sensors::SensorNoiseType> clocks;
+} 
+
+```
+
+And in ```Link.cc``` we'd populate this list
+
+```
+void Link::Load(sdf::ElementPtr _sdf)
+{
+  if (_sdf->HasElement("clock"))
+  {
+    sdf::ElementPtr clockElem =_sdf->GetElement("clock");
+    while (clockElem)
+    {
+      this->clocks[clockElem->Get<std::string>("name")] =
+        NoiseFactory::NewNoiseModel(
+          clockElem->GetElement("noise"));
+    }
+  }
+
+```
+
+Then, we'd implement the ```Sensor::GetClockTime``` proxy function...
+
+```
+common::Time Sensor::GetClockTime(const common::Time &in)
+{
+    return this->parentLink->clocks[this->GetClock()].Apply(in);
+}
+
+```
+
+
+One thing to think about at this point is whether SensorNoiseType actually belongs
+inside the ```sensor``` namespace and not the ```math``` namespace...
+
 
 ### Performance Considerations
 
