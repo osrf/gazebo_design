@@ -15,8 +15,8 @@ this error is that clocks are driven by an oscillator that suffers random noise,
 4. By default (clock unspecified) the time stamps used are perfect (global time)
 
 ### Architecture
-Include a system architecture diagram.
-This should be a conceptual diagram that describes what components of Gazebo will be utilized or changed, the flow of information, new classes, etc.
+
+
 
 ### Interfaces
 
