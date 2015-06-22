@@ -5,7 +5,7 @@
 
 Gazebo sensors currently time stamp their measurements with global time. However, in reality, as a result of imperfect clocks
 time stamps often differ across platforms -- even when a clock disciplining method like NTP is used. The underlying reason for 
-this error is that clocks are driven by an oscillator that suffers random noise, as well as temperature and age related error.
+this error is that clocks are driven by an oscillator that suffers error, as a result of temperature, age and random noise.
 
 ### Requirements
 
