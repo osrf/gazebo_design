@@ -132,6 +132,6 @@ the various noise models to ensure that performance is maintained.
 
 ## Pull requests ##
 
-The pull request to update the magnetometer sensor SDF: coming soon
+The [pull request](https://bitbucket.org/osrf/sdformat/pull-request/198/added-magnetometer-sensor-to-sdf) to update the magnetometer sensor SDF
 
 The pull request to add the magnetometer sensor to Gazebo: coming soon

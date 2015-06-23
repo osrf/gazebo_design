@@ -137,6 +137,6 @@ the various noise models to ensure that performance is maintained.
 
 ## Pull requests ##
 
-The pull request to add the atimeter sensor SDF: coming soon
+The [pull request](https://bitbucket.org/osrf/sdformat/pull-request/197/added-altimeter-sensor-to-sdf) to add the atimeter sensor SDF: coming soon
 
 The pull request to add the altimeter sensor to Gazebo: coming soon
