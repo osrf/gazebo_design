@@ -1,4 +1,4 @@
-## Project: Bring the IMU sensor inline with the generic noise model architecture
+## Project: Add clock noise to sensor measurement timestamps
 ***Gazebo Design Document***
 
 ### Overview
