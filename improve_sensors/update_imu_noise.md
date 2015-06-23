@@ -15,7 +15,7 @@ of this document is to phase out the bespoke implementation for the generic one.
 ## Architecture ##
 
 In order to support one noise stream for all six measurements produced by the
-inertil sensor, the SDF for the IMU must be modified in the following way:
+inertial sensor, the SDF for the IMU must be modified in the following way:
 
 ```
 <element name="angular_velocity" required="0">
@@ -52,8 +52,8 @@ inertil sensor, the SDF for the IMU must be modified in the following way:
   </element>
 </element>
 ```
-One big open question that I have is how to update the sdf covnerter for 
-moving 1.4 -> 1.5, given the changes that we have made to the noise params?
+One big open question that I have is how to update the SDF converter for 
+moving 1.4 -> 1.5, given the changes that we have made to the noise parameters?
 
 ## Performance Considerations ##
 
@@ -64,8 +64,8 @@ original sensor, but other noise models may further limit performance.
 
 1. Ensure that a sensor with the old noise SDF format produces a sensor with
    a Gaussian noise models with matching mean, variance and bias.
-2. Ensure that a sen with the new noise SDF produces a sensor with the correct
-   noise type for each of the measurement streams.
+2. Ensure that the new SDF produces a sensor with the correct noise type for 
+   each of the measurement streams.
 
 ## Pull requests ##
 

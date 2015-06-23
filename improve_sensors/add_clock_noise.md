@@ -22,7 +22,7 @@ reference epoch, and t is the current reference time. k is random noise.
 
 1. Each model should be able to define an arbitrary number of clocks, each 
    having a unique identifier
-2. Each clock drifts acording to a standard model, with a noise model term
+2. Each clock drifts according to a standard model, with a noise model term
 3. Each sensor can specify a clock to use when time stamping measurements
 4. By default (clock unspecified) the time stamps are perfect (global time)
 
@@ -166,7 +166,7 @@ ensure that performance is maintained.
 
 1. Create a sensor with no clock model specified and test that IMU sensor time 
    is equal to global time.
-1. Create a single Guassian clock noise model and test that IMU sensor time 
+1. Create a single Gaussian clock noise model and test that IMU sensor time 
   is perturbed correctly.
 
 ## Pull Requests ##

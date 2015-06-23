@@ -11,7 +11,7 @@ an estimated vertical position (with respect to a reference) and velocity.
 ## Requirements ##
 
 1. The sensor must be able to store / periodically update a reference height
-1. The sensor must report relative height in meters with repect to the reference
+1. The sensor must report relative height in meters with respect to the reference
 1. The sensor must report absolute vertical velocity in meters per second
 1. The sensor must support separate noise streams for the position and velocity
 
@@ -50,7 +50,7 @@ package gazebo.msgs;
 
 /// \ingroup gazebo_msgs
 /// \interface Altimeter
-/// \brief Data from an atimeter sensor
+/// \brief Data from an altimeter sensor
 
 import "time.proto";
 
