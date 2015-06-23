@@ -1,4 +1,4 @@
-## Project: Bring the IMU sensor inline with the generic noise model architecture
+## Project: Bring the IMU sensor inline with the generic noise models
 ***Gazebo Design Document***
 
 ## Overview 
@@ -14,7 +14,8 @@ of this document is to phase out the bespoke implementation for the generic one.
 
 ## Architecture
 
-In order to support he
+In order to support one noise stream for all six measurements produced by the
+inertil sensor, the SDF for the IMU must be modified in the following way:
 
 ```
 <element name="angular_velocity" required="0">
