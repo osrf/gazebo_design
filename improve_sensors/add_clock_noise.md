@@ -10,7 +10,7 @@ The underlying reason for this error is that clocks are driven by an oscillator
 that suffers random noise, as well as temperature and age related error.
 
 There is a well adopted model for clock error, which is used to model drift (dt)
-between the satellite vehicle clock and a perfect clock on the
+between a GPS satellite vehicle clock and a reference time (TAI)
 
   dt = a0 + a1 (t - t0) + a2 (t - t0)^2 + k
 
