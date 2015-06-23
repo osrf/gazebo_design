@@ -146,11 +146,11 @@ ensure that performance is maintained.
 
 ## Tests ##
 
-1. case: Create a single Guassian clock noise model and test that IMU sensor 
-   time is perturbed correctly.
-1. case: Create a sensor with no clock model specified and test that IMU sensor 
-   time is equal to global time.
-   
+1. Create a sensor with no clock model specified and test that IMU sensor time 
+   is equal to global time.
+1. Create a single Guassian clock noise model and test that IMU sensor time 
+  is perturbed correctly.
+
 ## Pull Requests ##
 
 The pull request to add the clock and update sensor/link SDF: coming soon
