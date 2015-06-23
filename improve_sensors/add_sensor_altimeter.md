@@ -1,14 +1,14 @@
 # Add an altimeter sensor to Gazebo
 ***Gazebo Design Document***
 
-## Overview 
+## Overview  ##
 
 GPS altitude tends to have a larger error component (at least several meters) in
 standard autonomous positioning mode. TFor this reason quadrotors typically use
 barometric pressure as an altitude sensor. The output of this sensor is simply
 an estimated vertical position (with respect to a reference) and velocity.
 
-## Requirements
+## Requirements ##
 
 1. The sensor must be able to store / periodically update a reference height
 1. The sensor must report relative height in meters with repect to the reference
@@ -18,7 +18,7 @@ an estimated vertical position (with respect to a reference) and velocity.
 More complicated behaviour, such as the way in which a true barometric sensor
 would respond to tropospheric conditions, can be implemented as a plugin.
 
-## Architecture
+## Architecture  ##
 
 Implementing the sensor will involve adding the following to SDF:
 
@@ -43,7 +43,7 @@ Implementing the sensor will involve adding the following to SDF:
 </element>
 ```
 
-To begin with a new message type (altimeter.proto) will need to be created:
+A new gazebo message type (msgs/altimeter.proto) will need to be created:
 
 ```
 package gazebo.msgs;
@@ -64,7 +64,7 @@ message Altimeter
 ```
 
 
-The implementation (AtimeterSennsor) of the sensor will simply add the pose of
+The implementation (AtimeterSensor) of the sensor will simply add the pose of
 the sensor to the pose of the link to which it is attached, then take the Z 
 component of the resulting position and subtract a reference height from it. The
 velocity will be calculated directly from the link's world linear velocity:
@@ -124,6 +124,12 @@ These changes will be accompanied by smaller necessary updates to the files:
 2. sensors/CMakeLists.txt
 2. msgs/CMakeLists.txt
 
+## Performance Considerations ##
+
+The run-time complexity of the sensor will depend on the noise model. It may 
+perhaps be prudent to write  a test case for profiling the execution time of 
+the various noise models to ensure that performance is maintained.
+
 ## Tests ##
 
 1. A sensor placed at (0,0,0) should report a vertical position/velocity of zero
@@ -131,6 +137,6 @@ These changes will be accompanied by smaller necessary updates to the files:
 
 ## Pull requests ##
 
-The pull request to add the atimeter sensor SDF is here
+The pull request to add the atimeter sensor SDF: coming soon
 
-The pull request to add the altimeter sensor to Gazebo is here
+The pull request to add the altimeter sensor to Gazebo: coming soon

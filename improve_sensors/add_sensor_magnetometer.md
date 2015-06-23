@@ -1,18 +1,18 @@
 # Add a magnetometer sensor to Gazebo
 ***Gazebo Design Document***
 
-## Overview 
+## Overview ##
 
 A triaxial magnetometer sensor measures the magnetic field strength (in Tesla) 
 along three mutually orthogonal axes. It is frequently used to measure the 
 Earth's magnetic field, and can be fused with an IMU to estimate orientation.
  
-## Requirements
+## Requirements ##
 
 1. The sensor must report the global magnetic field rotated into the body frame
 1. The sensor must perturb the three magnetometer axes with unique noise models
-
-## Architecture
+ 
+## Architecture ##
 
 SDF already supports the magnetometer sensor, but the implementation needs to be
 updated in order to support three independent noise models -- one per axis:
@@ -118,6 +118,12 @@ These changes will be accompanied by smaller necessary updates to the files:
 2. sensors/CMakeLists.txt
 2. msgs/CMakeLists.txt
 
+## Performance Considerations ##
+
+The run-time complexity of the sensor will depend on the noise model. It may 
+perhaps be prudent to write  a test case for profiling the execution time of 
+the various noise models to ensure that performance is maintained.
+
 ## Tests ##
 
 1. When aligned with the origin, the sensor should report global magnetic field
@@ -126,6 +132,6 @@ These changes will be accompanied by smaller necessary updates to the files:
 
 ## Pull requests ##
 
-The pull request to update the magnetometer sensor SDF is here
+The pull request to update the magnetometer sensor SDF: coming soon
 
-The pull request to add the magnetometer sensor to Gazebo is here
+The pull request to add the magnetometer sensor to Gazebo: coming soon

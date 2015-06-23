@@ -1,18 +1,18 @@
 ## Project: Bring the IMU sensor inline with the generic noise models
 ***Gazebo Design Document***
 
-## Overview 
+## Overview ##
 
 The IMU sensor currently has its own bespoke noise model, which duplicates a lot
 of the functionality provided by the reusable Gaussian noise model. The purpose
 of this document is to phase out the bespoke implementation for the generic one.
 
-## Requirements
+## Requirements ##
 
 1. The sensor must be updated to use 6 noise models for its axes of measurement
 2. The new sensor noise model must be backward-compatible with the old model
 
-## Architecture
+## Architecture ##
 
 In order to support one noise stream for all six measurements produced by the
 inertil sensor, the SDF for the IMU must be modified in the following way:
@@ -55,10 +55,20 @@ inertil sensor, the SDF for the IMU must be modified in the following way:
 One big open question that I have is how to update the sdf covnerter for 
 moving 1.4 -> 1.5, given the changes that we have made to the noise params?
 
+## Performance Considerations ##
+
+The run-time complexity of the new Gaussian sensor should be no worse than the
+original sensor, but other noise models may further limit performance.
+
 ## Tests ##
 
-To be written
+1. Ensure that a sensor with the old noise SDF format produces a sensor with
+   a Gaussian noise models with matching mean, variance and bias.
+2. Ensure that a sen with the new noise SDF produces a sensor with the correct
+   noise type for each of the measurement streams.
 
 ## Pull requests ##
 
-None yet
+The pull request to update the imu sensor SDF: coming soon
+
+The pull request to update the imu sensor to Gazebo: coming soon

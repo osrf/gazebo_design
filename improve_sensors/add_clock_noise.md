@@ -1,7 +1,7 @@
 ## Project: Add clock noise to sensor measurement timestamps
 ***Gazebo Design Document***
 
-### Overview
+## Overview ##
 
 Gazebo sensors currently time stamp their measurements with global time. 
 However, in reality, as a result of imperfect clocks time stamps often differ 
@@ -18,7 +18,7 @@ The a0 term is called the bias, while a1 is the drift. The a2 term is the rate
 of drift of the clock with respect to a reference time base. The time t0 is a
 reference epoch, and t is the current reference time. k is random noise.
 
-### Requirements
+## Requirements ##
 
 1. Each model should be able to define an arbitrary number of clocks, each 
    having a unique identifier
@@ -26,7 +26,7 @@ reference epoch, and t is the current reference time. k is random noise.
 3. Each sensor can specify a clock to use when time stamping measurements
 4. By default (clock unspecified) the time stamps are perfect (global time)
 
-### Architecture
+## Architecture ##
 
 The architectural diagram below illustrates the clock noise architecture. Two 
 clocks are attached to different (or the same) model links. As part of their 
@@ -36,9 +36,7 @@ is used to time stamp measurements produced by the sensor.
 
 ![Clock noise architecture](https://bytebucket.org/asymingt/gazebo_design/raw/64c4864a193551098cd0fb4e7ae1edc4269c7608/improve_sensors/clocknoise.png "Clock noise architecture")
 
-### Interfaces
-
-#### SDF changes ####
+## Interfaces ##
 
 Addition of ```clock.sdf```
 
@@ -80,7 +78,6 @@ Changes to ```sensor.sdf```
 
 </element>
 ```
-#### API changes ####
 
 Sensors currently generate time stamps by obtaining a pointer to the world at 
 load time and then accessing the ```World::GetSimTime()``` when time is needed: 
@@ -140,23 +137,22 @@ common::Time Sensor::GetClockTime(const common::Time &in)
 One thing to think about at this point is whether SensorNoiseType actually 
 belongs inside the ```sensor``` namespace and not the ```math``` namespace...
 
-### Performance Considerations
+## Performance Considerations ##
 
 The performance of time stamping sensor measurements will now depend on the 
 run-time complexity of the noise model. It may perhaps be prudent to write 
 a test case for profiling the execution time of the various noise models to 
 ensure that performance is maintained.
 
-### Tests
+## Tests ##
 
-1. Test: Clock noise model
-    1. case: Create a single Guassian clock noise model and test that IMU 
-       sensor time is perturbed correctly.
-    1. case: Create a sensor with no clock model specified and test that 
-       IMU sensor time is equal to global time.
-1. Test: Clock noise performance
-    1. case: Generate IMU measurements at 1000kHz for Gaussian noise type 
+1. case: Create a single Guassian clock noise model and test that IMU sensor 
+   time is perturbed correctly.
+1. case: Create a sensor with no clock model specified and test that IMU sensor 
+   time is equal to global time.
+   
+## Pull Requests ##
 
-### Pull Requests
+The pull request to add the clock and update sensor/link SDF: coming soon
 
-None yet.
+The pull request to add clock noise to Gazebo: coming soon
