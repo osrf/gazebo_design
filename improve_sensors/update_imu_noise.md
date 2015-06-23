@@ -3,11 +3,60 @@
 
 ## Overview 
 
+The IMU sensor currently has its own bespoke noise model, which duplicates a lot
+of the functionality provided by the reusable Gaussian noise model. The purpose
+of this document is to phase out the bespoke implementation for the generic one.
+
 ## Requirements
+
+1. The sensor must be updated to use 6 noise models for its axes of measurement
+2. The new sensor noise model must be backward-compatible with the old model
 
 ## Architecture
 
+In order to support he
+
+```
+<element name="angular_velocity" required="0">
+  <description>These elements are specific to body-frame angular velocity,
+  which is expressed in radians per second</description>
+  <element name="x" required="0">
+    <description>Angular velocity about the X axis of the sensor</description>
+    <include filename="noise.sdf" required="0"/>
+  </element>
+  <element name="y" required="0">
+    <description>Angular velocity about the Y axis of the sensor</description>
+    <include filename="noise.sdf" required="0"/>
+  </element>
+  <element name="z" required="0">
+    <description>Angular velocity about the Z axis of the sensor</description>
+    <include filename="noise.sdf" required="0"/>
+  </element>
+</element>
+
+<element name="linear_acceleration" required="0">
+  <description>These elements are specific to body-frame linear acceleration,
+  which is expressed in meters per second squared</description>
+  <element name="x" required="0">
+    <description>Linear acceleration about the X axis</description>
+    <include filename="noise.sdf" required="0"/>
+  </element>
+  <element name="y" required="0">
+    <description>Linear acceleration about the Y axis</description>
+    <include filename="noise.sdf" required="0"/>
+  </element>
+  <element name="z" required="0">
+    <description>Linear acceleration about the Z axis</description>
+    <include filename="noise.sdf" required="0"/>
+  </element>
+</element>
+```
+One big open question that I have is how to update the sdf covnerter for 
+moving 1.4 -> 1.5, given the changes that we have made to the noise params?
+
 ## Tests ##
+
+To be written
 
 ## Pull requests ##
 

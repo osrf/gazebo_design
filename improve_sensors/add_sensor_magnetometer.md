@@ -20,15 +20,24 @@ updated in order to support three independent noise models -- one per axis:
 ```
 <element name="magnetometer" required="0">
   <description>These elements are specific to a Magnetometer sensor.</description>
-  <x>
+  <element name="x" required="0">
+    <description>
+      Parameters related to the body-frame X axis of the magnetometer
+    </description>
     <include filename="noise.sdf" required="0"/>
-  </x>
-  <y>
+  </element>
+  <element name="y" required="0">
+    <description>
+      Parameters related to the body-frame Y axis of the magnetometer
+    </description>
     <include filename="noise.sdf" required="0"/>
-  </y>
-  <z>
+  </element>
+  <element name="z" required="0">
+    <description>
+      Parameters related to the body-frame Z axis of the magnetometer
+    </description>
     <include filename="noise.sdf" required="0"/>
-  </z>
+  </element>
 </element>
 ```
 
@@ -58,7 +67,7 @@ import "vector3d.proto";
 
 message Magnetometer
 {
-  required Time stamp                = 1;
+  required Time time                 = 1;
   required string entity_name        = 2;
   required Vector3d field_tesla      = 3;
 }
