@@ -14,12 +14,22 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the habil
 
 ### Example
 
+
+
+
+
 ### Challenges
 
 1. The proposed changes makes it more difficult for SDF parsers, because a pose may be defined by a succession of multiple frames. Using the SDF library will shield the user from this added complexity, because it should provide the element lookups to perform this task.
 1. Because pose elements are estimated relative to other frame elements, this design introduces the possibility of a circular dependencies.
 
+### Open questions, limitations
+
+1. Should it be possible to define frames in a world file? This could be useful for models defined in the world file, but could prevent a model to be used in any world, unless a default pose is assumed.
+
 ### Architecture
+
+
 
 
 ### Interfaces
