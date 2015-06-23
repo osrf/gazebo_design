@@ -72,7 +72,7 @@ Changes to ```sensor.sdf```
 
   ...
 
-  <element name="clock" type="string" default="none" required="1"/>
+  <element name="parent_clock" type="string" default="none" required="1"/>
 
   ...
 
