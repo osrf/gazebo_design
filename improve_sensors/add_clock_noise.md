@@ -38,16 +38,34 @@ is used to time stamp measurements produced by the sensor.
 
 ## Interfaces ##
 
-Addition of ```clock.sdf```
+Addition of ```clock.sdf```, which defines the parameters for a new clock. Note
+that the clock must have a pose with respect to the base link to which it (and
+sensors that reference the clock) must be attached.
 
 ```
 <element name="clock" required="0">
-  <description>These elements define a unique clock source</description>
-  <element name="id" type="string" default="default" required="1"/>
-  <element name="bias" type="double" default="0.0" required="1"/>
-  <element name="drift" type="double" default="0.0" required="1"/>
-  <element name="rate" type="double" default="0.0" required="1"/>
-  <element name="reference" type="double" default="0.0" required="1"/>
+  <description>These elements define a clock source, which is models the 
+  relationship between local time (Tl) and global simulation time (Ts) as
+  Tl = g + bias + drift * (Ts - t0) + rate * (Ts - t0)^2 + noise. The value t0 
+  is a reference epoch in global simulation time</description>
+  <element name="id" type="string" default="default" required="1">
+    <description>A unique string ID for this clock</description>
+  </element>
+  <element name="pose" type="pose" default="0 0 0 0 0 0" required="0">
+    <description>The pose of clock with respect to the parent link</description>
+  </element>
+  <element name="bias" type="double" default="0.0" required="1">
+    <description>Clock bias with respect to global time</description>
+  </element>
+  <element name="drift" type="double" default="0.0" required="1">
+    <description>Clock drift with respect to global time</description>
+  </element>
+  <element name="rate" type="double" default="0.0" required="1">
+    <description>Clock drift rate with respect to global time</description>
+  </element>
+  <element name="reference" type="double" default="0.0" required="1">
+    <description>Fixed bias of this clock with respect to global time</description>
+  </element>
   <include filename="noise.sdf" required="0"/>
 </element>
 ```
