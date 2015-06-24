@@ -16,6 +16,7 @@ Inputs:
 * A time series of commanded joint states (optional)
 
 Output:
+
 * The robot carries out the commanded joint state trajectory in simulation.
 * Simulated sensor data of the same type is recorded.
 * A diff of the sensor data is computed
@@ -30,17 +31,17 @@ Some of these features are discussed in this design document.
 * GUI panel for selecting an input data file, displaying output, selecting an output file
 * Plotting UI for visually comparing real world data to simulation data
 * UI for tuning robot model parameters
-  * Allow parameter tuning in-the-loop and recomputing of statistical data
+    * Allow parameter tuning in-the-loop and recomputing of statistical data
 * UI for tuning simulation parameters such as step size, friction on world objects, etc.
-  * Allow parameter tuning in-the-loop and recomputing of statistical data
+    * Allow parameter tuning in-the-loop and recomputing of statistical data
 * "Real-time" data collection and statistics computation (requires real-time factor less than 1)
 * Support variable sampling rate
 * ROS integration
-  * This may end up being a primary feature, since it could simplify the interfaces
+    * This may end up being a primary feature, since it could simplify the interfaces
 * Better sensor and motor interfaces
-  * The ability to increase simulation accuracy increases the utility of this tool
+    * The ability to increase simulation accuracy increases the utility of this tool
 * Better world state saving/loading interfaces
-  * To ensure matching initial conditions in simulation and reality
+    * To ensure matching initial conditions in simulation and reality
 
 ## Architecture
 
