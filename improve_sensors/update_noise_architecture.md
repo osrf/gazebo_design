@@ -65,19 +65,37 @@ class GAZEBO_VISIBLE Sensor
 
   /// \brief Returns the pose of the sensor in the world frame
   /// \return Sensor pose
-  public: math::Pose GetPose() const;
+  public: math::Pose GetWorldPose() const;
   
-  /// \brief Returns the twist of the sensor in the world frame
+  /// \brief Returns the sensor-frame linear acceleration
   /// \return Sensor twist
-  public: math::Twist GetTwist() const;
+  public: math::Vector3 GetLocalLinearVelocity() const;
 
-  /// \brief Returns the simulation time time
+  /// \brief Returns the sensor-frame angular velocity
   /// \return Sensor twist
+  public: math::Vector3 GetLocalAngularVelocity() const;
+
+  /// \brief Returns the current simulation time
+  /// \return Simulation time
   public: common::Time GetSimulationTime() const;
 
   ...
 }
 ```
+
+If it's not too risky an idea, one could also provide access to the world 
+pointer, allowing things like gravity and magnetic vectors to be accessed by
+plugins. Although it may be more sensible to mask these with sensor-specific
+proxy functions like ```ImuSensor::GetLocalGravityVector()```.
+
+
+```
+  /// \brief Returns a pointer to the World, allowing access to the gravity
+  ///  and geomagnetic vectors, as well as simulation time
+  /// \return Pointer to the world in which the sensor exists
+  public: physics::WorldPtr GetWorldPtr() const;
+````
+
 
 One of the challenges in the architectural design is to ensure that the noise
 models are notified -- and deal with -- events such as a simulation time reset 
