@@ -260,7 +260,7 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
 </sdf>
 ```
 
-With the changes proposed in ther document, Alice only needs to do two things,
+With the changes proposed in this document, Alice only needs to do two things,
 and neither break API/ABI in Gazebo. She does not need to change SDF.
 
 1. Add update logic to `BulletPhysics::[G/S]etParam` for the new key.
@@ -291,11 +291,9 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
 ```
 
 Alice can still submit major pull requests Gazebo and SDF if she
-wants to make her new parameter a first-class citizen,
-but she doesn't have to.
-This saves a lot of time and effort expended in pull request review. It reduces
-the number of API/ABI changes made to the code since Protobuf messages do not
-need to be changed, which makes the release process smoother.
+wants to make her new parameter a first-class citizen. But she does not
+need to substantially change the code in order to use the new implicit
+parameter in her research.
 
 ### Performance Considerations/Questions
 
