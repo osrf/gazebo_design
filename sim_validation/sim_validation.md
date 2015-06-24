@@ -16,6 +16,7 @@ Inputs:
 * A time series of sensor data (force/torque sensors, encoder data, etc.)
 
 Output:
+
 * The robot carries out the commanded joint state trajectory in simulation.
 * Simulated sensor data of the same type is recorded.
 * A diff of the sensor data is computed
