@@ -3,7 +3,7 @@
 ## Overview
 
 The simulation validation tool enables users to statistically compare data
-gathered from a real robot to sensor and actuator information computed in
+gathered in the real world to the corresponding information computed in
 Gazebo. It strives to answer a question asked by many Gazebo users:
 "how well does this simulated robot model reflect reality?"
 
@@ -12,8 +12,8 @@ Gazebo. It strives to answer a question asked by many Gazebo users:
 Inputs:
 
 * A robot model (SDF or URDF) with physically accurate inertial properties
-* A time series of commanded joint states
 * A time series of sensor data (force/torque sensors, encoder data, etc.)
+* A time series of commanded joint states (optional)
 
 Output:
 * The robot carries out the commanded joint state trajectory in simulation.
@@ -48,8 +48,8 @@ Some of these features are discussed in this design document.
 
 ### SignalInterface class
 
-The `SignalInterface` class is a minimal interface between a source of real-world
-data, a source of simulation data, and the `SignalStats` class, which
+The `SignalInterface` class is a minimal interface between a real-world
+data signal, a simulation data signal, and the `SignalStats` class, which
 accumulates statistics based on the collected signals.
 
 There is one `SignalInterface` per robot property (joint command or sensor value).
@@ -94,6 +94,14 @@ key to the corresponding function in `Joint`/`Sensor`.
 Once the matching function is found, it could be stored generically in the `SignalInterface`
 class using a function pointer or a lambda that wraps the result in a data point and
 pushes it to the buffer.
+
+Alternatively, this tool could be combined with the upcoming logging and
+playback tools, and simulation sensor data could be parsed out of logfiles.
+This implementation may be more elegant, but less modular.
+
+What is the interface for input controller data? Because Gazebo does not have an
+"actuator" abstraction, joint commands will directly control the state of Gazebo
+joints.
 
 ### SampleScheduler class
 
@@ -141,21 +149,78 @@ between the timestamp of an input and an output point for them to be matched.
 
 When `SampleScheduler` schedules a simulation sample, the function that retrieves
 the data point must occur after the world update loop. To that end, `SampleScheduler`
-will queue those functions using a `lambda` or a similar function 
+will queue those functions and call them in a `ConnectWorldUpdate` callback.
+
+`SignalInterface::ProcessInputBuffer` and most other operations initiated by
+`SampleScheduler` will run `SampleScheduler`'s own thread, so as not to
+interfere with the critical path of the physics update loop.
 
 ## Interface
 
-Steps for the user on a typical run of the tool
+The typical user workflow for the simulation validation tool is:
+
+1. Set up Gazebo with the correct initial conditions to match the environment where data was collected.
+2. Provide a file with sensors data.
+3. Optionally, provide a file with commanded actuator signals.
+4. Optionally, set miscellaneous parameters, e.g. timestep tolerance.
+5. Start simulation/data collection.
+6. Observe computed statistics. Save to file if desired.
+7. Optionally, save simulation signals gathered in step 5.
+
+### Initial Gazebo state
+
+For simulation validation to be accurate, the simulation environment in which
+simulation data is sampled and the initial conditions of the environment must
+match the circumstances in which the real world data was collected.
+
+This could be accomplished manually by the user by loading a world file with
+the correct initial conditions. However, it might be easier if the user could
+specify a set of states, perhaps in SDF, that could be re-loaded via the simulation
+validation tool interface. This could be accomplished using the existing World
+Reset hooks, which sometimes has unexpected dynamics behavior, or via the
+logging/playback utility, which could restore the simulation state from a
+particular point.
 
 ### Input data file format
 
+The input data must follow a whitespace or comma-delimited table format:
+
+```
+time  wrist_0/linear_vel/x wrist0/linear_vel/y ...
+0.000 0.000                0.000               ...
+0.001 0.000                0.001               ...
+0.002 0.001                0.002               ...
+0.003 -0.001               0.003               ...
+...   ...                  ..                  ...
+```
+
+See note above in "Sources of real-world data" about the convention for scoped
+keys.
+
+### Command-line interface
+
+The initial version of this work can be implemented with a minimal command-line
+interface:
+
+`gz validate <model name> <input table filename>`
+
+Optional flags:
+
+* `--command/-c <filename>`: Command joint angles from the table in `filename`.
+* `--outfile/-f <filename>`: Save sampled simulation signals to `filename`.
+* `--state/-s <filename>`: Start data collection from the state specified in `filename`.
+
 ### GUI
+
+Though a command-line interface is useful for scripting purposes, the
+accessibility of this tool would be greatly enhanced by a graphical interface
+that captures all the options specified above.
 
 ### ROS interface
 
-## Performance Considerations
+`rostopic`
 
-If this tool is 
+`rosbag`
 
 ## Tests
 
@@ -175,3 +240,24 @@ of this tool. This will direct the evolution of the tool in the large space of p
 enumerated in the "additional features" section.
 
 ## Pull requests
+
+The initial version of this work will feature:
+
+* Sensor data input from file
+* Statistical calculation
+* Minimal command line interface
+
+This intial version will be split up into three or more pull requests that
+implement each feature, with tests.
+
+The following features will be added in subsequent pull requests:
+
+* Support for controlled systems (actuator commands)
+* Saving output signals to file
+* Variable timestep support
+* GUI
+* Plotting in GUI
+* Option to load initial world state from SDF
+* Configuration options for simulation sampling
+* ROS integration
+* Parameter tuning interface (in robot model and simulation parameters)
