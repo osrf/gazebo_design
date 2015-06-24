@@ -42,10 +42,9 @@ Some of these features are discussed in this design document.
     * The ability to increase simulation accuracy increases the utility of this tool
 * Better world state saving/loading interfaces
     * To ensure matching initial conditions in simulation and reality
+* API for adding user code to the simulation sampling step
 
 ## Architecture
-
-((todo: flowchart))
 
 ### SignalInterface class
 
@@ -198,12 +197,15 @@ time  wrist_0/linear_vel/x wrist0/linear_vel/y ...
 See note above in "Sources of real-world data" about the convention for scoped
 keys.
 
+Multiple input data files are allowed. This is how the system will support input
+data sources with different sample rates.
+
 ### Command-line interface
 
 The initial version of this work can be implemented with a minimal command-line
 interface:
 
-`gz validate <model name> <input table filename>`
+`gz validate <model name> <input table filename(s)>`
 
 Optional flags:
 
@@ -217,28 +219,49 @@ Though a command-line interface is useful for scripting purposes, the
 accessibility of this tool would be greatly enhanced by a graphical interface
 that captures all the options specified above.
 
-### ROS interface
-
-`rostopic`
-
-`rosbag`
-
 ## Tests
 
 ### Unit Tests
 
+Because computing the expected outputs of the system as a whole is difficult,
+it will rely on unit tests to prove correctness.
+
+#### File parsing
+
+Given a set of typical input files and at least one invalid file, check that the
+system correctly parses the input data and throws errors when expected.
+
+Check that keys specified in the input data correctly match joint and sensor
+elements in the model.
+
 ### Validation test cases
+
+As an integration test, though not a continuous integration test, the system will
+be tested in two example use cases.
+
+In each case, the example scenario will be tested with a set of accurate parameters
+in the robot model, then with a set of inaccurate parameters. The hypothesis is that
+the error calculated by the simulation validation tool will be larger for a set of
+inaccurate parameters. If this is not the case, then the tool is not implemented correctly.
 
 #### Uncontrolled system
 
+The uncontrolled system features a simple cube instrumented with an IMU.
+The inertial and frictional properties of the object will be measured, then data
+will be collected in some controlled scenario, such as sliding the cube down
+a ramp, or dropping the cube from a known height.
+
 #### Controlled system
+
+The controlled system features a robot arm completing a known
+trajectory, such as moving the end effector in a circle.
 
 ### User Studies
 
 Because this tool is meant to be used by robotics researchers, it may be fruitful
-to run user studies with research groups using the completed minimum viable version
-of this tool. This will direct the evolution of the tool in the large space of possibilities
-enumerated in the "additional features" section.
+to run user studies with research groups using the early version
+of this tool. This will direct the evolution of the tool in the large space of
+possibilities enumerated in the "additional features" section.
 
 ## Pull requests
 
@@ -248,7 +271,7 @@ The initial version of this work will feature:
 * Statistical calculation
 * Minimal command line interface
 
-This intial version will be split up into three or more pull requests that
+This initial version will be split up into three or more pull requests that
 implement each feature, with tests.
 
 The following features will be added in subsequent pull requests:
