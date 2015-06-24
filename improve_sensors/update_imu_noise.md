@@ -69,6 +69,6 @@ original sensor, but other noise models may further limit performance.
 
 ## Pull requests ##
 
-The [pull request](https://bitbucket.org/osrf/sdformat/pull-request/199/updated-imu-sensor-to-support-six-generic) to update the imu sensor SDF: coming soon
+The [pull request](https://bitbucket.org/osrf/sdformat/pull-request/199/updated-imu-sensor-to-support-six-generic) updates the IMU sensor SDF
 
-The pull request to update the imu sensor to Gazebo: coming soon
+The [pull request](https://bitbucket.org/osrf/gazebo/pull-request/1754/updated-imu-sensor-to-use-generic-noise) to update the IMU code in Gazebo
