@@ -3,19 +3,74 @@
 
 ### Overview
 
-Inspired by Solid Work's reference geometry tools, the Idea is to have the hability to define frames of references (first) in SDF and reference them from extended pose elements.
+Inspired by Solid Work's reference geometry tools, the Idea is to have the ability to define frames of references in SDF and reference them using an extended version of the pose elements.
 
 
 ### Requirements
 
-1. Be able to define reference geometries inside the following elements: model, link, visual.
+1. Be able to define reference geometries inside the following elements: link, joint.
 1. Provide a type to help with visualization (axis, or frame)
 1. Be able to reference that geometry, using the path of the frame element.
 
 ### Example
 
 
+In this example, the pose of a robot is defined as a 1m  offset along X from the World.
 
+<sdf version='1.x'>
+  <model name='Robo'>
+    <pose frame='world'>1 0 0 0 0 0</pose>  // 'world' frame always exists, other frames must be explicitely defined
+    ...</>
+
+
+In this example, a frame named axis0 is defined in the model's torso link. It has a type element, for UI purposes. The convention is to use the Z axis. The axis1 frame is defined as an offset of axis0
+
+<sdf version="1.5x">
+  <model name="Robo">
+
+    <link name="l1">
+      <frame name="axis0">
+         <pose>1 0 0 0 0 0</pose>
+         <type>axis</type>
+      </frame>
+      <frame name="axis1">
+         <pose frame="axis0">0 -1 0 0 0 0</pose>
+      </frame>
+    ...</>
+
+This is how thew frame can be used elswhere in the sdf files, using its path name: "Robo::torso::axis0"
+
+
+<sdf version="1.5x">
+  <model name="Robo">
+    ...
+    <link name="arm0">
+      <pose frame="Robo::torso::axis0">1 0 0 0 0 0</pose>
+
+     ...</>
+
+
+In this example, we use a collision and a visual as frames. Anything that has a unique pose can be used as a frame, but elements (links, models, ...) can define multiple frames.
+
+
+<example missing>
+
+
+
+In a world file, frames can be used across models.
+
+
+<world>
+  <frame "center">
+  <frame "offense">
+  <frame "defense" >
+
+
+  <model name="Robo"></>
+
+  <model name="Robo2">
+    <pose frame='Robo::torso'>0 0 0.01 0 0 0</pose>
+  </>
 
 
 ### Challenges
@@ -29,7 +84,7 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the habil
 
 ### Architecture
 
-
+Evaluation of a pose is now done recursively. Appropriate action must be taken when frames are not found, or circular dependencies are detected.
 
 
 ### Interfaces
