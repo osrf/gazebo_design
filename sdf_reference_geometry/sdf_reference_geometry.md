@@ -32,8 +32,12 @@ In this example, robot Robo is defined in sdf, using frames to define relative p
       <pose frame='world'>1 1 0 0 0 0</pose>
     </frame>
 
-    As before, our model "Robo" needs a pose. The pose element has a new attribute, frame. This pose is relative to the "mf1" frame (x=1) and therefore the pose evaluates to x=2 y=1 in the world frame.
+~~~
 
+As before, our model "Robo" needs a pose. The pose element has a new attribute, frame.
+This pose is relative to the "mf1" frame (x=1) and therefore the pose evaluates to x=2 y=1 in the world frame.
+
+~~~
     <pose frame="mf1">1 0 0 0 0 0</pose>
 
 
