@@ -14,7 +14,7 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the abili
 
 ### Example
 
-In this example, the pose of a robot is defined as a 1m  offset along X from the World.
+In this example, the pose of a robot is defined as a 1m offset along X from the World.
 ![alt text](kinematics.png)
 
 <sdf version='1.x'>
