@@ -14,9 +14,12 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the abili
 
 ### Example
 
-In this example, the pose of a robot is defined as a 1m offset along X from the World.
+In this example, robot Robo is defined in sdf, using frames to define relative poses.
 
 ![kinematic chain](links.png)
+
+
+~~~
 
 <sdf version='1.x'>
   <model name="Robo">
@@ -57,7 +60,7 @@ In this example, the pose of a robot is defined as a 1m offset along X from the 
 
     </>
 
-
+~~~
 
 
 In this example, a frame named axis0 is defined in the model's torso link. It has a type element, for UI purposes. The convention is to use the Z axis. The axis1 frame is defined as an offset of axis0
