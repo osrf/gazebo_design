@@ -14,13 +14,49 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the abili
 
 ### Example
 
-
 In this example, the pose of a robot is defined as a 1m  offset along X from the World.
+![alt text](kinematics.png)
 
 <sdf version='1.x'>
-  <model name='Robo'>
-    <pose frame='world'>1 0 0 0 0 0</pose>  // 'world' frame always exists, other frames must be explicitely defined
-    ...</>
+  <model name="Robo">
+
+    We define a frame named mframe, relative to the world frame
+    The world frame always exists, but other frames need to be defined.
+    The mf1 frame has an offset of x=1 and y=1 with respect to the world frame
+
+    <frame name="mframe">
+      <pose frame='world'>1 1 0 0 0 0</pose>
+    </frame>
+
+    As before, our model "Robo" needs a pose. The pose element has a new attribute, frame. This pose is relative to the "mf1" frame (x=1) and therefore the pose evaluates to x=2 y=1 in the world frame.
+
+    <pose frame="mf1">1 0 0 0 0 0</pose>
+
+
+      <link name="l1">
+      <frame name="l1frame">
+        <pose frame="mframe">0 0 0 0 0 0</pose>
+      </frame>
+      <pose frame="l1frame">0 0 0 0 0 0</pose>
+    </link>
+
+    <joint name="j1">
+      <frame name="j1frame">
+        <pose frame="l1">
+      </frame>
+    </joint>
+
+    <link name="l2">
+      <frame name="l2frame">
+        <pose frame="mframe">0 0 0 0 0 0</pose>
+      </frame>
+      <pose frame="l1frame">0 0 0 0 0 0</pose>
+    </link>
+
+
+    </>
+
+
 
 
 In this example, a frame named axis0 is defined in the model's torso link. It has a type element, for UI purposes. The convention is to use the Z axis. The axis1 frame is defined as an offset of axis0
@@ -119,6 +155,5 @@ The pull requests that will be created to merge this project are:
 1.
 
 
-Keep in mind that smaller, atomic pull requests are easier to review.
 
 
