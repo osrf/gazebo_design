@@ -16,7 +16,7 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the abili
 
 In this example, robot Robo is defined in sdf, using frames to define relative poses.
 
-![kinematic chain](links.png)
+![kinematic chain](links.png =320x)
 
 
 ~~~
@@ -27,9 +27,9 @@ In this example, robot Robo is defined in sdf, using frames to define relative p
 
 We define a frame named mframe, relative to the world frame
 The world frame always exists, but other frames need to be defined.
-The mf1 frame has an offset of x=1 and y=1 with respect to the world frame.
-As always, our model "Robo" has a pose. The pose element has a new attribute, frame, which makes
-this pose relative to the "mframe". Therefore the final pose evaluates to x=2 y=1 in the world frame.
+The model frame "mmframe" has an offset of x=1 and y=1 with respect to the world frame.
+Like in previous versions of SDF, our model "Robo" has a pose. The pose element has a new attribute, frame, which makes
+this pose relative to the "mframe" frame. Therefore the final pose evaluates to x=2 y=1 in the world frame.
 
 ~~~
     <frame name="mframe">
