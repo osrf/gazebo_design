@@ -16,7 +16,7 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the abili
 
 In this example, robot Robo is defined in sdf, using frames to define relative poses.
 
-![kinematic chain](links.png =320x)
+![kinematic chain](links.png)
 
 
 ~~~
