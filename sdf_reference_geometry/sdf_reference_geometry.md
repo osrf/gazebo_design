@@ -21,14 +21,16 @@ In this example, robot Robo is defined in sdf, using frames to define relative p
 
 ~~~
 
-<sdf version='1.x'>
+<sdf version='1.5'>
   <model name="Robo">
 ~~~
 
-We define a frame named mframe, relative to the world frame
-The world frame always exists, but other frames need to be defined.
-The model frame "mmframe" has an offset of x=1 and y=1 with respect to the world frame.
-Like in previous versions of SDF, our model "Robo" has a pose. The pose element has a new attribute, frame, which makes
+The version of sdf remains 1.5.
+
+We define a frame named mframe, relative to the world frame.
+The world frame always exists, but all other frames need to be defined.
+The model frame "mframe" has an offset of x=1 and y=1 with respect to the world frame.
+Like in previous versions of SDF, our model "Robo" has a pose element. The pose element has a new attribute, frame, which makes
 this pose relative to the "mframe" frame. Therefore the final pose evaluates to x=2 y=1 in the world frame.
 
 ~~~
@@ -40,8 +42,8 @@ this pose relative to the "mframe" frame. Therefore the final pose evaluates to 
 
 Link 1 also defines frames:
 
-1. A baseframe "l1frame" relative to mframe. This is the framed used to express the link position.
-1. Two joint attachment frames, relative to "l1frame".
+1. A baseframe "l1frame" relative to mframe. This is the local linke frame.
+1. Two joint attachment frames, both relative to "l1frame".
 
 ~~~
 
@@ -63,7 +65,7 @@ Link 1 also defines frames:
 
 ~~~
 
-Joint 1 is between Link 1 and Link 2. Its frame is relative to l1frame.
+Joint 1 is between Link 1 and Link 2. The local frame for this joint is relative to l1frame.
 
 ~~~
 
@@ -77,7 +79,7 @@ Joint 1 is between Link 1 and Link 2. Its frame is relative to l1frame.
     </joint>
 ~~~
 
-Joint 2 is between Link 1 and Link 3. Its frame is relative to "l1frame".
+Joint 2 is between Link 1 and Link 3. Its frame is also elative to "l1frame".
 
 ~~~
 
@@ -137,13 +139,13 @@ Joint 3 is position on the attach point.
 
 ~~~
 
-Finally, Link 4.
+Finally, Link 4. Note the CW rotation.
 
 ~~~
 
     <link name="link4">
       <frame name="l4frame">
-        <pose frame="j3frame">0 0 0 0 0 0</pose>
+        <pose frame="j3frame">0 0 0 0 0 1.5708</pose>
       </frame>
       <pose frame="l4frame">0 0 0 0 0 0</pose>
     </link>
@@ -170,10 +172,10 @@ A valid Frame should have a parent list that never visits a single frame more th
 
 This mechanism will be a modified implmentation of the following function:
 ~~~
-sdf::Pose sdf::Element::GetValuePose (const std::string &_key = "")	
+sdf::Pose sdf::Element::GetValuePose (const std::string &_key = "")
 ~~~
 
-In order to enumerate the list of frames, the standard sdf::Element and sdf::Param API can be used to identify the correct frame for each Pose Element, and each pose offset from its parent. 
+In order to enumerate the list of frames, the standard sdf::Element and sdf::Param API can be used to identify the correct frame for each Pose Element, and each pose offset from its parent.
 
 A list of all Frames encountered during parsing will be maintained, to avoid having to go through all the nodes multiple times. For each frame, the name of the parent frame and the Pose offset should be available directly.
 
