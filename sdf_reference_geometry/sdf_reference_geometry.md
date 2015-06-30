@@ -165,14 +165,22 @@ without having to recompute multiple poses.
 
 ### Architecture
 
-The Frame class is responsible for the frame information. Each Frame instance has a parent Frame member.
-A valid Frame should have a parent list that never visits a single frame more than once (circular dependency), and the end of the list must point
-to the world frame (otherwise the pose cannot be evaluated numerically).
+The Element class is responsible is where the frame information is read from. Each Frame instance has a parent Frame member.
+A valid Frame should have a parent list that never visits a single frame more than once (circular dependency), and the end of the list must point to the world frame (otherwise the pose cannot be evaluated numerically). See below for backwards compatibility.
+
+This mechanism will be a modified implmentation of the following function:
+~~~
+sdf::Pose sdf::Element::GetValuePose (const std::string &_key = "")	
+~~~
+
+In order to enumerate the list of frames, the standard sdf::Element and sdf::Param API can be used to identify the correct frame for each Pose Element, and each pose offset from its parent. 
+
+A list of all Frames encountered during parsing will be maintained, to avoid having to go through all the nodes multiple times. For each frame, the name of the parent frame and the Pose offset should be available directly.
 
 The definition of frames is actually independent of the position of their element in the XML hierarchy. This means that frame elements can be placed in different location in a world or model file, without changing the poses. This is slightly different to the previous behaviour of pose
 elements, where the pose is relative to a parent element.
 
-Evaluation of a pose is now done by traversing the list of parents backwards, from the world frame to the parent of the final pose.
+Evaluation of a pose is now done by traversing the list of parents poses backwards, from the world frame to the parent of the final pose.
 
 Apropriate action must be taken when frames are not found, or circular dependencies are detected:
 1. Use gzerr to show a console message when the --verbose is set.
@@ -182,8 +190,10 @@ Using defined frames will be the recommended way forward, but backwards compatib
 
 ### Interfaces
 
-1. frame element: This is a new XML SDF element
-1. pose element: the frame XML attribute is added to the pose element.
+1. frame element: This is a new XML SDF element, and its information is available via the sdf::Element API
+1. pose element: the frame XML attribute is added to the pose element. The API stays the same.
+
+The sdf::Pose class is not modeified. This is because the current Pose is more of a math class (like the ignition math Pose class) than a vehicule to convey frame information. However, it would be possible to extend the sdf::Pose class to expose a list of frames.
 
 For example:
 Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
