@@ -104,7 +104,7 @@ Link 2 is positioned relative to Joint 1 attach frame on link1
       <frame name="l2frame">
         <pose frame="l1j1frame">0 0 0 0 0 0</pose>:w
       </frame>
-      <pose frame="j1frame">0 0 0 0 0 0</pose>
+      <pose frame="l2frame">0 0 0 0 0 0</pose>
     </link>
 
 ~~~
@@ -153,7 +153,18 @@ Finally, Link 4. Note the CW rotation.
 
 ~~~
 
+The following diagram shows the frame hierarchy. In this example, the hierachy has no error:
+
+1. Each frame has a parent frame that can be traced back to the world frame.
+1. There are no circular dependencies (no frame has itself has a parent).
+
+It is possible to express a pose relative to any other, using the common ancestor for 2 frames.
+
+![kinematic chain](frame_tree.png)
+
 Having all these extra frames is more work, but it makes is simple change link dimensions without having to change multiple poses.
+
+
 
 ### Challenges
 
