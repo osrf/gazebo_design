@@ -79,13 +79,14 @@ Joint 1 is between Link 1 and Link 2. The local frame for this joint is relative
     </joint>
 ~~~
 
-Joint 2 is between Link 1 and Link 3. Its frame is also elative to "l1frame".
+Joint 2 is between Link 1 and Link 3. Its frame is also relative to "l1j2frame", the Joint 2 attach frame
+on Link 1.
 
 ~~~
 
     <joint name="joint2" type="revolute">
       <frame name="j2frame">
-        <pose frame="l1frame">0 0 0 0 0 0</pose>
+        <pose frame="l1j2frame">0 0 0 0 0 0</pose>
       </frame>
 
       <pose frame="j2frame">0 0 0 0 0 0</pose>
@@ -95,13 +96,13 @@ Joint 2 is between Link 1 and Link 3. Its frame is also elative to "l1frame".
 
 ~~~
 
-Link 2 is positioned relative to Joint 1's frame
+Link 2 is positioned relative to Joint 1 attach frame on link1
 
 ~~~
 
     <link name="link2">
       <frame name="l2frame">
-        <pose frame="j1frame">0 0 0 0 0 0</pose>
+        <pose frame="l1j1frame">0 0 0 0 0 0</pose>:w
       </frame>
       <pose frame="j1frame">0 0 0 0 0 0</pose>
     </link>
@@ -114,10 +115,10 @@ Link 3 is rotated CCW by 90 degrees. It also has a frame for Joint 3 mounting po
 
     <link name="link3">
       <frame name="l3frame">
-        <pose frame="j2frame">0 0 0 0 0 -1.5708</pose>
+        <pose frame="j2frame">0 0 0 0 0 1.5708</pose>
       </frame>
       <pose frame="l3frame">0 0 0 0 0 0</pose>
-      <frame name="l3j1">
+      <frame name="l4j1frame">
         <pose frame="l3frame">3 0 0 0 0 0</pose>
       </frame>
     </link>
@@ -130,7 +131,7 @@ Joint 3 is position on the attach point.
 
     <joint name="joint3" type="revolute">
       <frame name="j3frame>
-        <pose frame="l3j1" >0 0 0 0 0 0</pose>
+        <pose frame="l4j1frame" >0 0 0 0 0 0</pose>
       </frame>
       <pose frame="j3frame">0 0 0 0 0 0</pose>
       <parent>link3</parent>
@@ -145,7 +146,7 @@ Finally, Link 4. Note the CW rotation.
 
     <link name="link4">
       <frame name="l4frame">
-        <pose frame="j3frame">0 0 0 0 0 1.5708</pose>
+        <pose frame="j3frame">0 0 0 0 0 -1.5708</pose>
       </frame>
       <pose frame="l4frame">0 0 0 0 0 0</pose>
     </link>
