@@ -3,7 +3,7 @@
 
 ### Overview
 
-Inspired by Solid Work's reference geometry tools, the Idea is to have the ability to define frames of references in SDF and reference them using an extended version of the pose elements.
+Inspired by the ROS tf2 library and Solid Work's reference geometry tools, the Idea is to have the ability to define frames of references in SDF and extend the pose elements to have .
 
 
 ### Requirements
@@ -14,7 +14,7 @@ Inspired by Solid Work's reference geometry tools, the Idea is to have the abili
 
 ### Example
 
-In this example, robot Robo is defined in sdf, using frames to define relative poses.
+In this example, robot "Robo" is defined in sdf, using frames to define relative poses.
 
 ![kinematic chain](links.png)
 
@@ -158,11 +158,20 @@ The following diagram shows the frame hierarchy. In this example, the hierachy h
 1. Each frame has a parent frame that can be traced back to the world frame.
 1. There are no circular dependencies (no frame has itself has a parent).
 
-It is possible to express a pose relative to any other, using the common ancestor for 2 frames.
 
-![kinematic chain](frame_tree.png)
+
+![frame tree](frame_tree.png)
+
+It is possible to compute the transformation between an origin frame to a destination frame, using the common ancestor for 2 frames:
+
+ 1. Use the origin frame as a starting point
+ 1. Apply the inverse poses of each parent frame until the common ancestor
+ 1. Apply the direct pose transformation until the destination frame is reached.
+ 1. The resulting pose is the Pose of the destination frame relative to the origine frame
 
 Having all these extra frames is more work, but it makes is simple change link dimensions without having to change multiple poses.
+
+Finding the shortest paths between two transformations should limit errors when 
 
 
 
@@ -174,17 +183,33 @@ Having all these extra frames is more work, but it makes is simple change link d
 ### Open questions, limitations
 
 1. Should it be possible to define frames in a world file? This could be useful for models defined in the world file, but could prevent a model to be used in any world, unless a default pose is assumed.
-1. Is the extra work of defining multiple frames offset by the added benefits? The main benefit is that link geometry can be changed easily,
-without having to recompute multiple poses.
+1. Is the extra work of defining multiple frames offset by the added benefits? The main benefit is that link geometry can be changed easily, without having to recompute multiple poses.
 
 ### Architecture
 
-The Element class is responsible is where the frame information is read from. Each Frame instance has a parent Frame member.
+## ign-math
+
+Proposition: add a new class to ign-math, named "FramesHierarchy" that contains the tree of frames. Objects of this type will typically be populated with frames as they are read during the parsing of SDF documents.
+
+1. void AddFrame(const string &name, const Pose &pose);
+1. 
+
+## SDFormat changes
+
+The Element class is where the frame information is read from. Each Frame instance has a parent Frame member.
+
 A valid Frame should have a parent list that never visits a single frame more than once (circular dependency), and the end of the list must point to the world frame (otherwise the pose cannot be evaluated numerically). See below for backwards compatibility.
 
 This mechanism will be a modified implmentation of the following function:
+
 ~~~
+// this is the current version
 sdf::Pose sdf::Element::GetValuePose (const std::string &_key = "")
+
+// this is the proposed version. You can specify a relative frame to get the Pose from. By default,
+// the absolute position in the world frame is used
+sdf::Pose sdf::Element::GetValuePose (const std::string &_key = "", const std::string &_frame="world")
+
 ~~~
 
 In order to enumerate the list of frames, the standard sdf::Element and sdf::Param API can be used to identify the correct frame for each Pose Element, and each pose offset from its parent.
@@ -201,6 +226,7 @@ Apropriate action must be taken when frames are not found, or circular dependenc
 1. Provide a default value for the pose.
 
 Using defined frames will be the recommended way forward, but backwards compatibility will be maintained for pose elements that do not have the frame attribute.
+
 
 ### Interfaces
 
