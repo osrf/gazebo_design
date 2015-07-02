@@ -351,8 +351,9 @@ The following design has been implemented in [this pull request](https://bitbuck
 ## Gazebo integration ##
 
 The ign-transport API is not a one to one replacement for the current Gazebo
-transport layer. This is a potential plan to facilitate the integration of
-ign-transport inside Gazebo:
+transport layer. This makes the replacement of the current transport library
+with ign-transport more difficult. This is a potential plan to facilitate the
+integration of ign-transport inside Gazebo:
 
 1. Add ign-transport as a Gazebo dependency and tweak our `SearchForStuff.cmake`
 to make sure that Gazebo can compile and link against ign-transport.
