@@ -171,7 +171,7 @@ It is possible to compute the transformation between an origin frame to a destin
 
 Having all these extra frames is more work, but it makes is simple change link dimensions without having to change multiple poses.
 
-Finding the shortest paths between two transformations should limit errors when 
+Finding the shortest paths between two transformations should limit errors when
 
 
 
@@ -191,8 +191,14 @@ Finding the shortest paths between two transformations should limit errors when
 
 Proposition: add a new class to ign-math, named "FramesHierarchy" that contains the tree of frames. Objects of this type will typically be populated with frames as they are read during the parsing of SDF documents.
 
-1. void AddFrame(const string &name, const Pose &pose);
-1. 
+1. void AddFrame(const string &_name, const string &_parent, const Pose &_Offset);
+1. bool GetParentFrame(const string &_frame, string &result);
+1. bool GetPose (const string &_originFrame, const string &_destinationFrame, Pose &_result);
+
+The GetPose method could also apply a Pose before returning the result, but this operation is easy to perform with the overloaded operator
+of Pose.
+
+There is no method to remove a frame, because the typical usage is to add frames while Parsing a SDF file, and then use GetPose to evaluate poses that are relative to frames.
 
 ## SDFormat changes
 
