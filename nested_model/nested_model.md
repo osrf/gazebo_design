@@ -38,8 +38,11 @@ compatible.
 
     ```
     <element name="model" required="*">
+
       <element ref="model" required="*">
+
       </element>
+
     </element>
     ```
 
