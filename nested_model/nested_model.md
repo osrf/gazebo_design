@@ -34,8 +34,15 @@ SDF 1.5 description will need to be extended but will remain backwards
 compatible.
 
 * `model.sdf`
-    * add a new custom element, e.g. `nested_sdf`, in the sdf description
-    to indicate that it can be nested.
+    * support nesting of models in the sdf description, e.g.
+
+    ```
+    <element name="model" required="*">
+      <element ref="model" required="*">
+      </element>
+    </element>
+    ```
+
 * `state.sdf`
     * similar to `model.sdf` - add an element to indicate that it can be nested.
 
