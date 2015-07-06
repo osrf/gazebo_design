@@ -163,6 +163,9 @@ in the world.
     loaded.
     1. case: Spawn a nested model and delete it. Verify the nested model and
     all its child models and links are deleted.
+    1. case: Spawn a nested model and delete an intermediate nested model.
+    Verify the intermediate nested model and all its child models and links are
+    deleted.
 1. Test: Loading and Saving
     1. case: Load a world file with a nested model and verify that the nested
     model and its child models are loaded.
