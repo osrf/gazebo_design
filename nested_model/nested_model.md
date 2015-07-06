@@ -36,15 +36,11 @@ compatible.
 * `model.sdf`
     * support nesting of models in the sdf description, e.g.
 
-    ~~~
-    <element name="model" required="*">
-
-      <element ref="model" required="*">
-
+      <element name="model" required="*">
+        <element ref="model" required="*">
+        </element>
       </element>
 
-    </element>
-    ~~~
 
 * `state.sdf`
     * similar to `model.sdf` - add an element to indicate that it can be nested.
