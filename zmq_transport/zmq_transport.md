@@ -347,3 +347,40 @@ Open questions:
 ## Pull requests ##
 
 The following design has been implemented in [this pull request](https://bitbucket.org/ignitionrobotics/ign_transport/pull-request/3/initial-complete-version).
+
+## Gazebo integration ##
+
+The ign-transport API is not a one to one replacement for the current Gazebo
+transport layer. This makes the replacement of the current transport library
+with ign-transport more difficult. This is a potential plan to facilitate the
+integration of ign-transport inside Gazebo:
+
+1. Add ign-transport as a Gazebo dependency and tweak our `SearchForStuff.cmake`
+to make sure that Gazebo can compile and link against ign-transport.
+1. Add a new `SetEnable(bool)` methods to all transport libraries (the Gazebo
+current one and ign-transport). This will allow to turn on/off one of the
+libraries, or run both at the same time.
+1. Add command line options for specifying which transport do you want
+to use (or both). This will exercise the functionality described in the previous
+bullet point.
+1. Start using ign-transport without removing any of the current
+transport code. As an example, if a publisher advertises and publishes
+a topic `/default/worldStatistics`, we'll add an ignition node that
+advertises and publishes the same topic using the new API. This will
+allow us to incrementally test the new code without actually breaking the
+existing one.
+
+### Plan for Gazebo 7 ###
+
+We ship the first version that supports ign-transport. By default, Gazebo will
+use the current transport but it will possible to change it via command line
+options.
+
+### Plan for Gazebo Gazebo 8 ###
+
+We will deprecate the current transport API in favor of the ign-transport API.
+
+### Plan for Gazebo 9 ###
+
+We will remove the current gazebo::transport library and all the code that
+exercises it from Gazebo.
