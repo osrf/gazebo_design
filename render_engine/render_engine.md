@@ -4,8 +4,8 @@
 ### Overview
 
 We currently make native Ogre calls throughout much of Gazebo. This project
-aims to hide implementation details behind an abstract interface, so that we
-can easily substitute Ogre with another render-engine in the future.
+aims to hide rendering implementation details behind an abstract interface, so
+that we can easily substitute Ogre with another render-engine in the future.
 Admittedly, this will be no easy task, as the very nature of this project
 requires much of Gazebo to be modified and even completely rewritten.
 
@@ -23,9 +23,9 @@ be provided:
 ### Architecture
 
 Given then above requirements, we must move away from directly accessing a
-`RenderEngine` singleton and allow one to be selected on the fly. For this
+`RenderEngine` singleton and allow one to be selected at runtime. For this
 reason we propose employing a `RenderEngineManager` singleton to provide access
-to the available render-engines. `RenderEngine` instances would be created as
+to the available render-engines. `RenderEngine` instances will be created as
 needed, and the references maintained by the `RenderEngineManager`. The UML
 diagram below shows this relationship:
 
@@ -34,17 +34,17 @@ diagram below shows this relationship:
 Here we see that each new render-engine will need to provide its own
 implementation of the pure virtual class `RenderEngine`. As before, the main
 purpose of the `RenderEngine` class will be to load needed resources and create
-new `Scene` objects.
+new `Scene` instances.
 
-The `Scene` class will change greatly in this design. Currently it subscribes
-to topics like `~/visual`, `~/model/info`, and `~/pose/info`.  The `Scene`
-class uses this subscriptions to modify itself. We propose moving this
-functionality outside of the `Scene` class for two reasons:
+The `Scene` class will change greatly in this new design. Currently `Scene`
+subscribes to topics like `~/visual`, `~/model/info`, and `~/pose/info`.  The
+`Scene` class uses these subscriptions to modify itself. We propose moving this
+functionality outside of the `Scene` class for three reasons:
 
 1. We may want scenes that are not subject to global modification
 1. Each render-engine implementation should not need to reimplement such
 functionality
-1. Easier to keep multiple scenes synchronized
+1. It will be easier to keep multiple scenes synchronized
 
 For these reasons, we propose creating a `SceneManager` class that handles the
 current functionality of subscribing to these topics and modifying all scenes
@@ -55,22 +55,22 @@ below shows this relationship:
 
 ![alt text](rendering_uml2.png)
 
-Each concrete class in a scene-graph will be directly or indirectly derived
-from an implementation of the abstract `Node` class. The `Node` class provides
-the interface for setting the pose and scale of an object in the scene-graph, as
-well as the addition and removal of its children. Any subclass of `Node` can be
-added to any other instance of `Node`. These concrete classes will also be
-responsible for implementing its respective pure virtual interface. The UML
-diagram below shows this relationship for the `OgreLight` class.
+Each element in a scene-graph will be directly or indirectly derived from
+an implementation of the abstract `Node` class. The `Node` class provides the
+interface for simply setting the pose of an object in the scene-graph. The only
+possible internal node in a scene-graph will be the `Visual` class. All other
+`Node` subclasses (`Sensor` and `Light`) may only be leaf nodes. Consequently,
+the `Visual` class will be the only class to provide functionality to add and
+remove children. The UML diagram below shows this relationship:
 
 ![alt text](rendering_uml3.png)
 
-While diagram clearly illustrates the dreaded diamond inheritance problem, we
-do not believe it will cause any major issues. As the generic `Node` and `Light`
-classes strictly contain pure virtual functions, the `OgreLight` class will only
-inherit functionality from `OgreNode` and implement the remaining `Light`
-interface itself. The full relationship of scene-graph nodes can be seen in the
-following UML diagram:
+While this diagram clearly illustrates the dreaded diamond inheritance problem,
+we do not believe it will cause any major issues. As the generic `Node` and
+`Visual` classes strictly contain pure virtual functions, the `OgreVisual`
+class will only inherit functionality from `OgreNode` and implement the
+remaining `Visual` interface itself. The full relationship of scene-graph nodes
+can be seen in the following UML diagram:
 
 ![alt text](rendering_uml4.png)
 
@@ -78,8 +78,20 @@ This diagram illustrates an important digression from the current design. The
 `Visual` class will now hold reference to the new `Geometry` and `Material`
 classes, instead of internalizing that functionality. This enables us to provide
 a concise interface for each geometry and to treat composite visuals in a
-generic manner (axis-arrows are cones and cylinders of a certain color and
-proportion, no matter the underlying render-engine).
+generic manner (we will not need a `OgreArrowVisual` class, only
+`ArrowVisual`). Although it will be possible to add multiple `Geometry`
+instances to a single `Visual`, `Geometry` objects themselves do not carry pose
+information. So it will be more common to wrap each `Geometry` with its own
+`Visual`. This relationship is illustrated in the following UML diagram:
+
+![alt text](rendering_uml5.png)
+
+Here we can see how the `ArrowVisual` class references two instances of the
+abstract `Visual` class, one for the head of the arrow the other the shaft. It
+will create these instances itself via the functions `CreateVisual()`,
+`CreateCone()`, and `CreateCylinder()` provided by the `Scene` class. This way
+one need only pass an instance of either `OgreScene` or `OptixScene` to
+`ArrowVisual` to create an arrow for the desired render-engine.
 
 ### Interfaces
 
@@ -93,30 +105,31 @@ must select an engine via the `RenderEngineManager`. This call can be wrapped
 by a `RenderingIface` function in a similar fashion as scene creation is
 currently being performed:
 
-    RenderEnginePtr renderEngine = rendering::get_engine("Ogre");
+    RenderEngine* renderEngine = rendering::get_engine("Ogre");
 
 Once a developer gains reference to a specific `RenderEngine`, a `Scene` can be
-constructed in a generic manner:
+constructed as follows:
 
     ScenePtr scene = renderEngine->CreateScene("world");
 
-This call will also register the new `Scene` with the `SceneManager`, so
-that it will be automatically updated via the scene messages.  However, if you
-wish to create a scene not subject to global changes, you could instead call
-the following function:
+This will create a empty scene that will not be updated automatically via scene
+messages sent by the server. Here elements in the scene must be added manually.
+However, if you wish to have the scene updated automatically, you will need to
+register it with the `SceneManager` as follows:
 
-    ScenePtr scene = renderEngine->CreateUnregisteredScene("my_scene");
+    SceneManager::Instance()->AddScene(scene);
 
-Once a scene has been created, nodes can be added directly in the following
-manner: 
+Whether or not a `Scene` is registered with the `SceneManager`, nodes can be
+added manually in the following manner: 
 
-    PointLightPtr light = scene->CreatePointLight("light0");
+    PointLightPtr light = scene->CreatePointLight("my_light");
     light->setDiffuseColor(0.8, 0.8, 0.8);
     light->setWorldPose(0, 0, 10);
     scene->AddChild(light);
 
-As previously mentioned, `Visual` objects will consist of a `Geometry` and
-`Material`, as the following example illustrates:
+As previously mentioned, `Visual` objects will consist of one or more
+`Geometry` instances and a single `Material`, as the following example
+illustrates:
 
     MaterialPtr material = scene->CreateMaterial();
     material->SetAmbient(0.6, 0, 0);
@@ -127,27 +140,32 @@ As previously mentioned, `Visual` objects will consist of a `Geometry` and
     cone->SetRadius(0.5);
     cone->SetHeight(4);
 
-    VisualPtr visual = scene->CreateVisual("red_cone");
+    VisualPtr visual = scene->CreateVisual("my_visual");
     visual->SetLocalPosition(0, 0, 0);
     visual->SetMaterial(material);
-    visual->SetGeometry(cone);
+    visual->AddGeometry(cone);
 
     scene->AddChild(visual);
 
-However, as `common::Mesh` objects often contain material details, developers
-can directly create mesh visuals as follows:
+However, as `common::Mesh` objects often contain material information, one can
+directly create mesh visuals as follows:
 
     common::Mesh mesh = common::MeshManager::Instance()->Load(filename);
     VisualPtr visual = scene->CreateVisual("my_mesh", mesh);
+
+This will automatically create a `Geometry` for each submesh as well as its
+respective `Material`, bundling everything into a `Visual` instance. Depending
+on the `common::Mesh` given, this `Visual` may be composed of one or
+instances of `Visual`.
 
 As before, calls to `scene->AddChild()` will only modify the referenced scene.
 If you wish to apply changes globally to all scenes managed by the
 `SceneManager`, you will need to publish the respective scene update message.
 
 The interface with camera sensors will largely be unchanged, as the
-`sensors::CameraSensor` class mainly interfaced directly with our
+`sensors::CameraSensor` class mainly interfaces directly with
 `rendering::Camera` and not Ogre. However the GUI side of Gazebo will undergo
-several large interface changes, to break its strong ties to Ogre.
+several large internal changes to break its strong ties to Ogre.
 
 ### Performance Considerations
 
