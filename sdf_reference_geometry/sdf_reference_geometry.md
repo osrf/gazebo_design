@@ -8,8 +8,7 @@ Inspired by the ROS tf2 library and Solid Work's reference geometry tools, the I
 
 ### Requirements
 
-1. Be able to define reference geometries inside the following elements: link, joint.
-1. Provide a type to help with visualization (axis, or frame)
+1. Be able to define reference frames in SDF.
 1. Be able to reference that geometry, using the path of the frame element.
 
 ### Example
@@ -233,34 +232,39 @@ Apropriate action must be taken when frames are not found, or circular dependenc
 
 Using defined frames will be the recommended way forward, but backwards compatibility will be maintained for pose elements that do not have the frame attribute.
 
+The Frame element will also support a "type" or "visual" attribute, to help the gui dislpay axis or coordinate frames.
 
 ### Interfaces
 
 1. frame element: This is a new XML SDF element, and its information is available via the sdf::Element API
 1. pose element: the frame XML attribute is added to the pose element. The API stays the same.
 
-The sdf::Pose class is not modeified. This is because the current Pose is more of a math class (like the ignition math Pose class) than a vehicule to convey frame information. However, it would be possible to extend the sdf::Pose class to expose a list of frames.
+The sdf::Pose class is not modified. This is because the current Pose is more of a math class (like the ignition math Pose class) than a vehicule to convey frame information. However, it would be possible to extend the sdf::Pose class to expose a list of frames.
 
-For example:
-Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
-
-Include any UX design drawings.
 
 ### Performance Considerations
 
 This design should not impact perfromance much. While there is an added cost to compute each pose element, this cost can be done once when the sdf is loaded.
 
 ### Tests
-List and describe the tests that will be created. For example:
 
-1. Test: built in reference frames:
+1. Test: FramesHierarchy in ign math:
+    1. case: Return correct Pose when it is relative to the world frame
+    1. case: Verify Error when asking for a pose in an unknown frame.
+    1. case: Add a frame, and evaluate Poses relative to this frame in the world frame.
+    1. case: Add 2 frames and ask for the transform between the 2.
+1. Test: reference frames in SDF:
     1. case: define a pose that uses the world frame. A pose with a non existing frame.
     1. case: multiple frame elements, and a pose that uses them. A circular reference.
-    1. case: poses inside world files that use frames defined in model files.
-1. Test: Multiple plots
-    1. case: Create two plots with identical data. Saved CSV data from each should be identical
+    1. case: verify that frames work with models defined in a separate sdf file (outside the world file).
+    1. case: check that backwards compatibility works when frames are not specified in Pose elements.
+
 
 ### Pull Requests
+
+1. Add the FramesHierarchy class to the ign math library.
+1. Add the Frame and Pose elements to the SDF parser.
+1. Add the visual cue to the Frame element so it can be displayed visually by Gazebo
 
 
 
