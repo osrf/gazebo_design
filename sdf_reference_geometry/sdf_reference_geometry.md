@@ -3,7 +3,7 @@
 
 ### Overview
 
-Inspired by the ROS tf2 library and Solid Work's reference geometry tools, the Idea is to have the ability to define frames of references in SDF and extend the pose elements to have .
+Inspired by the ROS tf2 library and Solid Work's reference geometry tools, the Idea is to have the ability to define frames of references in SDF and extend the pose element to have a frame origin.
 
 
 ### Requirements
