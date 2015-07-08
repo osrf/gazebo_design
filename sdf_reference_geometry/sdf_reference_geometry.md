@@ -41,7 +41,7 @@ this pose relative to the "mframe" frame. Therefore the final pose evaluates to 
 
 Link 1 also defines frames:
 
-1. A baseframe "l1frame" relative to mframe. This is the local linke frame.
+1. A baseframe "l1frame" relative to mframe. This is the local link frame.
 1. Two joint attachment frames, both relative to "l1frame".
 
 ~~~
@@ -166,7 +166,7 @@ It is possible to compute the transformation between an origin frame to a destin
  1. Use the origin frame as a starting point
  1. Apply the inverse poses of each parent frame until the common ancestor
  1. Apply the direct pose transformation until the destination frame is reached.
- 1. The resulting pose is the Pose of the destination frame relative to the origine frame
+ 1. The resulting pose is the Pose of the destination frame relative to the origin frame
 
 Having all these extra frames is more work, but it makes is simple change link dimensions without having to change multiple poses.
 
@@ -226,7 +226,8 @@ elements, where the pose is relative to a parent element.
 
 Evaluation of a pose is now done by traversing the list of parents poses backwards, from the world frame to the parent of the final pose.
 
-Apropriate action must be taken when frames are not found, or circular dependencies are detected:
+Appropriate action must be taken when frames are not found, or circular dependencies are detected:
+
 1. Use gzerr to show a console message when the --verbose is set.
 1. Provide a default value for the pose.
 
