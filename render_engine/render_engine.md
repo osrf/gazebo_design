@@ -105,7 +105,7 @@ must select an engine via the `RenderEngineManager`. This call can be wrapped
 by a `RenderingIface` function in a similar fashion as scene creation is
 currently being performed:
 
-    RenderEngine* renderEngine = rendering::get_engine("Ogre");
+    RenderEngine* renderEngine = rendering::get_engine("ogre");
 
 Once a developer gains reference to a specific `RenderEngine`, a `Scene` can be
 constructed as follows:
@@ -147,8 +147,9 @@ illustrates:
 
     scene->AddChild(visual);
 
-However, as `common::Mesh` objects often contain material information, one can
-directly create mesh visuals as follows:
+A `Mesh` geometry can be created in a similar fashion as the `Cone` in this
+example. However as `common::Mesh` objects often contain material information,
+one can directly create `Visual` for a mesh as follows:
 
     common::Mesh mesh = common::MeshManager::Instance()->Load(filename);
     VisualPtr visual = scene->CreateVisual("my_mesh", mesh);
@@ -217,6 +218,12 @@ important:
     1. case: clearing all nodes
     1. case: transferring nodes
     1. case: compare final generic structure
+    1. case: adding valid geometry
+    1. case: adding null geometry
+    1. case: adding multiple geometries
+    1. case: removing present geometry
+    1. case: removing absent geometry
+    1. case: replacing geometry
 
 ### Pull Requests
 
