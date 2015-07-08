@@ -101,7 +101,7 @@ Link 2 is positioned relative to Joint 1 attach frame on link1
 
     <link name="link2">
       <frame name="l2frame">
-        <pose frame="l1j1frame">0 0 0 0 0 0</pose>:w
+        <pose frame="l1j1frame">0 0 0 0 0 0</pose>
       </frame>
       <pose frame="l2frame">0 0 0 0 0 0</pose>
     </link>
@@ -170,7 +170,7 @@ It is possible to compute the transformation between an origin frame to a destin
 
 Having all these extra frames is more work, but it makes is simple change link dimensions without having to change multiple poses.
 
-Finding the shortest paths between two transformations should limit errors when
+When computing transformation between 2 frames, finding the shortest paths between the two transformations should give more precision in transformations than going all the way to the world frame (because it avoids computing unnecessary transformations that can add error).
 
 
 
