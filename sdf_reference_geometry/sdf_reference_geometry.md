@@ -129,7 +129,7 @@ Joint 3 is position on the attach point.
 ~~~
 
     <joint name="joint3" type="revolute">
-      <frame name="j3frame>
+      <frame name="j3frame">
         <pose frame="l4j1frame" >0 0 0 0 0 0</pose>
       </frame>
       <pose frame="j3frame">0 0 0 0 0 0</pose>
