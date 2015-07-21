@@ -65,7 +65,7 @@ The modeling process then becomes:
 
 #### Open Questions
 
-- Motors sometimes introduces new joints, i.e. it adds an intermediate motor core mass that spins independently of motor casing and motor axle.
+- Motors sometimes introduce new intermediate joints and links, i.e. it adds an intermediate motor core mass that spins independently of motor casing and motor axle.
 - Gearboxes can also introduce intermediate joints and links.  A link is connected to an input shaft, another to the output shaft, then there are stuff (gears) in between that spins/moves at different rates than input or output links.
 
 
