@@ -86,15 +86,122 @@ A very nice diagram.
 
 Relevant Objects / Entities in Simulation:
 
- * Base
- * Entities
- * PhysicsEngine
- * Models: abstract collection of Links and Joints.
- * Links
+ * Physics
+ * World
+ * Model
+ * Link
    * Inertia
    * Visual
    * Collision
  * Joints
+
+~~~
+struct oppInertia
+{
+  std::string name;
+  int id;
+  double mass;
+  matrix3 moi;
+  matrix3 moi;
+  Pose pose;
+};
+
+struct oppShape
+{
+};
+
+struct oppSphereShape : public oppShape
+{
+};
+
+struct oppBoxShape : public oppShape
+{
+};
+
+struct oppCylinderShape : public oppShape
+{
+};
+
+struct oppMeshShape : public oppShape
+{
+};
+
+struct oppCollision
+{
+  std::string name;
+  int id;
+  Pose pose;
+  Shape shape;
+};
+
+struct oppVisual
+{
+  std::string name;
+  int id;
+  Pose pose;
+  Shape shape;
+};
+
+struct oppLink
+{
+  std::string name;
+  int id;
+  Pose pose;
+  // pointer to arrays of objects
+  oppInertia* inertias;
+  oppCollision* collisions;
+  oppVisual* visuals;
+  oppJoint* parentJoints;
+  oppJoint* childJoints;
+  oppConstraint* constraints;
+};
+
+enum {
+  oppJointTypeHinge         = 1,
+  oppJointTypeSlider        = 2,
+  oppJointTypeScrew         = 4
+};
+
+struct oppJoint 
+{
+  std::string name;
+  int id;
+  Pose pose;
+
+  // hard = Featherstone, mobilizer, internal coordinate joint.
+  // ~hard = soft = constraint based joint.
+  bool hard;
+
+  // type of joint: e.g. dxJointTypeHinge, etc.
+  int jointType;
+
+  // pointers to links
+  oppLink* parentLinks;
+  oppLink* childLinks;
+
+  // joint info: ??? Jacobians, etc?
+  JointInfo* data;
+};
+
+struct oppModel 
+{
+  oppLink* links;
+  oppJoint* joints;
+  Pose pose;
+};
+
+struct oppWorld 
+{
+  
+};
+
+struct oppPhysics
+{
+  
+};
+
+
+~~~
 
 The API will be split into following categories:
 
