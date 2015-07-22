@@ -88,6 +88,22 @@ Class relationships between objects:
     - For exmaple, if the motor is a direct drive motor, one way to simulation this is to simply call Joint::SetForce() to simulate torque application.
     - If the motor has a gearbox, we might have to destroy the existing joint and replace it with two joints plus an intermediate link (motor core). Then add a gearbox constraint between the two joints.
 
+The Actuator class takes motor commands from custom controller,
+and outputs motor control, which is one or more motor command torques.
+For direct drive transmission, the motor torque can be applied directly to a joint toruqe.
+For more complicated transmission, where there is multi-joint coupling,
+the command torque needs to map to several joint torques.
+The mapping is to be defined in a Transmission object either by means of
+building real physics models (four bar linkage, gearbox, etc.),
+or by some fictitious logic that lives in the Transmission class that
+determines where and how the command torque should be split up to targeted joint torques.
+
+So to sumarize, an Actuator object can do one of the two things (or both):
+
+1. (Optional) Create a physics coupling mechanism (four bar linkage, gearbox, friction?), then
+1. (Required) Specify a motor torque to joint torque mapping.
+
+
 ### Performance Considerations
 This addition will not change performance of simulations that do not utililize the new proposed method of simulation.
 
