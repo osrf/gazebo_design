@@ -79,6 +79,7 @@ To answer this, we will examine a synchronous real-time system more closely.
 ### Interfaces
 #### Implementations
 Class relationships between objects:
+
 - Joint Sensor has access to Joints, Links or Models (to read position, velocity, accelerations, torque, etc.)
 - Actuator has access to Joints, Links or Models (to set position, velocity, torque)
 - Actuator plugin will have some comms abstraction. We will use either TCP sockets or CANBus as an example.
@@ -103,6 +104,46 @@ So to sumarize, an Actuator object can do one of the two things (or both):
 1. (Optional) Create a physics coupling mechanism (four bar linkage, gearbox, friction?), then
 1. (Required) Specify a motor torque to joint torque mapping.
 
+#### Example SDF
+
+~~~
+<model name="test_model">
+
+  <link name="test_link_1">
+  </link>
+
+  <link name="test_link_2">
+  </link>
+
+  <joint name="test_joint_12" type="revolute">
+  </joint>
+
+  <transmission name="test_transmission">
+    <joint>test_joint_12</joint>
+    <parent>test_link_1</parent>
+    <child>test_link_2</child>
+  </transmission>
+
+  <actuator name="test_actuator">
+    <joint>test_joint_12</joint>
+    <parent>test_link_1</parent>
+    <child>test_link_2</child>
+  </actuator>
+
+  <encoder name="test_encoder" type="position">
+    <!-- Sometimes we want to compute position using multiple joints,
+         E.g. differential drive, where the encoder output might be
+         the position of another transmissioned joint, or numerically
+         a weighed mixture of two or more joints.
+         Based on this requirement, the encoder should
+         connect to a transmission, and not a joint specifically.  -->
+
+    <!-- use this transmission to obtain coupling or mechanical reduction information -->
+    <transmission>test_transmission</transmission>
+  </encoder>
+
+</model>
+~~~
 
 ### Performance Considerations
 This addition will not change performance of simulations that do not utililize the new proposed method of simulation.
