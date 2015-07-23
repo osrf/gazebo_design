@@ -188,11 +188,11 @@ When computing transformation between 2 frames, finding the shortest paths betwe
 
 ## ign-math
 
-Proposition: add a new class to ign-math, named "FramesHierarchy" that contains the tree of frames. Objects of this type will typically be populated with frames as they are read during the parsing of SDF documents.
+Proposition: add a new class to ign-math, named "FrameGraph" that contains the tree of frames. Objects of this type will typically be populated with frames as they are read during the parsing of SDF documents.
 
 1. void AddFrame(const string &_name, const string &_parent, const Pose &_Offset);
-1. bool GetParentFrame(const string &_frame, string &result);
-1. bool GetPose (const string &_originFrame, const string &_destinationFrame, Pose &_result);
+1. bool ParentFrame(const string &_frame, string &_result);
+1. bool Pose (const string &_originFrame, const string &_destinationFrame, Pose &_result);
 
 The GetPose method could also apply a Pose before returning the result, but this operation is easy to perform with the overloaded operator
 of Pose.
@@ -249,7 +249,7 @@ This design should not impact perfromance much. While there is an added cost to 
 
 ### Tests
 
-1. Test: FramesHierarchy in ign math:
+1. Test: FrameGraph in ign math:
     1. case: Return correct Pose when it is relative to the world frame
     1. case: Verify Error when asking for a pose in an unknown frame.
     1. case: Add a frame, and evaluate Poses relative to this frame in the world frame.
@@ -263,7 +263,7 @@ This design should not impact perfromance much. While there is an added cost to 
 
 ### Pull Requests
 
-1. Add the FramesHierarchy class to the ign math library.
+1. Add the FrameGraph class to the ign math library.
 1. Add the Frame and Pose elements to the SDF parser.
 1. Add the visual cue to the Frame element so it can be displayed visually by Gazebo
 
