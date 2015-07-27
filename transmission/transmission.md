@@ -11,9 +11,36 @@ system examples preceded this proposed implementations
 
 ### Requirements
 
+Approach to simulating motors, transmissions and joint sensors can be infinitely
+complicated. Therefor it is very important that we scope this proposal precisely.
+The goal here is to define minimal set of information needed for a physically
+accurate actuator-transmission-encoder model.
+
+A target use case might be:
+
+1. Simulate brushless DC motors with direct drive transmission
+   and hall effect sensors as encoders.
+
+Here are some basic scoping statements. We will:
+
+1. For motors:
+    1. Simulate idealized torque, torque-speed curve.
+    1. Simulate stall torque.
+    1. Not simulate electrical properties of the motor (E.g. back EMF, current
+       controller, phase commutation torque ripple effects, etc.) here,
+       but allow the user to easily extend the model to include electrical effects.
+1. For transmission and joint couplings:
+    1. Simulate idealized loss-less torque distributions.
+    1. Not simulate every single gear component dynamics.
+1. For joint sensors (encoders):
+    1. Simulate idealized joint position or velocity sensors.
+    1. Not simulate common hall effect sensor raw outputs (but allow
+       users to do so if they wish).
+
 Traditionally, gazebo robot control has been approached as an exercise to
 
-1. Read joint and sensor states from Gazebo.
+1. Operate in idealized joint states, assume sensor state can be parsed
+   directly from joint state, and motor torque transfers directly to joint torque.
 1. Custom code that uses simulated sensor data to provide realistic sensor
    data.
 1. Custom controller that does something with the incoming sensor data and 
@@ -62,6 +89,15 @@ The modeling process then becomes:
 1. Create a Transmission object in SDF.
 1. Create a Controller object that has access to Actuator plugin and Joint Sensor plugin.
 
+So in a way, Actuator, Transmission or Encoder are glorified SDF models,
+each can be composed of Joints, Links and convenience function calls to
+model members in Gazebo.
+
+How FIXED are these glorified SDF models? What do we allow users to change?
+What do we not allow users to tweak?
+If we impose any kind of structures to these models, will the imposed structure
+become a barrier to modeling certain types of objects?
+These are all questions to be answered here.
 
 #### Open Questions
 
@@ -115,20 +151,121 @@ So to sumarize, an Actuator object can do one of the two things (or both):
   <link name="test_link_2">
   </link>
 
-  <joint name="test_joint_12" type="revolute">
+  <joint name="test_joint_01" type="revolute">
+    <parent>world</parent>
+    <child>test_link_1</child>
   </joint>
 
-  <transmission name="test_transmission">
-    <joint>test_joint_12</joint>
+  <joint name="test_joint_12" type="revolute">
     <parent>test_link_1</parent>
     <child>test_link_2</child>
+  </joint>
+
+  <actuator name="test_actuator_01" type="electric_motor">
+    <joint>test_joint_01</joint>
+  </actuator>
+
+  <actuator name="test_actuator_12" type="electric_motor">
+    <joint>test_joint_12</joint>
+  </actuator>
+
+  <transmission name="test_generic_transmission" type="linear_map">
+    <!--
+      Let vector a denote an array of actuator efforts as defined by <actuator_array>,
+                   where na is the size of the actuator array.
+      Let scalar j denote the array of resulting joint efforts defined by <joint_array>,
+                   where nj is the size of the joint array.
+      Let vector o_a denote array of actuator effort offsets.
+      Let vector o_j denote array of joint effort offsets.
+      Let matrix t_aj with dimensions nj X na denote transform from
+                      actuator efforts to joint efforts.
+                      t_aj defaults to the identity matrix, so if left unspecified,
+                      actuator maps to joints one-on-one.
+
+      The conversion from actuator efforts into joint efforts is defined by
+      equation below:
+
+        [j] = [t_aj] x ([a]+[o_a]) + [o_j]
+
+      Lastly, the resulting joint effort array j is
+      truncated by (joint_effort_lower, joint_effort_upper).
+    -->
+
+    <!-- actuator array used for simple linear transmission mapping -->
+    <actuator_array>
+      test_joint_01
+      test_joint_12
+    </actuator_array>
+
+    <joint_array>
+      test_joint_01
+      test_joint_12
+    </joint_array>
+
+    <mapping>
+      <t_aj>
+        1.0 0.0
+        0.0 1.0
+      </t_aj>
+      <actuator_offsets>
+        0 0
+      </actuator_offsets>
+      <joint_offsets>
+        0 0
+      </joint_offsets>
+      <joint_effort_lower>
+        0 0
+      </joint_effort_lower>
+      <joint_effort_upper>
+        10 10
+      </joint_effort_upper>
+    </mapping>
   </transmission>
 
-  <actuator name="test_actuator">
-    <joint>test_joint_12</joint>
-    <parent>test_link_1</parent>
-    <child>test_link_2</child>
-  </actuator>
+  <plugin name="custom_transmission_plugin" filename="libCustomTransmissionPlugin.so">
+    <!--
+      A more generic approach is to let user define a plugin that maps from
+      actuator outputs to joint commands using a custom defined function,
+      so the mapping can also depends on other simulation states:
+
+        j = F(a, ...)
+
+      The user extends the Transmission class, and implement custom mapping in place
+      of the linear_mapping.
+    -->
+
+    <actuator_array>
+      test_joint_01
+      test_joint_12
+    </actuator_array>
+
+    <joint_array>
+      test_joint_01
+      test_joint_12
+    </joint_array>
+  </plugin>
+
+  <transmission name="test_transmission" type="custom_functions">
+    <!--
+      Alternative format for the generic approach, where the plugin
+      is specific to the transmission class, and contains a conversion
+      function that overloads the one in the Transmission class:
+
+        j = F(a, ...)
+    -->
+
+    <actuator_array>
+      test_joint_01
+      test_joint_12
+    </actuator_array>
+
+    <joint_array>
+      test_joint_01
+      test_joint_12
+    </joint_array>
+
+    <mapping_plugin name="custom_transmission_plugin" filename="libCustomTransmissionPlugin.so"/>
+  </transmission>
 
   <encoder name="test_encoder" type="position">
     <!-- Sometimes we want to compute position using multiple joints,
@@ -144,6 +281,12 @@ So to sumarize, an Actuator object can do one of the two things (or both):
 
 </model>
 ~~~
+
+One thought was We can implement everything as plugins for the first pass and determine
+later if it is worth the effort to upgrade these to Gazebo classes. But on second thought
+that approach requires us to implement a transport mechanism for data flow between
+the different proposed objects (i.e. encoders, actuators and transmissions), and
+will further complicate things.
 
 ### Performance Considerations
 This addition will not change performance of simulations that do not utililize the new proposed method of simulation.
