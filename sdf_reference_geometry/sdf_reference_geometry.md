@@ -124,7 +124,7 @@ Link 3 is rotated CCW by 90 degrees. It also has a frame for Joint 3 mounting po
 
 ~~~
 
-Joint 3 is position on the attach point.
+Joint 3 is positioned on the attach point.
 
 ~~~
 
@@ -161,14 +161,14 @@ The following diagram shows the frame hierarchy. In this example, the hierachy h
 
 ![frame tree](frame_tree.png)
 
-It is possible to compute the transformation between an origin frame to a destination frame, using the common ancestor for 2 frames:
+It is possible to compute the transformation from an origin frame to a destination frame, using the common ancestor for 2 frames:
 
  1. Use the origin frame as a starting point
  1. Apply the inverse poses of each parent frame until the common ancestor
  1. Apply the direct pose transformation until the destination frame is reached.
  1. The resulting pose is the Pose of the destination frame relative to the origin frame
 
-Having all these extra frames is more work, but it makes is simple change link dimensions without having to change multiple poses.
+Having all these extra frames is more work, but it makes it simple to change link dimensions without having to change multiple poses.
 
 When computing transformation between 2 frames, finding the shortest paths between the two transformations should give more precision in transformations than going all the way to the world frame (because it avoids computing unnecessary transformations that can add error).
 
@@ -190,14 +190,14 @@ When computing transformation between 2 frames, finding the shortest paths betwe
 
 Proposition: add a new class to ign-math, named "FrameGraph" that contains the tree of frames. Objects of this type will typically be populated with frames as they are read during the parsing of SDF documents.
 
-1. void AddFrame(const string &_name, const string &_parent, const Pose &_Offset);
+1. void AddFrame(const string &_name, const string &_parent, const Pose &_offset);
 1. bool ParentFrame(const string &_frame, string &_result);
 1. bool Pose (const string &_originFrame, const string &_destinationFrame, Pose &_result);
 
 The GetPose method could also apply a Pose before returning the result, but this operation is easy to perform with the overloaded operator
 of Pose.
 
-There is no method to remove a frame, because the typical usage is to add frames while Parsing a SDF file, and then use GetPose to evaluate poses that are relative to frames.
+There is no method to remove a frame, because the typical usage is to add frames while parsing an SDF file, and then use GetPose to evaluate poses that are relative to frames.
 
 ## SDFormat changes
 
@@ -219,7 +219,7 @@ sdf::Pose sdf::Element::GetValuePose (const std::string &_key = "", const std::s
 
 In order to enumerate the list of frames, the standard sdf::Element and sdf::Param API can be used to identify the correct frame for each Pose Element, and each pose offset from its parent.
 
-A list of all Frames encountered during parsing will be maintained, to avoid having to go through all the nodes multiple times. For each frame, the name of the parent frame and the Pose offset should be available directly.
+A list of all frames encountered during parsing will be maintained, to avoid having to go through all the nodes multiple times. For each frame, the name of the parent frame and the Pose offset should be available directly.
 
 The definition of frames is actually independent of the position of their element in the XML hierarchy. This means that frame elements can be placed in different location in a world or model file, without changing the poses. This is slightly different to the previous behaviour of pose
 elements, where the pose is relative to a parent element.
@@ -240,7 +240,7 @@ The Frame element will also support a "type" or "visual" attribute, to help the 
 1. frame element: This is a new XML SDF element, and its information is available via the sdf::Element API
 1. pose element: the frame XML attribute is added to the pose element. The API stays the same.
 
-The sdf::Pose class is not modified. This is because the current Pose is more of a math class (like the ignition math Pose class) than a vehicule to convey frame information. However, it would be possible to extend the sdf::Pose class to expose a list of frames.
+The sdf::Pose class is not modified. This is because the current Pose is more of a math class (like the ignition math Pose class) than a vehicle to convey frame information. However, it would be possible to extend the sdf::Pose class to expose a list of frames.
 
 
 ### Performance Considerations
