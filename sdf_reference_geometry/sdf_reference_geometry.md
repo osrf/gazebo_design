@@ -243,6 +243,37 @@ The Frame element will also support a "type" or "visual" attribute, to help the 
 The sdf::Pose class is not modified. This is because the current Pose is more of a math class (like the ignition math Pose class) than a vehicle to convey frame information. However, it would be possible to extend the sdf::Pose class to expose a list of frames.
 
 
+### Backwards compatibility
+
+In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements and their possible path in the sdf file.
+
+1. <world><include><pose>
+1. <world><state><model><pose>
+1. <world><light><pose>
+1. <sdf/world><actor><pose>
+1. <sdf/world><model><pose> A position and orientation in the global coordinate frame for the model. Position(x,y,z) and rotation (roll, pitch yaw) in the global coordinate frame.
+1. <sdf/world><model><link><pose> This is the pose of the link reference frame, relative to the model reference frame.
+1. <sdf/world><model><link><inertial><pose> This is the pose of the inertial reference frame, relative to the link reference frame. The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.
+1. <sdf/world><model><link><collision><pose> The reference frame of the collision element, relative to the reference frame of the link.
+1. <sdf/world><model><link><visual><pose> The reference frame of the visual element, relative to the reference frame of the link.
+1. <sdf/world><model><joint><pose> Pose offset from child link frame to joint frame (expressed in child link frame).
+
+### frame element scoping and Support for nested models
+
+This is ongoing. please add a comment.
+
+### Future improvements
+
+The first step is to implement frames so that they can be specified in sdformat, and loaded by Gazebo.
+Support for frames inside Gazebo will come later, and this effort will have its own design. This will include these topics:
+
+1. Where frame information will be displayed for the user
+1. 3D feedback for frame origin, and the FrameGraph
+1. Upgrades to the Pose message, Join::anchorPose
+1. Support in the physics library.
+1. Real time updates to the FrameGraph
+
+
 ### Performance Considerations
 
 This design should not impact perfromance much. While there is an added cost to compute each pose element, this cost can be done once when the sdf is loaded.
