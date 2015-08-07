@@ -245,13 +245,13 @@ The sdf::Pose class is not modified. This is because the current Pose is more of
 
 ### Backwards compatibility
 
-In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements and their possible path in the sdf file.
+In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements, according to their path in the sdf file. It shows how the pose is determined when no frame is provided.
 
-1. <world><include><pose>
-1. <world><state><model><pose>
-1. <world><light><pose>
-1. <sdf/world><actor><pose>
-1. <sdf/world><model><pose> A position and orientation in the global coordinate frame for the model. Position(x,y,z) and rotation (roll, pitch yaw) in the global coordinate frame.
+1. <world><include><pose> This pose uses the "world" frame
+1. <world><state><model><pose> This pose uses the "world" frame
+1. <world><light><pose> This pose uses the "world" frame
+1. <sdf/world><actor><pose> This pose uses the "world" frame
+1. <sdf/world><model><pose> A position and orientation in the global coordinate frame for the model. Position(x,y,z) and rotation (roll, pitch yaw) in the global "world"  coordinate frame.
 1. <sdf/world><model><link><pose> This is the pose of the link reference frame, relative to the model reference frame.
 1. <sdf/world><model><link><inertial><pose> This is the pose of the inertial reference frame, relative to the link reference frame. The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.
 1. <sdf/world><model><link><collision><pose> The reference frame of the collision element, relative to the reference frame of the link.
