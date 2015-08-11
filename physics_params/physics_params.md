@@ -168,7 +168,8 @@ bool ConvertParamToSDF(const msgs::Param &_msg, sdf::ElementPtr _elem);
 // Call "bool ConvertParamToSDF", throw an exception if it returns false
 sdf::ElementPtr ConvertParamToSDF(const msgs::Param &_msg);
 
-template<typename T> bool ConvertParam(const msgs::Param &_msg, T _value);
+template<typename T> bool ConvertParam(msgs::Param &_msg,
+    const std::String &_key, const T &_value);
 // Call "bool ConvertParam", throw an exception if it returns false
 template<typename T> msgs::Param ConvertParam(const std::String &_key,
     const T &_value);
