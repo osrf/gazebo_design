@@ -291,7 +291,7 @@ bool BulletPhysics::GetParam(std::string key, boost::any value)
 </sdf>
 ```
 
-Alice can still submit major pull requests Gazebo and SDF if she
+Alice can still submit major pull requests to Gazebo and SDF if she
 wants to make her new parameter a first-class citizen. But she does not
 need to substantially change the code in order to use the new implicit
 parameter in her research.
