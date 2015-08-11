@@ -160,15 +160,13 @@ converting a primitive to a Param Protobuf message:
 
 ```
 
-template<typename T> bool ConvertParamFromSDF(const sdf::ElementPtr _elem,
-    msgs::Param &_msg);
+bool ConvertParamFromSDF(const sdf::ElementPtr _elem, msgs::Param &_msg);
 // Call "bool ConvertParamFromSDF", throw an exception if it returns false
-template<typename T> msgs::Param ConvertParamFromSDF(const sdf::ElementPtr _elem);
+msgs::Param ConvertParamFromSDF(const sdf::ElementPtr _elem);
 
-template<typename T> bool ConvertParamToSDF(const msgs::Param &_msg,
-    sdf::ElementPtr _elem);
+bool ConvertParamToSDF(const msgs::Param &_msg, sdf::ElementPtr _elem);
 // Call "bool ConvertParamToSDF", throw an exception if it returns false
-template<typename T> sdf::ElementPtr ConvertParamToSDF(const msgs::Param &_msg);
+sdf::ElementPtr ConvertParamToSDF(const msgs::Param &_msg);
 
 template<typename T> bool ConvertParam(const msgs::Param &_msg, T _value);
 // Call "bool ConvertParam", throw an exception if it returns false
