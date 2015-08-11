@@ -322,7 +322,8 @@ messages with `params` structure.
 The last two items on this list are optional and may require further forethought before implementation.
 
 1. SDF: New `param.sdf` element integrated, with tests.
-2. Gazebo: Add `param.proto` protobuf message. Add `Params` to `physics.proto`.
+2. Gazebo: Add `param.proto` protobuf message.
+Add `Params` to `physics.proto` (eventually to model, link, visual, collision, surface).
 Add conversion functions and tests.
 3. Gazebo: Integrate each physics engine with `param` messages, with parameterized tests.
 4. Gazebo: Integrate links for each physics engine with `param` messages, with tests.
