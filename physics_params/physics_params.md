@@ -72,7 +72,9 @@ Param messages:
 * Only one data field of the Any message can be filled at a time.
 
 * The `param` message is hierarchical. Each `param` message can contain a list of
-`param` children. A `param` cannot contain multiple children with the same name.
+`param` children. A `param` should not contain multiple children with the same name.
+If multiple children with the same name are found, only the first child
+`param` will be used.
 
 Hierarchical parameters are represented within Gazebo with scoped names.
 For example, the ODE-specific physics parameter `sor` is a child of the element
