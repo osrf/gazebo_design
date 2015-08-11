@@ -93,16 +93,11 @@ So in a way, Actuator, Transmission or Encoder are glorified SDF models,
 each can be composed of Joints, Links and convenience function calls to
 model members in Gazebo.
 
-How FIXED are these glorified SDF models? What do we allow users to change?
-What do we not allow users to tweak?
-If we impose any kind of structures to these models, will the imposed structure
-become a barrier to modeling certain types of objects?
-These are all questions to be answered here.
-
 #### Open Questions
 
 - Motors sometimes introduce new intermediate joints and links, i.e. it adds an intermediate motor core mass that spins independently of motor casing and motor axle.
 - Gearboxes can also introduce intermediate joints and links.  A link is connected to an input shaft, another to the output shaft, then there are stuff (gears) in between that spins/moves at different rates than input or output links.
+- How structured are these glorified SDF models for actuators and transmissions? What do we allow users to change? How can we impose structure to these models without reducing flexibility?
 
 
 ### Synchronization
