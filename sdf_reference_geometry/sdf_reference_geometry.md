@@ -8,8 +8,10 @@ Inspired by the ROS tf2 library and Solid Work's reference geometry tools, the I
 
 ### Requirements
 
-1. Be able to define reference frames in SDF.
-1. Be able to reference that geometry, using the path of the frame element.
+1. Be able to define reference frames in SDF, inside entities like models, links and collissions.
+1. Be able to reference that geometry, by using a frame path inside a pose element.
+1. Support nested models, by supporting relative (and absolute) paths when referencing paths.
+1. Be backwards compatible, by providing default frames for pose elements that do not specify them
 
 ### Example
 
@@ -158,10 +160,9 @@ The following diagram shows the frame hierarchy. In this example, the hierachy h
 1. There are no circular dependencies (no frame has itself has a parent).
 
 
-
 ![frame tree](frame_tree.png)
 
-It is possible to compute the transformation from an origin frame to a destination frame, using the common ancestor for 2 frames:
+To compute the transformation from an origin frame to a destination frame, we use the common ancestor for 2 frames:
 
  1. Use the origin frame as a starting point
  1. Apply the inverse poses of each parent frame until the common ancestor
@@ -172,6 +173,17 @@ Having all these extra frames is more work, but it makes it simple to change lin
 
 When computing transformation between 2 frames, finding the shortest paths between the two transformations should give more precision in transformations than going all the way to the world frame (because it avoids computing unnecessary transformations that can add error).
 
+
+### Relative paths
+
+Support for nested models means that frames names should not be absolute. When specifying a pose, the path to the relative frame can thus be relative or absolute.
+Here are examples:
+
+1. Absolute path: "/world/model1/nested_model/frame_of_reference"
+1. A relative path: "my_link/frame_of_reference"
+1. A relative path outside the current scope: "../middle_finger/third_phalange/frame_of_reference"
+
+It is also important to keep in mind that a frame "super_frame" in the path "/world/model/super_frame" could be relative to another frame, even if that frame is not part of the path.
 
 
 ### Challenges
@@ -190,12 +202,11 @@ When computing transformation between 2 frames, finding the shortest paths betwe
 
 Proposition: add a new class to ign-math, named "FrameGraph" that contains the tree of frames. Objects of this type will typically be populated with frames as they are read during the parsing of SDF documents.
 
-1. void AddFrame(const string &_name, const string &_parent, const Pose &_offset);
-1. bool ParentFrame(const string &_frame, string &_result);
+1. void AddFrame(const string &_name, cconst Pose &_pose, tonst string &_parent);
+1. bool ParentFrame(const string &_frame, string &_result, bool canonical=false);
 1. bool Pose (const string &_originFrame, const string &_destinationFrame, Pose &_result);
 
-The GetPose method could also apply a Pose before returning the result, but this operation is easy to perform with the overloaded operator
-of Pose.
+By default, parentFrame returns the path that was initially specified, but the full path can be obtained by passing true for the cannonical parameter.
 
 There is no method to remove a frame, because the typical usage is to add frames while parsing an SDF file, and then use GetPose to evaluate poses that are relative to frames.
 
@@ -247,16 +258,17 @@ The sdf::Pose class is not modified. This is because the current Pose is more of
 
 In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements, according to their path in the sdf file. It shows how the pose is determined when no frame is provided.
 
-1. <world><include><pose> This pose uses the "world" frame
-1. <world><state><model><pose> This pose uses the "world" frame
-1. <world><light><pose> This pose uses the "world" frame
-1. <sdf/world><actor><pose> This pose uses the "world" frame
-1. <sdf/world><model><pose> A position and orientation in the global coordinate frame for the model. Position(x,y,z) and rotation (roll, pitch yaw) in the global "world"  coordinate frame.
-1. <sdf/world><model><link><pose> This is the pose of the link reference frame, relative to the model reference frame.
-1. <sdf/world><model><link><inertial><pose> This is the pose of the inertial reference frame, relative to the link reference frame. The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.
-1. <sdf/world><model><link><collision><pose> The reference frame of the collision element, relative to the reference frame of the link.
-1. <sdf/world><model><link><visual><pose> The reference frame of the visual element, relative to the reference frame of the link.
-1. <sdf/world><model><joint><pose> Pose offset from child link frame to joint frame (expressed in child link frame).
+1. <world><include><pose> This pose uses the "/world" frame
+1. <world><state><model><pose> This pose uses the "/world" frame
+1. <world><light><pose> This pose uses the "/world" frame
+1. <sdf/world><actor><pose> This pose uses the "/world" frame
+1. <sdf/world><model*><pose> This poses is relative to "/world"  coordinate frame.
+1. <sdf/world><model*><link><pose> This is the pose of the link reference frame, relative to the model reference frame. This pose is relative to the "/world/*/model/f_model"
+1. <sdf/world><model*><link><inertial><pose> This is the pose of the inertial reference frame, relative to the link reference frame. The pose is relative to "/world/*/model/link_name/f_link"
+The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.
+1. <sdf/world><model><link><collision><pose> The reference frame of the collision element, relative to the reference frame of the link "/world/*/model/link_name/f_link".
+1. <sdf/world><model><link><visual><pose> The reference frame of the visual element, relative to the reference frame of the link: "/world/*/model/link_name/f_link" .
+1. <sdf/world><model><joint><pose> Pose offset from child link frame to joint frame (expressed in child link frame)  "/world/*/model/link_name/f_link".
 
 ### frame element scoping and Support for nested models
 
