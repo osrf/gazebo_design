@@ -124,7 +124,7 @@ Link 3 is rotated CCW by 90 degrees. It also has a frame for Joint 3 mounting po
 
     <link name="link3">
       <frame name="l3frame">
-        <pose frame="j2frame">0 0 0 0 0 1.5708</pose>
+        <pose frame="../joint2/j2frame">0 0 0 0 0 1.5708</pose>
       </frame>
       <pose frame="l3frame">0 0 0 0 0 0</pose>
       <frame name="l4j1frame">
@@ -140,7 +140,7 @@ Joint 3 is positioned on the attach point.
 
     <joint name="joint3" type="revolute">
       <frame name="j3frame">
-        <pose frame="l4j1frame" >0 0 0 0 0 0</pose>
+        <pose frame="../link3/l4j1frame" >0 0 0 0 0 0</pose>
       </frame>
       <pose frame="j3frame">0 0 0 0 0 0</pose>
       <parent>link3</parent>
@@ -155,7 +155,7 @@ Finally, Link 4. Note the CW rotation.
 
     <link name="link4">
       <frame name="l4frame">
-        <pose frame="j3frame">0 0 0 0 0 -1.5708</pose>
+        <pose frame="../joint3/j3frame">0 0 0 0 0 -1.5708</pose>
       </frame>
       <pose frame="l4frame">0 0 0 0 0 0</pose>
     </link>
