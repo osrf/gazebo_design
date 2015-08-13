@@ -28,29 +28,35 @@ In this example, robot "Robo" is defined in sdf, using frames to define relative
 
 The version of sdf remains 1.5.
 
-We define a frame named mframe, relative to the world frame.
+We define a frame named mframe (for model frame), relative to the world frame. In a simple world with a single Robo instance, the full path of the frame would be `/world/mframe'. However, this path could be different:
+
+1. If the world contains 2 Robos, the following frame would also exist: `/world/Robo_0/mframe`
+1. If Robo was nested inside another model instance called `Mobo`, `/world/Mobo/Robo/mframe` would also point to a valid frame.
+
 The world frame always exists, but all other frames need to be defined.
 The model frame "mframe" has an offset of x=1 and y=1 with respect to the world frame.
 Like in previous versions of SDF, our model "Robo" has a pose element. The pose element has a new attribute, frame, which makes
 this pose relative to the "mframe" frame. Therefore the final pose evaluates to x=2 y=1 in the world frame.
 
 ~~~
+
     <frame name="mframe">
-      <pose frame='world'>1 1 0 0 0 0</pose>
+      <pose frame='/world'>1 1 0 0 0 0</pose>
     </frame>
     <pose frame="mframe">1 0 0 0 0 0</pose>
+
 ~~~
 
 Link 1 also defines frames:
 
-1. A baseframe "l1frame" relative to mframe. This is the local link frame.
-1. Two joint attachment frames, both relative to "l1frame".
+1. A frame `l1frame` (for link1 frame) is defined relative to mframe. This is the local link frame. The full path for this frame is `/world/Robo/link1/l1frame`. Because the frame `l1frame` is defined using the relative path `../mframe`. This is because the 2 frames are defined under two different entities (model and link).
+1. Two joint attachment frames, 'l1j1frame' and `l1j2frame`, both relative to `l1frame`. In a simple world with a single Robo model instance, their full path would be '/world/Robo/link1/l1j1frame' and `/world/Robo/link1/l1j2frame`.
 
 ~~~
 
     <link name="link1">
       <frame name="l1frame">
-        <pose frame="mframe">0 0 0 0 0 0</pose>
+        <pose frame="../mframe">0 0 0 0 0 0</pose>
       </frame>
       <pose frame="l1frame">0 0 0 0 0 0</pose>
 
@@ -61,10 +67,10 @@ Link 1 also defines frames:
       <frame name="l1j1frame">
         <pose frame="l1frame">2 3 0 0 0 0</pose>
       </frame>
-
     </link>
 
 ~~~
+
 
 Joint 1 is between Link 1 and Link 2. The local frame for this joint is relative to l1frame.
 
@@ -72,12 +78,13 @@ Joint 1 is between Link 1 and Link 2. The local frame for this joint is relative
 
     <joint name="joint1">
       <frame name="j1frame">
-        <pose frame="l1j1frame">0 0 0 0 0 0</pose>
+        <pose frame="../link1/l1j1frame">0 0 0 0 0 0</pose>
       </frame>
       <pose frame="j1frame">0 0 0 0 0 0</pose>
       <parent>link1</parent>
       <child>link3</child>
     </joint>
+
 ~~~
 
 Joint 2 is between Link 1 and Link 3. Its frame is also relative to "l1j2frame", the Joint 2 attach frame
@@ -87,12 +94,13 @@ on Link 1.
 
     <joint name="joint2" type="revolute">
       <frame name="j2frame">
-        <pose frame="l1j2frame">0 0 0 0 0 0</pose>
+        <pose frame="../link1/l1j2frame">0 0 0 0 0 0</pose>
       </frame>
-
       <pose frame="j2frame">0 0 0 0 0 0</pose>
+
       <parent>link1</parent>
       <child>link3</child>
+
     </joint>
 
 ~~~
@@ -103,7 +111,7 @@ Link 2 is positioned relative to Joint 1 attach frame on link1
 
     <link name="link2">
       <frame name="l2frame">
-        <pose frame="l1j1frame">0 0 0 0 0 0</pose>
+        <pose frame="../link1/l1j1frame">0 0 0 0 0 0</pose>
       </frame>
       <pose frame="l2frame">0 0 0 0 0 0</pose>
     </link>
