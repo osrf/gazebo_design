@@ -64,7 +64,7 @@ Link 1 also defines frames:
         <pose frame="l1frame">-1 3 0 0 0 0</pose>
       </frame>
 
-      <frame name="l1j1frame">
+      <frame name="l1j3frame">
         <pose frame="l1frame">2 3 0 0 0 0</pose>
       </frame>
     </link>
@@ -127,7 +127,7 @@ Link 3 is rotated CCW by 90 degrees. It also has a frame for Joint 3 mounting po
         <pose frame="../joint2/j2frame">0 0 0 0 0 1.5708</pose>
       </frame>
       <pose frame="l3frame">0 0 0 0 0 0</pose>
-      <frame name="l4j1frame">
+      <frame name="l3j2frame">
         <pose frame="l3frame">3 0 0 0 0 0</pose>
       </frame>
     </link>
@@ -140,7 +140,7 @@ Joint 3 is positioned on the attach point.
 
     <joint name="joint3" type="revolute">
       <frame name="j3frame">
-        <pose frame="../link3/l4j1frame" >0 0 0 0 0 0</pose>
+        <pose frame="../link3/l3j3frame" >0 0 0 0 0 0</pose>
       </frame>
       <pose frame="j3frame">0 0 0 0 0 0</pose>
       <parent>link3</parent>
