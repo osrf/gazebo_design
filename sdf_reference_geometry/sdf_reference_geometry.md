@@ -8,7 +8,7 @@ Inspired by the ROS tf2 library and Solid Work's reference geometry tools, the I
 
 ### Requirements
 
-1. Be able to define reference frames in SDF, inside entities like models, links and collissions.
+1. Be able to define reference frames in SDF, inside entities like models, links and collisions.
 1. Be able to reference that geometry, by using a frame path inside a pose element.
 1. Support nested models, by supporting relative (and absolute) paths when referencing paths.
 1. Be backwards compatible, by providing default frames for pose elements that do not specify them
@@ -52,7 +52,6 @@ Link 1 also defines frames:
 1. A frame `l1frame` (for link1 frame) is defined relative to mframe. This is the local link frame. The full path for this frame is `/world/Robo/link1/l1frame`. Because the frame `l1frame` is defined using the relative path `../mframe`. This is because the 2 frames are defined under two different entities (model and link).
 1. Two joint attachment frames, 'l1j1frame' and `l1j2frame`, both relative to `l1frame`. In a simple world with a single Robo model instance, their full path would be '/world/Robo/link1/l1j1frame' and `/world/Robo/link1/l1j2frame`.
 
-N
 
 ~~~
 
@@ -129,9 +128,17 @@ Link 3 is rotated CCW by 90 degrees. It also has a frame for Joint 3 mounting po
         <pose frame="../joint2/j2frame">0 0 0 0 0 1.5708</pose>
       </frame>
       <pose frame="l3frame">0 0 0 0 0 0</pose>
+
+      <!-- this is where joint 2 attaches -->
       <frame name="l3j2frame">
+        <pose frame="l3frame">0.5 0 0 0 0 0</pose>
+      </frame>
+
+      <!-- this is where joint 3 attaches -->
+      <frame name="l3j3frame">
         <pose frame="l3frame">3 0 0 0 0 0</pose>
       </frame>
+
     </link>
 
 ~~~
@@ -287,7 +294,7 @@ In the current SDF, pose elements do not have a frame attribute. In order to mai
 | <sdf/world><model*><link><inertial><pose>   | /world/model*/link This is the pose of the inertial reference frame (needs to be at the center of gravity)  |
 | <sdf/world><model><link><collision><pose>   | /world/model*/link  |
 | <sdf/world><model><link><visual><pose>      | /world/model*/link  |
-| <sdf/world><model><joint><pose>             | /world/model*/link  |
+| <sdf/world><model><joint><pose>             | /world/model*/link  This pose is relative to the 'child' link, as specified in the joint |
 
 
 ### Future improvements
