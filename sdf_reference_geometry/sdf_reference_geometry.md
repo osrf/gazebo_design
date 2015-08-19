@@ -164,10 +164,15 @@ Finally, Link 4. Note the CW rotation.
 
 ~~~
 
-The following diagram shows the frame hierarchy. In this example, the hierachy has no error:
+The following diagram shows the frame hierarchy.
+
 
 1. Each frame has a parent frame that can be traced back to the world frame.
-1. There are no circular dependencies (no frame has itself has a parent).
+1. There are no circular dependencies (no frame has itself as a parent).
+1. Entities are represented as round shapes, and frames as rectangles
+1. Blue arrows go from the leaf path to the root
+1. Red arrows go from frame to the /world frame via parent frames
+1. Note that entity paths are also valid frames
 
 
 ![frame tree](frame_tree.png)
@@ -320,10 +325,5 @@ This design should not impact perfromance much. While there is an added cost to 
 1. Add the FrameGraph class to the ign math library.
 1. Add the Frame and Pose elements to the SDF parser.
 1. Add the visual cue to the Frame element so it can be displayed visually by Gazebo
-
-
-
-
-
 
 
