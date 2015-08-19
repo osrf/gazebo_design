@@ -52,6 +52,8 @@ Link 1 also defines frames:
 1. A frame `l1frame` (for link1 frame) is defined relative to mframe. This is the local link frame. The full path for this frame is `/world/Robo/link1/l1frame`. Because the frame `l1frame` is defined using the relative path `../mframe`. This is because the 2 frames are defined under two different entities (model and link).
 1. Two joint attachment frames, 'l1j1frame' and `l1j2frame`, both relative to `l1frame`. In a simple world with a single Robo model instance, their full path would be '/world/Robo/link1/l1j1frame' and `/world/Robo/link1/l1j2frame`.
 
+N
+
 ~~~
 
     <link name="link1">
@@ -265,6 +267,13 @@ The sdf::Pose class is not modified. This is because the current Pose is more of
 ### Backwards compatibility
 
 In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements, according to their path in the sdf file. It shows how the pose is determined when no frame is provided.
+
+
+| Pose element path                           | Implicit frame |
+|:-------------------------------------------:|:--------------:|
+| <world><include><pose>                      | /world         |
+| <world><state><model><pose>                 | /world         |
+
 
 1. <world><include><pose> This pose uses the "/world" frame
 1. <world><state><model><pose> This pose uses the "/world" frame
