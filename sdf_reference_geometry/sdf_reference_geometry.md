@@ -266,30 +266,24 @@ The sdf::Pose class is not modified. This is because the current Pose is more of
 
 ### Backwards compatibility
 
-In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements, according to their path in the sdf file. It shows how the pose is determined when no frame is provided.
+In the current SDF, pose elements do not have a frame attribute. In order to maintain backwards compatibility, the following rules will apply for pose elements when no frame is specified. The following is a list of pose elements, according to their path in the sdf file. It shows how the pose is determined when no frame is provided. The * symbol indicates that multiple nested models can exist in the path.
 
 
 | Pose element path                           | Implicit frame |
 |:-------------------------------------------:|:--------------:|
 | <world><include><pose>                      | /world         |
 | <world><state><model><pose>                 | /world         |
+| <world><include><pose>                      | /world         |
+| <world><state><model><pose>                 | /world         |
+| <world><light><pose>                        | /world         |
+| <sdf/world><actor><pose>                    | /world                                                     |
+| <sdf/world><model*><pose>                   | /world for the top most model, or the parent's model pose   |
+| <sdf/world><model*><link><pose>             | /world/model*/link (the pose of the link reference frame, relative to the model reference frame. |
+| <sdf/world><model*><link><inertial><pose>   | /world/model*/link This is the pose of the inertial reference frame (needs to be at the center of gravity)  |
+| <sdf/world><model><link><collision><pose>   | /world/model*/link  |
+| <sdf/world><model><link><visual><pose>      | /world/model*/link  |
+| <sdf/world><model><joint><pose>             | /world/model*/link  |
 
-
-1. <world><include><pose> This pose uses the "/world" frame
-1. <world><state><model><pose> This pose uses the "/world" frame
-1. <world><light><pose> This pose uses the "/world" frame
-1. <sdf/world><actor><pose> This pose uses the "/world" frame
-1. <sdf/world><model*><pose> This poses is relative to "/world"  coordinate frame.
-1. <sdf/world><model*><link><pose> This is the pose of the link reference frame, relative to the model reference frame. This pose is relative to the "/world/*/model/f_model"
-1. <sdf/world><model*><link><inertial><pose> This is the pose of the inertial reference frame, relative to the link reference frame. The pose is relative to "/world/*/model/link_name/f_link"
-The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.
-1. <sdf/world><model><link><collision><pose> The reference frame of the collision element, relative to the reference frame of the link "/world/*/model/link_name/f_link".
-1. <sdf/world><model><link><visual><pose> The reference frame of the visual element, relative to the reference frame of the link: "/world/*/model/link_name/f_link" .
-1. <sdf/world><model><joint><pose> Pose offset from child link frame to joint frame (expressed in child link frame)  "/world/*/model/link_name/f_link".
-
-### frame element scoping and Support for nested models
-
-This is ongoing. please add a comment.
 
 ### Future improvements
 
