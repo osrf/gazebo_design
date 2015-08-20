@@ -143,8 +143,12 @@ digraph G {
 
     j3frame -> l3j3frame
     l3j3frame -> l3frame
-    l3j2frame ->l3frame
-    l3frame -> j2frame
+
+//    l3j2frame ->l3frame
+//    l3frame -> j2frame
+
+    l3frame -> l3j2frame
+    l3j2frame -> j2frame
 
     l2j1frame ->l2frame
 
