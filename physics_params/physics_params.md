@@ -60,14 +60,14 @@ message Param
 
 message Any
 {
-  optional double  double_value  = 1;
-  optional int     int_value     = 2;
-  optional string  string_value  = 3;
-  optional Vector3 vector3_value = 4;
-  optional Color color_value = 5;
-  optional Pose pose_value = 6;
+  optional double         double_value = 1;
+  optional int               int_value = 2;
+  optional string         string_value = 3;
+  optional Vector3       vector3_value = 4;
+  optional Color           color_value = 5;
+  optional Pose             pose_value = 6;
   optional Quaternion quaternion_value = 7;
-  optional bool    bool_value   = 5;
+  optional bool             bool_value = 8;
 }
 ~~~
 
