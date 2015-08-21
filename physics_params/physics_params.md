@@ -5,17 +5,22 @@
 Each of gazebo's physics engines has many parameters for setting
 physical properties of models (e.g. inertia, surface stiffness, joint damping)
 and numerical properties of solvers (e.g. iterations, tolerance).
-Traditionally, we have manually added physics parameters
-to the Gazebo API in the form of Get/Set functions in the physics class,
+These parameters are explicitly defined in multiple levels
+of the API, including Get/Set functions in the physics class,
 fields in protobuf messages, and elements in the sdformat description.
-This is not a scalable approach, as it would require unreasonable
-effort to add all parameters to the API.
-Additionally any changes to protobuf messages break ABI,
-and thus can only be done on new major versions.
+Explicit definition allows for better documentation and type safety, though
+it increases the effort required to add new parameters
+and causes physics API changes to affect downstream tools
+(such as `gz physics`).
 
-The goal of this design is to specify an interface for getting
-and setting physics parameters in a scalable manner without
-breaking API/ABI when parameters are added or removed.
+When adding and testing new parameters, it would be convenient
+to have API mechanisms that allow the use of implicit parameters,
+or parameters that aren't explicitly defined.
+Using new parameters in the way should not break API or ABI.
+This will simplify development and testing of new features.
+Once parameters are accepted and widely used, they should be
+defined explicitly in the API with documentation and the type
+declared.
 
 ### Requirements
 
