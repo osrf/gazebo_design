@@ -164,7 +164,6 @@ representations of a Param, adding a primitive as a Param to a Physics message, 
 converting a primitive to a Param Protobuf message:
 
 ```
-
 bool ConvertParamFromSDF(const sdf::ElementPtr _elem, msgs::Param &_msg);
 // Call "bool ConvertParamFromSDF", throw an exception if it returns false
 msgs::Param ConvertParamFromSDF(const sdf::ElementPtr _elem);
@@ -210,7 +209,7 @@ library.
 `boost::any` is currently used to for generic type handling in the physics library.
 The `Param` protobuf message could replace `boost::any` to simplify the code and
 migrate away from reliance on Boost. To settle this design choice, the relative performance
-of protobuf messages vs. boost::any could be profiled in
+of protobuf messages vs. boost::any should be profiled in
 order to determine which has superior speed.
 
 With a mechanism finally in place to keep the physics parameters enumerated in SDF
