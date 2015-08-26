@@ -143,4 +143,8 @@ though some changes to the API were made in response to the pull request comment
 It modified the `INTEGRATION_physics_inertia_ratio` test to use
 these classes.
 
-A subsequent pull request will be submitted to ignition-math.
+The design was added to ignition-math in the following pull requests:
+
+* https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/34
+* https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/42
+* https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/45
