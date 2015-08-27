@@ -9,6 +9,8 @@ position.
 
 ![Simple case](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/simple_case.png)
 
+### What would undo do?
+
 The expected undo behaviour in a simple case like the one above is quite clear.
 However, worlds in Gazebo are affected not only by user commands, but also by
 the **physics engine** and **plugins**. Moreover, **several clients** might be
@@ -29,108 +31,109 @@ If the user hits undo now, what should happen?
 
 ![Plugins plus physics](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/cmd_plugin_physics.png)
 
-The proposal here is that when the user presses "undo", the vehicle is moved to
-the position it was before the user command, and also the cone goes back to its
-previous pose.
+Different users might expect different behaviours from undo here. Such as:
 
-![Proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/proposal.png)
+A. The vehicle returns to its previous position before the user moved it, and
+also the cone gets back standing up, as it was a side effect of moving the car.
+This would be effectively going back in time to the moment just before the user
+command. All models would retain their physical states, such as velocity.
+
+B. The vehicle returns to its previous position but all side-effects remain
+unchanged, so the cone remains fallen. The vehicle's physical states are reset.
+
+C. Similar to B, but the vehicle's physical states are kept the same as before
+the user command.
+
+### Current proposal
+
+This document proposes option B for a few reasons:
+
+1. Undo will be treated as an **inverse command** instead of a **going back in
+time**. Going back in time might be introduced in a new feature where the user
+saves "keyframes" of the simulation in case they want to go back to a specific
+configuration.
+
+1. This way, it is always clear to the user what undo will do, while going back
+in time might have unexpected effects, undoing other things that happened due to
+physics / plugins, which maybe not even interacted with the user command.
+
+1. Supporting multiple clients will be more natural, as one client undoing their
+actions won't affect what the other client did, unless they are commanding the
+same model. In case they are acting on the same model, undo commands will be
+handled like other user commands are being handled at the moment: they are
+executed in order.
+
+1. Someone hits Ctrl+Z by mistake after 10 mins of simulation - if we go for the
+"time goes back" approach, suddenly everything changes.
 
 ## Specifications
 
-* Undo user commands, but not pure plugin / physics actions.
-
 * User commands which can be undone:
 
-    + Translate
+    + **Translate / Rotate / Snap / Align ("move" commands)**:
 
-    + Rotate
+      > Undo restores the full pose before the command. For example, if the
+      model tips over after being translated, it is translated back with the
+      same orientation as before, not the new orientation.
 
-    + Scale
+      > Redo restores the full pose the model got to the first time the model
+      was moved. For example, model A is aligned to model B, then this is
+      undone, then model B moves. If the user hits redo now, model A will
+      move to the way it was previously aligned, instead of being aligned to
+      model B's new pose. This is done to keep undo and redo inversible and
+      foreseeable.
 
-    + Snap
+    + **Scale**:
 
-    + Align
+      > Undo restores the scale before the command. Any other coupled effects such
+      as scaling inertias and mass should also be undone.
 
-    + Insert / paste entity
+      > Redo scales the same way the user did before.
 
-    + Delete entity
+    + **Insert / paste entity**:
 
-    + Copy entity
+      > Undo deletes the entity. If pasting a copied entity, the entity remains
+      in the copy stack ready to be pasted again.
 
-    + Any others?
+      > Redo spawns a new entity with the same name, but probably different ID.
+      The spawned model should appear in the pose the previous model was at.
 
-* All physics / plugin effects which happened after a user command will be
-undone if the user command is undone. That is, **the world will go back to the
-state it was before the user command**. Time however, does not go back.
+    + **Delete entity**:
 
-* Unlike undo, **redo** does not reproduce a whole world state. It only executes the
-single user command which was executed previously and physics/plugins work as
-usual from there.
+      > See redo above.
 
-* Future goal: plugin internal states are also rewinded. This could be done by
-emitting events for undo / redo which plugins can listen to and each plugin is
-responsible for handling it by themselves.
+      > See undo above.
+
+* New commands are added to the end of a **undo command list**. When undo is
+triggered, last added commands are executed first.
+
+* Undone commands are added to the end of a **redo command list**. When redo is
+triggered, last added commands are executed first. When the user executes a new
+command, the redo list is cleared.
+
+* The user might try to undo something which isn't possible anymore, such as
+moving something which a plugin deleted. Some possible outcomes are:
+
+    + Clear that client's whole lists.
+
+    + Display a warning that it wasn't undone but keep lists.
+
+* There will be undo and redo buttons on the top toolbar, with `Ctrl+Z` and
+`Shift+Ctrl+Z` hotkeys respectively. There will also be items under the `Edit`
+menu.
+
+* Nice to have: Long-pressing the undo / redo toolbar buttons displays a list
+of commands and the user can skip to an action in the middle.
+
+* Future goal: Notify plugins of undo / redo commands, maybe emitting events
+so each plugin can handle it as they want.
 
 ## Architecture
 
-### Keyframes (world states)
-
-In order to return the world to the state it was before a user command, we need
-to keep track of "keyframes", i.e. complete world states. A keyframe would contain
-pose and velocity information for all entities in the world at a given time (which
-should be sufficient to fully restore the physics states).
-
-Therefore, each time a command is executed, a keyframe is added to the undo
-queue. This has the potential of decreasing performance, so we will probably
-need to limit the number of keyframes stored (maximum number of undo steps).
-
-> "Keyframe" functionality sounds similar to what is currently performed by the
-`WorldState` class. To my best understanding so far, `WorldState` handles
-incremental changes exclusively, so a state only describes things that have
-changed since the previous time step. During the implementation, it might make
-more sense to extend the `WorldState` class to handle complete sets of
-information instead of introducing the concept of "keyframes".
-
-The world class keeps a pointer to the whole SDF description of the scene. A
-couple of functions such as follows might be added to `physics::World`.
-
-    /// \brief Gets an SDF element with the complete description of the world.
-    /// \return The complete SDF for the current state of the world.
-    sdf::ElementPtr World::Keyframe()
-    {
-      // Note issue #1714
-      // It will go somewhat like this...
-      this->dataPtr->sdf->Update();
-      this->UpdateStateSDF();
-      return this->dataPtr->sdf;
-    }
-
-    /// \brief Set the complete state of the world.
-    /// \param[in] SDF describing the entire world.
-    void World::SetKeyframe(sdf::ElementPtr _sdf)
-    {
-      // Update the state of all entities in the world
-    }
-
 ### User commands
 
-Some information about user commands will be kept in the server side, and thus
-be shared among all clients, while some information will be client-specific.
+All information about user commands will be kept in the client side.
 
-#### Server side
-
-The structure kept server-side will keep information about the world state
-(keyframes) and what the command "does and undoes".
-
-The server knows:
-
-* What the command does (its effect in the world, such as moving or deleting
-something)
-
-* The state of the world before the command was executed
-
-* A unique ID for the command (which may be the time the command was executed
-or we can have something else as the ID)
 
 There will be an abstract class `common::UserCmd`, with `Do` and `Undo`
 functions to be overridden:
@@ -140,230 +143,121 @@ functions to be overridden:
     class UserCmd
     {
       /// \brief Constructor
-      /// \param[in] _ID Unique ID for this command
-      /// \param[in] _world Pointer to the world - depending on where this class
-      /// lives, it might make more sense to have a publisher of keyframe msgs or
-      /// something like that.
-      /// \param[in] _keyframe SDF representing the whole world state the
-      /// moment the command was executed.
-      public: UserCmd(common::Time _ID,
-                      physics::WorldPtr _world,
-                      sdf::ElementPtr _keyframe)
-          : ID(_ID), world(_world), keyframe(_keyframe)
-      {
-      };
+      public: UserCmd() {};
 
       /// \brief Destructor
       public: virtual ~UserCmd() {};
 
       /// \brief This performs the user command.
-      public: virtual void Do() = 0;
+      /// \return True if successul.
+      public: virtual bool Do() = 0;
 
-      /// \brief This performs the opposite of the user command. For most cases,
-      /// it will involve loading a keyframe.
-      /// Note: Instead of being abstract, this could have a default
-      /// implementation which sets the keyframe to the world.
-      public: virtual void Undo() = 0;
-
-      /// \brief Return this command's unique ID.
-      /// \return Unique ID
-      public: common::Time ID() {return this->ID};
-
-      /// \brief Pointer to the world
-      private: physics::WorldPtr world;
-
-      /// \brief SDF representing the whole world state the moment the user
-      /// command was executed. The default behaviour of "Undo" will be to set
-      /// the world to this state by default.
-      private: sdf::ElementPtr keyframe;
-
-      /// \brief Unique ID identifying this command in the server.
-      private: common::Time ID;
+      /// \brief This performs the opposite of the user command.
+      /// \return True if successul.
+      public: virtual bool Undo() = 0;
     };
 
 Each user command will inherit from this class and implement its own functions.
 Here's an example for a general command which changes a model's pose, such as
-`translate`, `rotate`, `snap` and `align`:
+`translate`, `rotate`, `snap` and `align`. For the server, there's no difference
+between a move command and an undo move command.
 
-    /// \brief A user command which alters the pose of an entity in the world.
-    class MoveEntityCmd : public UserCmd
+    /// \brief A user command which alters the pose of an model in the world.
+    class MoveModelCmd : public UserCmd
     {
       /// \brief Constructor
-      /// \param[in] _ID Unique ID for this command
-      /// \param[in] _world Pointer to the world - depending on where this class
-      /// lives, it might make more sense to have a publisher of keyframe msgs or
-      /// something like that.
-      /// \param[in] _keyframe SDF representing the whole world state the
-      /// moment the command was executed.
-      /// \paramp[in] _entity Entity which was moved, such as a model or a
-      /// light.
+      /// \paramp[in] _modelName Scoped name of model which was moved.
+      /// \param[in] _startPose Start pose
       /// \param[in] _endPose End pose
-      public: MoveEntityCmd(common::Time _ID,
-                            physics::WorldPtr _world,
-                            sdf::ElementPtr _keyframe,
-                            physics::EntityPtr _entity,
-                            ignition::math::Pose3d _endPose)
-          : ID(_ID),
-            world(_world),
-            keyframe(_keyframe),
-            entity(_entity),
+      public: MoveModelCmd(std::string _modelName
+                           ignition::math::Pose3d _startPose,
+                           ignition::math::Pose3d _endPose)
+          : modelName(_modelName),
+            endPose(_startPose),
             endPose(_endPose)
       {
       };
 
       /// \brief Destructor
-      public: ~MoveEntityCmd() = default;
+      public: ~MoveModelCmd() = default;
 
-      /// \brief Set the entity's pose to be the end pose.
-      public: void Do()
+      /// \brief Set the model's pose to be the end pose.
+      /// \return True if successul.
+      public: bool Do()
       {
-        this->entity->SetPose(endPose);
+        // Check if model still exists
+
+        // Publish message to move to end pose
+
+        // Optional: check after a while to see if succeeded
       };
 
-      /// \brief Set the world state to be that of before the user moved the
-      /// entity.
-      public: void Undo()
+      /// \brief Set the model's pose to be the start pose.
+      /// \return True if successul.
+      public: bool Undo()
       {
-        // Before setting the world back to another state, it will probably be
-        // good to check if the entity hasn't been deleted for example. Maybe
-        // we keep track of the entity's startPose as well as endPose and double
-        // check that against the keyframe to be sure they match. Check for
-        // deletions / insertions and so on.
-        this->world->SetKeyframe(this->keyframe);
+        // Check if model still exists
+
+        // Publish message to move to start pose
+
+        // Optional: check after a while to see if succeeded
       };
 
-      /// \brief Entity which was moved.
-      private: physics::EntityPtr _entity;
+      /// \brief Model which was moved.
+      private: physics::VisualPtr _model;
 
-      /// \brief Pose which the user has moved the entity to.
+      /// \brief Pose which the model has before being moved.
+      private: ignition::math::Pose3d startPose;
+
+      /// \brief Pose which the user has moved the model to.
       private: ignition::math::Pose3d endPose;
     };
 
-Whenever the user performs a command, the client publishes a `*Cmd` message.
-For example, for a new `MoveEntityCmd`:
+### User commands manager
 
-    package gazebo.msgs;
-
-    /// \ingroup gazebo_msgs
-    /// \interface MoveEntityCmd
-    /// \brief Notifies that a new move command has been executed by a user
-
-    import "time.proto";
-
-    message MoveEntityCmd
-    {
-      /// \brief Unique id for user command.
-      required Time id = 1;
-
-      /// \brief Entity fully scoped name
-      required string name = 2;
-
-      /// \brief End pose
-      required Pose end_pose = 3;
-
-      /// \brief Unique ID for the client so the server can double check when an
-      /// undo request is received?
-      required: gzclient ID?
-    }
-
-A `physics::UserCmdManager` class will subscribe to `*Cmd` messages. It will
-keep two lists of `UserCmd` objects: one for undo, another for redo.
-
-When the server receives a new command message, it creates a `UserCmd` object and
+The lists of commands will be handled by class `gui::UserCmdManager`.
+When the manager receives a new command, it creates a `UserCmd` object and
 appends it to the end of the `undoUserCmds` vector.
 
-    /// \brief Callback when a MoveEntityCmd message is received.
-    /// \param[in] _msg Incoming message
-    private: void UserCmdManager::OnMoveEntityCmd(msgs::MoveEntityCmdPtr _msg)
+    /// \brief User executes a new move model command.
+    /// \paramp[in] _modelName Scoped name of model which was moved.
+    /// \param[in] _startPose Start pose
+    /// \param[in] _endPose End pose
+    private: void UserCmdManager::NewMoveModelCmd(std::string _modelName,
+        ignition::math::Pose3d _startPose,
+        ignition::math::Pose3d _endPose)
     {
-      EntityPtr entity = this->world->GetEntity(_msg->name());
-      MoveEntityCmd cmd = new MoveEntityCmd(msgs::Convert(
-          _msg->time()),
-          this->world,
-          this->world->Keyframe,
-          entity,
-          _msg->end_pose());
+      MoveModelCmd cmd = new MoveModelCmd(_modelName, _startPose, _endPose);
 
       // Add it to undo list
       this->userUndoCmds.push_back(cmd);
 
       // Clear redo list
+      this->userRedoCmds.clear();
     };
 
-The server does / undoes a command when it receives a message with the command's
-unique ID and whether it should be done or undone. The message will look like
-this:
+And when the user presses undo:
 
-    package gazebo.msgs;
-
-    /// \ingroup gazebo_msgs
-    /// \interface UndoRedo
-    /// \brief Message for doing / undoing a user command
-
-    import "time.proto";
-
-    message UndoRedo
+    /// \brief Callback when an undo / redo request is received.
+    private: void UserCmdManager::OnUndo()
     {
-      /// \brief Unique id for user command.
-      required Time id = 1;
+      // Get the command
+      UserCmd *cmd = this->userRedoCmds.back();
 
-      /// \brief True to undo, false to redo.
-      required bool undo = 2;
-    }
+      // Undo it
+      cmd->Undo();
 
-And the subscriber callback:
+      // Remove from undo list
+      this->userUndoCmds.pop_back();
 
-    /// \brief Callback when an UndoRedo message is received.
-    /// \param[in] _msg Incoming message
-    private: void UserCmdManager::OnUndoRedoMsg(msgs::UndoRedoPtr _msg)
-    {
-      // Undo
-      if (_msg()->undo())
-      {
-        // Check if msg id is found in the undo vector
+      // Disable undo action if there are no more commands in the list
+      if (this->userUndoCmds.empty())
+        this->DisableUndo();
 
-        // Maybe check it is indeed the last command by that gzclient in the
-        // list?
-
-        // Get the command
-        UserCmd *cmd = this->userRedoCmds.back();
-
-        // Do it
-        cmd->Do();
-
-        // Remove from redo list
-        this->userRedoCmds.pop_back();
-
-        // Add command to undo list
-        this->userUndoCmds.push_back(cmd);
-      }
-      // Redo
-      else
-      {
-        // similar to undo
-      }
+      // Add command to redo list
+      this->userRedoCmds.push_back(cmd);
     };
 
-#### Client side
-
-
-
-
-
-### Command queue
-
-
-
-
-
-Since all user commands inherit from the same class, they can be kept in two
-queues, one for **undo** and another for **redo**. The queues are
-
-
-### Open questions
-
-1. Someone hits Ctrl+Z by mistake after 10 mins of simulation and suddenly
-everything changes...?
 
 
 
