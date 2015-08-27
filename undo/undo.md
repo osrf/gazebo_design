@@ -7,7 +7,7 @@ example, a user moves a model from one place to another in the world but
 afterwards wants to revert that command so the model goes back to its previous
 position.
 
-![Simple case](https://bytebucket.org/osrf/gazebo_design/raw/undo2/undo/simple_case.png)
+![Simple case](https://bytebucket.org/osrf/gazebo_design/raw/undo_2.0/undo/simple_case.png)
 
 ### What would undo do?
 
@@ -29,7 +29,7 @@ plugin to drive between several cones.
 
 If the user hits undo now, what should happen?
 
-![Plugins plus physics](https://bytebucket.org/osrf/gazebo_design/raw/undo2/undo/cmd_plugin_physics.png)
+![Plugins plus physics](https://bytebucket.org/osrf/gazebo_design/raw/undo_2.0/undo/cmd_plugin_physics.png)
 
 Different users might expect different behaviours from undo here. Such as:
 
@@ -80,7 +80,7 @@ executed in order.
       model B's new pose. This is done to keep undo and redo inversible and
       foreseeable.
 
-      ![Move proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo2/undo/proposal_move.png)
+      ![Move proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo_2.0/undo/proposal_move.png)
 
     + **Scale**:
 
