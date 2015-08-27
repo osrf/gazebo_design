@@ -38,12 +38,16 @@ Different users might expect different behaviours from undo here. Such as:
 This would be effectively going back in time to the moment just before the user
 command. All models would retain their physical states, such as velocity.
 
-2. The vehicle returns to its previous position but all side-effects remain
+1. The **vehicle returns** to its previous position but all side-effects remain
 unchanged, so the cone remains fallen. The vehicle's physical states are reset.
+
+1. **Just restore the cone's pose**, since that's the last thing that
+"happened".
 
 ### Current proposal
 
-This document proposes option 2 for a few reasons:
+This document proposes option 2, i.e. return the vehicle but not the cone, for
+a few reasons:
 
 * **Undo** will be treated as an **inverse command** instead of a **going back in
 time**. Going back in time could be introduced as a new feature where the user
@@ -51,17 +55,15 @@ saves "keyframes" of the simulation in case they want to go back to a specific
 configuration.
 
 * This way, it is always predictable what undo will do. Going back in time
-might have unexpected effects, undoing other things that happened due to
-physics / plugins, which maybe didn't even interact with the user command.
+might have unexpected effects such as undoing other things that happened due to
+physics / plugins / other clients, which maybe didn't even interact with the
+user command.
 
 * Supporting multiple clients will be more natural, as one client undoing their
 actions won't affect what the other client did, unless they are commanding the
 same model. In case they are acting on the same model, undo commands will be
 handled like other user commands are being handled at the moment: they are
 executed in order.
-
-* Someone hits Ctrl+Z by mistake after 10 mins of simulation - if we go for the
-"time goes back" approach, suddenly everything changes.
 
 ## Specifications
 
@@ -70,15 +72,16 @@ executed in order.
     + **Translate / Rotate / Snap / Align ("move" commands)**:
 
       > **Undo** restores the full pose before the command. For example, if the
-      model tips over after being translated, it is translated back with the
-      same orientation as before, not the new orientation.
+      model tips over after being translated (position only), it is translated
+      back with the same full pose (position and orientation) as before, not
+      the new orientation.
 
       > **Redo** restores the full pose the model got to the first time the model
       was moved. For example, model A is aligned to model B, then this is
       undone, then model B moves. If the user hits redo now, model A will
       move to the way it was previously aligned, instead of being aligned to
-      model B's new pose. This is done to keep undo and redo inversible and
-      foreseeable.
+      model B's new pose. This is done to keep undo and redo invertible,
+      foreseeable and locally repeatable.
 
       ![Move proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo_2.0/undo/proposal_move.png)
 
@@ -99,15 +102,15 @@ executed in order.
 
     + **Delete entity**:
 
-      > See redo above.
+      > **Undo**: See redo above.
 
-      > See undo above.
+      > **Redo**: See undo above.
 
 * New commands are added to the end of a **list of undo commands**. Commands are
-undone beggining from the end of the list.
+undone starting from the end of the list.
 
 * Undone commands are added to the end of a **list of redo commands**. Commands
-are redone beginning from the end of the list. When the user executes a new
+are redone starting from the end of the list. When the user executes a new
 command, the redo list is cleared.
 
 * The user might try to undo something which isn't possible anymore, such as
