@@ -3,11 +3,11 @@
 ## Overview
 
 Users often wish to undo commands while editing their worlds in simulation. For
-example, a user moves a robot from one place to another in the world but
-afterwards wants to revert that command so the robot goes back to its previous
+example, a user moves a model from one place to another in the world but
+afterwards wants to revert that command so the model goes back to its previous
 position.
 
-![Simple case](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/simple_case.png)
+![Simple case](https://bytebucket.org/osrf/gazebo_design/raw/undo2/undo/simple_case.png)
 
 ### What would undo do?
 
@@ -23,47 +23,44 @@ plugin to drive between several cones.
 
 1. The user moves the vehicle to the beginning of the course (cmd).
 
-1. Then the vehicle starts being controlled by a plugin.
+1. The vehicle starts being controlled by a plugin.
 
 1. The vehicle hits a cone and the cone falls.
 
 If the user hits undo now, what should happen?
 
-![Plugins plus physics](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/cmd_plugin_physics.png)
+![Plugins plus physics](https://bytebucket.org/osrf/gazebo_design/raw/undo2/undo/cmd_plugin_physics.png)
 
 Different users might expect different behaviours from undo here. Such as:
 
-A. The vehicle returns to its previous position before the user moved it, and
-also the cone gets back standing up, as it was a side effect of moving the car.
+1. The **vehicle returns** to its previous position before the user moved it, and
+**also the cone** gets back standing up, as it was a side effect of moving the car.
 This would be effectively going back in time to the moment just before the user
 command. All models would retain their physical states, such as velocity.
 
-B. The vehicle returns to its previous position but all side-effects remain
+2. The vehicle returns to its previous position but all side-effects remain
 unchanged, so the cone remains fallen. The vehicle's physical states are reset.
-
-C. Similar to B, but the vehicle's physical states are kept the same as before
-the user command.
 
 ### Current proposal
 
-This document proposes option B for a few reasons:
+This document proposes option 2 for a few reasons:
 
-1. Undo will be treated as an **inverse command** instead of a **going back in
-time**. Going back in time might be introduced in a new feature where the user
+* **Undo** will be treated as an **inverse command** instead of a **going back in
+time**. Going back in time could be introduced as a new feature where the user
 saves "keyframes" of the simulation in case they want to go back to a specific
 configuration.
 
-1. This way, it is always clear to the user what undo will do, while going back
-in time might have unexpected effects, undoing other things that happened due to
-physics / plugins, which maybe not even interacted with the user command.
+* This way, it is always predictable what undo will do. Going back in time
+might have unexpected effects, undoing other things that happened due to
+physics / plugins, which maybe didn't even interact with the user command.
 
-1. Supporting multiple clients will be more natural, as one client undoing their
+* Supporting multiple clients will be more natural, as one client undoing their
 actions won't affect what the other client did, unless they are commanding the
 same model. In case they are acting on the same model, undo commands will be
 handled like other user commands are being handled at the moment: they are
 executed in order.
 
-1. Someone hits Ctrl+Z by mistake after 10 mins of simulation - if we go for the
+* Someone hits Ctrl+Z by mistake after 10 mins of simulation - if we go for the
 "time goes back" approach, suddenly everything changes.
 
 ## Specifications
@@ -72,30 +69,32 @@ executed in order.
 
     + **Translate / Rotate / Snap / Align ("move" commands)**:
 
-      > Undo restores the full pose before the command. For example, if the
+      > **Undo** restores the full pose before the command. For example, if the
       model tips over after being translated, it is translated back with the
       same orientation as before, not the new orientation.
 
-      > Redo restores the full pose the model got to the first time the model
+      > **Redo** restores the full pose the model got to the first time the model
       was moved. For example, model A is aligned to model B, then this is
       undone, then model B moves. If the user hits redo now, model A will
       move to the way it was previously aligned, instead of being aligned to
       model B's new pose. This is done to keep undo and redo inversible and
       foreseeable.
 
+      ![Move proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo2/undo/proposal_move.png)
+
     + **Scale**:
 
-      > Undo restores the scale before the command. Any other coupled effects such
+      > **Undo** restores the scale before the command. Any other coupled effects such
       as scaling inertias and mass should also be undone.
 
-      > Redo scales the same way the user did before.
+      > **Redo** scales the same way the user did before.
 
     + **Insert / paste entity**:
 
-      > Undo deletes the entity. If pasting a copied entity, the entity remains
+      > **Undo** deletes the entity. If pasting a copied entity, the entity remains
       in the copy stack ready to be pasted again.
 
-      > Redo spawns a new entity with the same name, but probably different ID.
+      > **Redo** spawns a new entity with the same name, but probably different ID.
       The spawned model should appear in the pose the previous model was at.
 
     + **Delete entity**:
@@ -104,11 +103,11 @@ executed in order.
 
       > See undo above.
 
-* New commands are added to the end of a **undo command list**. When undo is
-triggered, last added commands are executed first.
+* New commands are added to the end of a **list of undo commands**. Commands are
+undone beggining from the end of the list.
 
-* Undone commands are added to the end of a **redo command list**. When redo is
-triggered, last added commands are executed first. When the user executes a new
+* Undone commands are added to the end of a **list of redo commands**. Commands
+are redone beginning from the end of the list. When the user executes a new
 command, the redo list is cleared.
 
 * The user might try to undo something which isn't possible anymore, such as
@@ -122,11 +121,9 @@ moving something which a plugin deleted. Some possible outcomes are:
 `Shift+Ctrl+Z` hotkeys respectively. There will also be items under the `Edit`
 menu.
 
-* Nice to have: Long-pressing the undo / redo toolbar buttons displays a list
-of commands and the user can skip to an action in the middle.
-
-* Future goal: Notify plugins of undo / redo commands, maybe emitting events
-so each plugin can handle it as they want.
+* Nice to have: Long-pressing the undo / redo toolbar buttons displays the list
+of commands and the user can press any command to execute all commands leading
+to it.
 
 ## Architecture
 
@@ -134,11 +131,10 @@ so each plugin can handle it as they want.
 
 All information about user commands will be kept in the client side.
 
-
-There will be an abstract class `common::UserCmd`, with `Do` and `Undo`
+There will be an abstract class `gui::UserCmd`, with `Do` and `Undo`
 functions to be overridden:
 
-    /// \brief Base class which represents a user command, which can be "done"
+    /// \brief Base class which represents a user command that can be "done"
     /// and "undone".
     class UserCmd
     {
@@ -159,10 +155,12 @@ functions to be overridden:
 
 Each user command will inherit from this class and implement its own functions.
 Here's an example for a general command which changes a model's pose, such as
-`translate`, `rotate`, `snap` and `align`. For the server, there's no difference
-between a move command and an undo move command.
+`translate`, `rotate`, `snap` and `align`.
 
-    /// \brief A user command which alters the pose of an model in the world.
+For the server, there's no difference between a "move" command and an "undo
+move" command.
+
+    /// \brief A user command which alters the pose of a model in the world.
     class MoveModelCmd : public UserCmd
     {
       /// \brief Constructor
@@ -203,17 +201,17 @@ between a move command and an undo move command.
         // Optional: check after a while to see if succeeded
       };
 
-      /// \brief Model which was moved.
-      private: physics::VisualPtr _model;
+      /// \brief Name of model which was moved.
+      private: std::string modelName;
 
-      /// \brief Pose which the model has before being moved.
+      /// \brief Pose which the model had before being moved.
       private: ignition::math::Pose3d startPose;
 
       /// \brief Pose which the user has moved the model to.
       private: ignition::math::Pose3d endPose;
     };
 
-### User commands manager
+### User command manager
 
 The lists of commands will be handled by class `gui::UserCmdManager`.
 When the manager receives a new command, it creates a `UserCmd` object and
@@ -238,7 +236,7 @@ appends it to the end of the `undoUserCmds` vector.
 
 And when the user presses undo:
 
-    /// \brief Callback when an undo / redo request is received.
+    /// \brief Callback when an undo request is received.
     private: void UserCmdManager::OnUndo()
     {
       // Get the command
