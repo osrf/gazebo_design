@@ -50,7 +50,7 @@ this pose relative to the "mframe" frame. Therefore the final pose evaluates to 
 Link 1 also defines frames:
 
 1. A frame `l1frame` (for link1 frame) is defined relative to mframe. This is the local link frame. The full path for this frame is `/world/Robo/link1/l1frame`. Because the frame `l1frame` is defined using the relative path `../mframe`. This is because the 2 frames are defined under two different entities (model and link).
-1. Two joint attachment frames, 'l1j1frame' and `l1j2frame`, both relative to `l1frame`. In a simple world with a single Robo model instance, their full path would be '/world/Robo/link1/l1j1frame' and `/world/Robo/link1/l1j2frame`.
+1. Two joint attachment frames, `l1j1frame` and `l1j2frame`, both relative to `l1frame`. In a simple world with a single Robo model instance, their full path would be `/world/Robo/link1/l1j1frame` and `/world/Robo/link1/l1j2frame`.
 
 
 ~~~
