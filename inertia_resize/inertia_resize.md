@@ -1,21 +1,60 @@
-## Project: TITLE
+## Project: Graphically Resize Inertia
 ***Gazebo Design Document***
 
 ### Overview
 
-Just a few sentences that describes the purpose of this project. For example:
-Create a graphical tool to plot simulation data.
+When modeling a robot, one must choose inertial parameter values
+for each rigid body (or Link) in the system.
+These parameters include the mass, center of mass location,
+and the six components of the symmetric 3x3 moment of inertia matrix.
+While intuition can often be used to estimate the mass
+and location of the center of mass,
+it is very difficult to estimate inertia matrix parameters,
+which depend on both the mass and size of an object.
+
+For this reason, visualization of the moment of inertia was added to Gazebo in
+[pull request 745](https://bitbucket.org/osrf/gazebo/pull-requests/745)
+(see also [issue 203](https://bitbucket.org/osrf/gazebo/issues/203)).
+The mass `m` and principal moments of inertia `Ixx`, `Iyy`, and `Izz`
+are used to compute the dimensions of a box of uniform density
+with equivalent moment of inertia.
+For example, a box with dimensions `dx`, `dy`, and `dz`
+has the following moment of inertia components:
+
+~~~
+Ixx = m/12 (dy^2 + dz^2)
+Iyy = m/12 (dz^2 + dx^2)
+Izz = m/12 (dx^2 + dy^2)
+~~~
+
+The equations can be inverted to express the box dimensions
+as a function of mass and inertia components:
+
+~~~
+dx = sqrt(6/m (Izz + Iyy - Ixx))
+dy = sqrt(6/m (Ixx + Izz - Iyy))
+dz = sqrt(6/m (Iyy + Ixx - Izz))
+~~~
+
+These calculations are currently used to visualize the inertia of an object
+as a pink box.
+
+![inertia box of a sphere](inertia_box.png)
+
+While it is useful to visualize the inertia, it would be even more useful
+to be able to modify the inertia using interactive markers.
+Gazebo currently has the ability to resize simple shapes,
+though it does not currently affect the inertia.
 
 ### Requirements
 
-List the set of requirements that this project must fulfill.
-If the list gets too long, consider splitting the project into multiple small projects.
+1. When resizing a simple shape, scale the inertia values accordingly.
 
-For example:
+2. Allow the moment of inertia values to be modified by attaching
+interactive markers to the inertia visualization
+and scaled in a similar manner to the other resize tool.
 
-1. GUI should plot values over time, where values can be joint angles, poses of objects, forces on objects, diagnostic signals, and values from topics.
-1. Up to four values per plot is allowed.
-1. Multiple plots should be supported.
+![resizing a sphere](inertia_sphere.png)
 
 ### Architecture
 Include a system architecture diagram.
