@@ -54,7 +54,7 @@ though it does not currently affect the inertia.
 interactive markers to the inertia visualization
 and scaled in a similar manner to the other resize tool.
 
-![resizing a sphere](inertia_sphere.png)
+![resizing a sphere](inertia_resize.png)
 
 ### Architecture
 Include a system architecture diagram.
