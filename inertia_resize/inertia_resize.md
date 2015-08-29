@@ -17,7 +17,9 @@ For this reason, visualization of the moment of inertia was added to Gazebo in
 (see also [issue 203](https://bitbucket.org/osrf/gazebo/issues/203)).
 The mass `m` and principal moments of inertia `Ixx`, `Iyy`, and `Izz`
 are used to compute the dimensions of a box of uniform density
-with equivalent moment of inertia.
+with equivalent moment of inertia
+(see [issue 880](https://bitbucket.org/osrf/gazebo/issues/880)
+for a discussion of how to properly account for off-diagonal inertia terms).
 For example, a box with dimensions `dx`, `dy`, and `dz`
 has the following moment of inertia components:
 
@@ -40,6 +42,9 @@ These calculations are currently used to visualize the inertia of an object
 as a pink box.
 
 ![inertia box of a sphere](inertia_box.png)
+
+Inertia values for other shapes can be found on
+[wikipedia](https://en.wikipedia.org/wiki/List_of_moments_of_inertia).
 
 While it is useful to visualize the inertia, it would be even more useful
 to be able to modify the inertia using interactive markers.
