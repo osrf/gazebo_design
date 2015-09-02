@@ -15,11 +15,36 @@ which depend on both the mass and size of an object.
 For this reason, visualization of the moment of inertia was added to Gazebo in
 [pull request 745](https://bitbucket.org/osrf/gazebo/pull-requests/745)
 (see also [issue 203](https://bitbucket.org/osrf/gazebo/issues/203)).
-The mass `m` and principal moments of inertia `Ixx`, `Iyy`, and `Izz`
-are used to compute the dimensions of a box of uniform density
-with equivalent moment of inertia
-(see [issue 880](https://bitbucket.org/osrf/gazebo/issues/880)
-for a discussion of how to properly account for off-diagonal inertia terms).
+While it is useful to visualize the inertia, it would be even more useful
+to be able to modify the inertia using interactive markers.
+Gazebo currently has the ability to resize simple shapes;
+this should be extended to modify the inertia as well.
+
+### Requirements
+
+1. When resizing a simple shape, scale the inertia values accordingly.
+
+2. When modifying the mass or density of an object, there should be an option
+for scaling the moment of inertia according to the new values.
+Perhaps the moment of inertia could be "linked" to the
+mass / density parameters?
+
+3. Allow the moment of inertia values to be modified by attaching
+interactive markers to the inertia visualization
+and scaled in a similar manner to the other resize tool.
+This functionality will be available in the Model Editor.
+
+4. Properly account for off-diagonal inertia terms.
+This requires the ability to diagonalize a 3x3 symmetric
+positive definite matrix.
+(see [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
+
+### Box of equivalent inertia
+
+To visualize inertia, we utilize the concept of a box of equivalent inertia.
+Given the mass `m` and principal moments of inertia `Ixx`, `Iyy`, and `Izz`,
+the dimensions of a box of uniform density are computed that has
+an equivalent moment of inertia.
 For example, a box with dimensions `dx`, `dy`, and `dz`
 has the following moment of inertia components:
 
@@ -45,55 +70,54 @@ as a pink box.
 
 Inertia values for other shapes can be found on
 [wikipedia](https://en.wikipedia.org/wiki/List_of_moments_of_inertia).
+These could be used to derive alternative visualizations.
+The [ellipsoid](https://en.wikipedia.org/wiki/Moment_of_inertia#Inertia_ellipsoid),
+for example, is sometimes used for inertia visualization.
 
-While it is useful to visualize the inertia, it would be even more useful
-to be able to modify the inertia using interactive markers.
-Gazebo currently has the ability to resize simple shapes,
-though it does not currently affect the inertia.
+### Architecture
 
-### Requirements
+Modifying inertia properties graphically will consist of GUI elements
+that communicate changes in inertial parameters to the gazebo server
+over the `~/model/modify` topic.
+This is a proven interface, it simply needs tests to be added for
+inertia parameter modification.
 
-1. When resizing a simple shape, scale the inertia values accordingly.
+### Interfaces
 
-2. Allow the moment of inertia values to be modified by attaching
-interactive markers to the inertia visualization
-and scaled in a similar manner to the other resize tool.
+The graphical resizing of inertia can be implemented using
+the graphical markers used for the simple shape resize tool:
 
 ![resizing a sphere](inertia_resize.png)
 
-### Architecture
-Include a system architecture diagram.
-This should be a conceptual diagram that describes what components of Gazebo will be utilized or changed, the flow of information, new classes, etc.
-
-### Interfaces
-Describe any new interfaces or modifications to interfaces, where interfaces are protobuf messages, function API changes, SDF changes, and GUI changes. These changes can be notional.
-
-For example:
-Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
-
-Include any UX design drawings.
-
 ### Performance Considerations
-Will this project cause changes to performance?
-If so, describe how.
-One or more performance tests may be required.
+This should not affect simulation performance.
 
 ### Tests
-List and describe the tests that will be created. For example:
 
-1. Test: Plot View
-    1. case: Plot window should appear when signaled by QT.
-    1. case: Plot simulation time should produce correct results when save to CSV
-    1. case: Signalling a close should close the plotting window.
-1. Test: Multiple plots
-    1. case: Create two plots with identical data. Saved CSV data from each should be identical
+1. Change inertial parameters with `~/model/modify` for each physics engine.
+    1. Test inertial accessors: in world with no gravity,
+       modify mass, inertia components, and center-of-mass location
+       and verify that C++ accessors confirm the changes.
+    1. Test center-of-mass changes: in world with gravity,
+       spawn spheres with center of mass at geometric center.
+       Verify that they remain at rest.
+       Then move center of mass laterally and confirm that they roll around.
+    1. Test mass changes: in world with gravity,
+       create a balanced see-saw with stacked boxes
+       then increase the mass on one side and verify that it tips over.
+    1. Test moment of inertia changes: in world with gravity,
+       create swinging pendulum and measure its oscillation frequency.
+       Increase the moment of inertia and verify that its oscillation
+       frequency decreases.
+1. GUI tests:
+    1. TODO
 
 ### Pull Requests
-List and describe the pull requests that will be created to merge this project.
-Consider separating large refactoring operations from additions of new code.
-For example, the physics::SurfaceParams class was refactored in
-[pull request #891](https://bitbucket.org/osrf/gazebo/pull-request/891/refactor)
-so that a new FrictionPyramid class could be added in
-[pull request #935](https://bitbucket.org/osrf/gazebo/pull-request/935/create).
 
-Keep in mind that smaller, atomic pull requests are easier to review.
+* Create tests for modifying inertial parameters with `~/model/modify`
+  and fix any physics engines that don't support this properly.
+* Add methods for diagonalizing a symmetric positive definite matrix to ign-math
+  based on discussion in
+  [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
+* Correct inertia visualization to account for off-diagonal terms.
+* Add GUI features.
