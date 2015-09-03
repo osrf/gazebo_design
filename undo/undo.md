@@ -31,19 +31,20 @@ If the user hits undo now, what should happen?
 
 Different users might expect different behaviours from undo here. Such as:
 
-1. The **vehicle returns** to its previous position before the user moved it, and
+1. The **vehicle returns** to the position it was before the user command, and
 **also the cone** gets back standing up, as it was a side effect of moving the car.
 
-1. The **vehicle returns** to its previous position but all side-effects remain
-unchanged, so the cone remains fallen.
+1. The **vehicle returns** to the position before the command but all
+side-effects remain unchanged, so the cone remains fallen.
 
 1. Some users might expect that undo would **just restore the cone's pose**,
 since that's the last thing that "happened".
 
 ### Current proposal
 
-This document proposes option 1, because we imagine it might be more useful to
-users. If moving the car was a mistake, so were the side-effects of moving it.
+This document proposes option 1, because we imagine it might be more useful for
+users. If moving the car was a mistake, most likely so were the side-effects of
+moving it.
 
 ![Proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/proposal.png)
 
@@ -85,6 +86,21 @@ to tell other clients what's going on.
 
 * Time jumps back and forth as the user undoes / redoes.
 
+* There will be undo and redo buttons on the top toolbar, with `Ctrl+Z` and
+`Shift+Ctrl+Z` hotkeys respectively. There will also be items under the `Edit`
+menu.
+
+* New commands are added to the end of a **list of undo commands**. Commands are
+undone starting from the end of the list.
+
+* Undone commands are added to the end of a **list of redo commands**. Commands
+are redone starting from the end of the list. Whenever the user executes a new
+command, the redo list is cleared.
+
+* Nice to have: Long-pressing the undo / redo toolbar buttons displays the list
+of commands available, in order. The user can press any command to jump straight
+to it.
+
 * If a log is being recorded, it continues to be recorded normally even if undo
 has been triggered.
 
@@ -102,9 +118,9 @@ the jump in positions of models which they didn't expect to move.
     an object. The user moves the object and hits undo to move it back. The robot
     also moves back and so does the time. The plugin will likely go crazy.
 
-    Hopefully, users which want to use undo often while their plugins are running
-    will be willing to solve these problems from within the plugin, keeping
-    track of jumps in time.
+    With the current proposal, users which want to use undo often while their
+    plugins are running would have to solve these problems from within the
+    plugin, properly handling any jumps in time.
 
 ## Architecture
 
@@ -117,9 +133,9 @@ should be sufficient to fully restore all physics states).
 
 Therefore, each time a command is executed, a keyframe is added to the undo
 queue. This has the potential of decreasing performance and making user
-interaction laggy on slower computers. We will probably need to limit the
-number of keyframes stored (maximum number of undo steps). Perhaps also give
-the user an option to turn off the undo feature.
+interaction laggy on slower computers, especially for very complex scenes. We
+will probably need to limit the number of keyframes stored (maximum number of
+undo steps). Perhaps also give the user an option to turn off the undo feature.
 
 > **Obs:** "Keyframe" functionality sounds similar to what is currently performed by the
 `WorldState` class. To my best understanding so far, `WorldState` handles
@@ -151,29 +167,22 @@ couple of functions might be added to `physics::World` as follows:
 
 ### User commands
 
-Some information about user commands will be kept in the server side, and thus
-be shared among all clients, while some information will be client-specific.
-
 #### Server side
 
-The structure kept server-side will keep information about the world state
-(keyframes).
+Although user commands come from clients, due to the need to store lots of data
+about the world state, user commands will be managed mostly by the server side.
 
 The server knows:
 
-* The state of the world before the command was executed.
+* World states (keyframes) to be used by Undo and Redo.
 
-* If undo is executed, store the state of the world the moment undo was
-executed so it can be used by redo.
+* A unique ID for each command.
 
-* A unique ID for the command.
+* Lists of commands to be done and undone, in order.
 
-* A descriptive name for the command, such as "Translate unit_box" or
-"Delete unit_box".
-
-Add a class for user commands, `physics::UserCmd`, with ``Undo` and `Redo`
-functions. An object of this class will be created for each command executed
-by the user.
+There will be a class for user commands, `physics::UserCmd`, with ``Undo` and
+`Redo` functions. An object of this class will be created for each command
+executed by the user.
 
     /// \brief Class which represents a user command, which can be "undone"
     /// and "redone".
@@ -198,7 +207,7 @@ by the user.
       /// \brief Set the world state to the one just before the user command.
       public: virtual void Undo()
       {
-        // Record / override the current state for redo
+        // Record / override the state for redo
         this->endState = this->world->Keyframe();
 
         // Set the world state
@@ -217,7 +226,14 @@ by the user.
       /// \return Unique ID
       public: std::string ID()
       {
-        return this->ID
+        return this->ID;
+      };
+
+      /// \brief Return this command's description
+      /// \return Description
+      public: std::string Description()
+      {
+        return this->description;
       };
 
       /// \brief Pointer to the world
@@ -240,7 +256,7 @@ by the user.
       private: std::string description;
     };
 
-Whenever the user performs a command, the **client publishes a `UserCmd`**
+Whenever the user performs a command via the GUI, the **client publishes a `UserCmd`**
 message. For example:
 
     package gazebo.msgs;
@@ -258,11 +274,10 @@ message. For example:
       required string description = 2;
     }
 
-On the server side, a `physics::UserCmdManager` class will subscribe to
-`UserCmd` messages. It will keep two lists of `UserCmd` objects: one for undo,
-another for redo.
+A `physics::UserCmdManager` class will subscribe to `UserCmd` messages. It will
+keep two lists of `UserCmd` objects: one for undo, another for redo.
 
-When the server receives a new command message, it creates a `UserCmd` object and
+When the manager receives a new command message, it creates a `UserCmd` object and
 appends it to the end of the `undoUserCmds` vector.
 
     /// \brief Callback when a UserCmd message is received.
@@ -283,8 +298,8 @@ appends it to the end of the `undoUserCmds` vector.
     };
 
 The server does / undoes a command when it receives a message from a client with
-the command's unique ID and whether it should be done or undone. The message
-will look like this:
+the command's unique ID and whether it should be done or undone. Such message
+would look like this:
 
     package gazebo.msgs;
 
@@ -338,8 +353,13 @@ And the subscriber callback:
 
 #### Client side
 
+The client will keep track of user commands and requests to undo / redo them.
 
-
+It would be nice to have feedback from the server about which commands are
+still available to be undone or redone. Whenever the user command manager in the
+server side executes a command, it could send feedback to the user with the
+current state of the undo and redo lists. The client could then display the
+command's description on a list for the user.
 
 
 
