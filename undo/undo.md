@@ -3,8 +3,8 @@
 ## Overview
 
 Users often wish to undo commands while editing their worlds in simulation. For
-example, a user moves a robot from one place to another in the world but
-afterwards wants to revert that command so the robot goes back to its previous
+example, a user moves a model from one place to another in the world but
+afterwards wants to revert that command so the model goes back to its previous
 position.
 
 ![Simple case](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/simple_case.png)
@@ -42,7 +42,7 @@ since that's the last thing that "happened".
 
 ### Current proposal
 
-This document proposes option 1, because we imagine it might be more useful to i
+This document proposes option 1, because we imagine it might be more useful to
 users. If moving the car was a mistake, so were the side-effects of moving it.
 
 ![Proposal](https://bytebucket.org/osrf/gazebo_design/raw/undo/undo/proposal.png)
@@ -56,7 +56,7 @@ might have consequences unforeseen by the user, because actions which had nothin
 to do with their command, such as other robots moving in the scene, will also
 be undone.
 
-* **Redo** will jump forward to the moment the user hit undo. This way, the
+* **Redo** will jump forward to the moment the user last hit undo. This way, the
 user can "undo the undo" if they wish.
 
 * Things might get confusing for multiple clients, as going back in time will
@@ -98,12 +98,13 @@ has been triggered.
 * Plugins which make use of time might be affected by the jump back in time and
 the jump in positions of models which they didn't expect to move.
 
-For example, a plugin is using a custom PID control to move a robot arm to grasp
-an object. The user moves the object and hits undo to move it back. The robot
-moves back and so does the time. The plugin will likely go crazy.
+    For example, a plugin is using a custom PID control to move a robot arm to grasp
+    an object. The user moves the object and hits undo to move it back. The robot
+    also moves back and so does the time. The plugin will likely go crazy.
 
-Hopefully, users which want to use undo often while their plugins are running
-will be willing to solve these problems from within the plugin.
+    Hopefully, users which want to use undo often while their plugins are running
+    will be willing to solve these problems from within the plugin, keeping
+    track of jumps in time.
 
 ## Architecture
 
@@ -116,11 +117,11 @@ should be sufficient to fully restore all physics states).
 
 Therefore, each time a command is executed, a keyframe is added to the undo
 queue. This has the potential of decreasing performance and making user
-interaction laggy on smaller computers. We will probably need to limit the
+interaction laggy on slower computers. We will probably need to limit the
 number of keyframes stored (maximum number of undo steps). Perhaps also give
 the user an option to turn off the undo feature.
 
-> "Keyframe" functionality sounds similar to what is currently performed by the
+> **Obs:** "Keyframe" functionality sounds similar to what is currently performed by the
 `WorldState` class. To my best understanding so far, `WorldState` handles
 incremental changes exclusively, so a state only describes things that have
 changed since the previous time step. During the implementation, it might make
@@ -128,7 +129,7 @@ more sense to extend the `WorldState` class to handle complete sets of
 information instead of introducing the concept of "keyframes".
 
 The world class keeps a pointer to the whole SDF description of the scene. A
-couple of functions such as follows might be added to `physics::World`.
+couple of functions might be added to `physics::World` as follows:
 
     /// \brief Gets an SDF element with the complete description of the world.
     /// \return The complete SDF for the current state of the world.
@@ -171,7 +172,8 @@ executed so it can be used by redo.
 "Delete unit_box".
 
 Add a class for user commands, `physics::UserCmd`, with ``Undo` and `Redo`
-functions. Each command executed will create an object of this class:
+functions. An object of this class will be created for each command executed
+by the user.
 
     /// \brief Class which represents a user command, which can be "undone"
     /// and "redone".
@@ -180,6 +182,8 @@ functions. Each command executed will create an object of this class:
       /// \brief Constructor
       /// \param[in] _ID Unique ID for this command
       /// \param[in] _world Pointer to the world
+      /// \param[in] _description Description for the command, such as
+      /// "Rotate box", "Delete sphere", etc.
       public: UserCmd(std::string _ID,
                       physics::WorldPtr _world,
                       const std::string &_description)
@@ -189,7 +193,7 @@ functions. Each command executed will create an object of this class:
       };
 
       /// \brief Destructor
-      public: virtual ~UserCmd() {};
+      public: virtual ~UserCmd() = default;
 
       /// \brief Set the world state to the one just before the user command.
       public: virtual void Undo()
@@ -205,8 +209,6 @@ functions. Each command executed will create an object of this class:
       /// called.
       public: virtual void Redo()
       {
-        // We don't update startState even if some time has passed since undo...?
-
         // Set the world state
         this->world->SetKeyframe(this->endState);
       }
@@ -265,25 +267,24 @@ appends it to the end of the `undoUserCmds` vector.
 
     /// \brief Callback when a UserCmd message is received.
     /// \param[in] _msg Incoming message
-    private: void UserCmdManager::OnMoveEntityCmd(msgs::MoveEntityCmdPtr _msg)
+    private: void UserCmdManager::OnUserCmd(msgs::UserCmdPtr _msg)
     {
       EntityPtr entity = this->world->GetEntity(_msg->name());
-      MoveEntityCmd cmd = new MoveEntityCmd(msgs::Convert(
-          _msg->time()),
+      UserCmd cmd = new UserCmd(
+          _msg->id(),
           this->world,
-          this->world->Keyframe,
-          entity,
-          _msg->end_pose());
+          _msg->description());
 
       // Add it to undo list
       this->userUndoCmds.push_back(cmd);
 
       // Clear redo list
+      this->userRedoCmds.clear();
     };
 
-The server does / undoes a command when it receives a message with the command's
-unique ID and whether it should be done or undone. The message will look like
-this:
+The server does / undoes a command when it receives a message from a client with
+the command's unique ID and whether it should be done or undone. The message
+will look like this:
 
     package gazebo.msgs;
 
@@ -313,20 +314,20 @@ And the subscriber callback:
       {
         // Check if msg id is found in the undo vector
 
-        // Maybe check it is indeed the last command by that gzclient in the
-        // list?
+        // Maybe sanity check that it is indeed the last command by that
+        // gzclient in the list?
 
         // Get the command
-        UserCmd *cmd = this->userRedoCmds.back();
+        UserCmd *cmd = this->userUndoCmds.back();
 
-        // Do it
-        cmd->Do();
+        // Undo it
+        cmd->Undo();
 
-        // Remove from redo list
-        this->userRedoCmds.pop_back();
+        // Remove from undo list
+        this->userUndoCmds.pop_back();
 
-        // Add command to undo list
-        this->userUndoCmds.push_back(cmd);
+        // Add command to redo list
+        this->userRedoCmds.push_back(cmd);
       }
       // Redo
       else
@@ -341,20 +342,10 @@ And the subscriber callback:
 
 
 
-### Command queue
 
 
 
 
-
-Since all user commands inherit from the same class, they can be kept in two
-queues, one for **undo** and another for **redo**. The queues are
-
-
-### Open questions
-
-1. Someone hits Ctrl+Z by mistake after 10 mins of simulation and suddenly
-everything changes...?
 
 
 
