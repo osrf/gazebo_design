@@ -37,7 +37,7 @@ This functionality will be available in the Model Editor.
 4. Properly account for off-diagonal inertia terms.
 This requires the ability to diagonalize a 3x3 symmetric
 positive definite matrix.
-(see [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
+(see [issue 880](https://bitbucket.org/osrf/gazebo/issues/880)).
 
 ### Box of equivalent inertia
 
