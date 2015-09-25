@@ -22,17 +22,20 @@ this should be extended to modify the inertia as well.
 
 ### Requirements
 
-1. When resizing a simple shape, scale the inertia values accordingly.
+1. When resizing a simple shape in simulation mode,
+scale the inertia values accordingly.
+Note that this was implemented for resizing in the Model Editor in
+[gazebo pull request 1836](https://bitbucket.org/osrf/gazebo/pull-request/1836).
 
-2. When modifying the mass or density of an object, there should be an option
-for scaling the moment of inertia according to the new values.
+2. When modifying the mass or density of an object in the Model Editor,
+there should be an option for scaling the moment of inertia
+according to the new values.
 Perhaps the moment of inertia could be "linked" to the
 mass / density parameters?
 
-3. Allow the moment of inertia values to be modified by attaching
-interactive markers to the inertia visualization
+3. Allow the moment of inertia values to be modified in the Model Editor
+by attaching interactive markers to the inertia visualization
 and scaled in a similar manner to the other resize tool.
-This functionality will be available in the Model Editor.
 
 4. Properly account for off-diagonal inertia terms.
 This requires the ability to diagonalize a 3x3 symmetric
@@ -85,7 +88,8 @@ inertia parameter modification.
 ### Interfaces
 
 The graphical resizing of inertia can be implemented using
-the graphical markers used for the simple shape resize tool:
+the graphical markers used for the simple shape resize tool,
+perhaps with pink arrow heads:
 
 ![resizing a sphere](inertia_resize.png)
 
