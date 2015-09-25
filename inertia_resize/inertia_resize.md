@@ -114,8 +114,16 @@ This should not affect simulation performance.
        create swinging pendulum and measure its oscillation frequency.
        Increase the moment of inertia and verify that its oscillation
        frequency decreases.
-1. GUI tests:
-    1. TODO
+1. GUI tests in Simulation:
+    1. Check that the visuals are updated after a `~/model/modify`
+       message is published.
+    1. Check that the left panel is updated after a `~/model/modify`
+       message is published.
+1. Model Editor tests:
+    1. Check that values in the link inspector are updated when
+       the user resizes the inertia in the 3D view.
+    1. Check that inertia visualization (not yet present in the editor)
+       updates correctly when the inertia is changed in the link inspector.
 
 ### Pull Requests
 
@@ -125,4 +133,4 @@ This should not affect simulation performance.
   based on discussion in
   [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
 * Correct inertia visualization to account for off-diagonal terms.
-* Add GUI features.
+* Add GUI tests and features.
