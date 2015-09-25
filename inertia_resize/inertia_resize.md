@@ -102,13 +102,14 @@ This should not affect simulation performance.
     1. Test inertial accessors: in world with no gravity,
        modify mass, inertia components, and center-of-mass location
        and verify that C++ accessors confirm the changes.
-    1. Test center-of-mass changes: in world with gravity,
-       spawn spheres with center of mass at geometric center.
-       Verify that they remain at rest.
-       Then move center of mass laterally and confirm that they roll around.
     1. Test mass changes: in world with gravity,
-       create a balanced see-saw with stacked boxes
+       create a balanced seesaw with stacked boxes
        then increase the mass on one side and verify that it tips over.
+    1. Test center-of-mass changes: in world with gravity,
+       create a balanced seesaw with stacked boxes
+       then move the center of mass of the seesaw plank
+       towards one of the balanced boxes.
+       Verify that it tips over.
     1. Test moment of inertia changes: in world with gravity,
        create swinging pendulum and measure its oscillation frequency.
        Increase the moment of inertia and verify that its oscillation
