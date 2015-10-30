@@ -22,7 +22,7 @@ Here is a high level design of what this tool could look like. It is written
  for an implementation inside Gazebo, but the UI can also apply to an external
  application.
 
-[plotting v3](./Plotting_v3.pdf)
+[plotting v3](https://bitbucket.org/osrf/gazebo_design/src/db9782356501878b0df60b396f9d54860cc7d28c/time_series_2d_plots/Plotting_v3.pdf?at=time_series_2d_plots&fileviewer=file-view-default)
 
 ### Gazebo transport
 
