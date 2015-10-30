@@ -22,7 +22,7 @@ Here is a high level design of what this tool could look like. It is written
  for an implementation inside Gazebo, but the UI can also apply to an external
  application.
 
-![plotting v3](Plotting_v3.pdf)
+[plotting v3](Plotting_v3.pdf)
 
 ### Gazebo transport
 
@@ -31,6 +31,10 @@ The Gazebo transport library allows the gzclient to interact with the
  called topics. Messages contain numerical values (and sometimes time stamps) that
  can be plotted. Plugins can also create new message types and topics.
 
+
+For example, the plotting system could create a "scene_info" request, subscribe
+ to the '~scene' topic to get the the list of all rigid bodies, and allow the user
+ to plot the position, rotation of any rigid body link in the system.
 
 ### Notes about GazeboJs
 
