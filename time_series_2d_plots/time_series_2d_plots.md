@@ -22,7 +22,7 @@ Here is a high level design of what this tool could look like. It is written
  for an implementation inside Gazebo, but the UI can also apply to an external
  application.
 
-[plotting v3](Plotting_v3.pdf)
+[plotting v3](./Plotting_v3.pdf)
 
 ### Gazebo transport
 
