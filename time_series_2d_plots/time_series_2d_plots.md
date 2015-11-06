@@ -31,6 +31,11 @@ The Gazebo transport library allows the gzclient to interact with the
  called topics. Messages contain numerical values (and sometimes time stamps) that
  can be plotted. Plugins can also create new message types and topics.
 
+In Gazebo 6 and 7, the transport library is in the Gazebo source tree. Gazebo 8
+ will switch to the [ign-transport](https://bitbucket.org/ignitionrobotics/ign-transport).
+ This project targets the currently used transport library in Gazebo and GazeboJS.
+ In Gazebo 7, both transports are available, but ign-transport does not carry the data
+ used for plotting.
 
 For example, the plotting system could create a "scene_info" request, subscribe
  to the '~scene' topic to get the the list of all rigid bodies, and allow the user
@@ -41,6 +46,6 @@ For example, the plotting system could create a "scene_info" request, subscribe
 There are multiple graph libraries for JavaScript (d3, flot, sigmajs ...) that
  can be used to make a graph utility for Gazebo. The graphing feature can than
  be added to GZweb, and also packaged as a stand alone application with a
- toolkit like electron (https://github.com/atom/electron).
+ toolkit like [electron](https://github.com/atom/electron).
 
 GazeboJs cannot access new types of messages that are created by Plugins.
