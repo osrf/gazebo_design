@@ -37,9 +37,8 @@ In Gazebo 6 and 7, the transport library is in the Gazebo source tree. Gazebo 8
  In Gazebo 7, both transports are available, but ign-transport does not carry the data
  used for plotting.
 
-For example, the plotting system could create a `scene_info` request, subscribe
- to the `~/scene` topic to get the the list of all rigid bodies, and allow the user
- to plot the position, rotation of any rigid body link in the system.
+For example, the plotting system could subscribe to the `~/pose/info` topic to get
+ entity pose data over time.
 
 ### Notes about GazeboJs
 
