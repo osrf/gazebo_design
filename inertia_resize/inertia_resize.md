@@ -85,6 +85,43 @@ over the `~/model/modify` topic.
 This is a proven interface, it simply needs tests to be added for
 inertia parameter modification.
 
+Additionally, the `gazebo::physics::Inertial` class will be moved
+to the Ignition Math library.
+This class stores and allows computation about the mass,
+moment of inertia, and center of mass location.
+To address [issue 880](https://bitbucket.org/osrf/gazebo/issues/880),
+an additional subclass `MassMatrix3` will be defined
+that contains the scalar mass and symmetric moment of inertia
+matrix components.
+It will provide methods for diagonalizing the matrix to
+determine the principal moments of inertia
+and identify the orientation of the principal axes,
+based on [this paper](http://arxiv.org/abs/1306.6291v4).
+
+~~~
+class MassMarix3<T>
+{
+  // Scalar mass
+  private: T mass;
+  // Diagonal components of moment of inertia matrix
+  private: Vector3<T> Ixxyyzz;
+  // Off-diagonal components of moment of inertia matrix
+  private: Vector3<T> Ixyxzyz;
+};
+~~~
+
+~~~
+class Inertial<T>
+{
+  // Pose offset from link frame to inertial frame.
+  // The inertial frame position specifies the center of mass location
+  // and the orientation is used to interpret the inertia matrix.
+  private: Pose3<T> pose;
+  // Mass and moment of inertia matrix expressed in inertial frame.
+  private: MassMatrix3<T> massMatrix;
+};
+~~~
+
 ### Interfaces
 
 The graphical resizing of inertia can be implemented using
@@ -93,8 +130,20 @@ perhaps with pink arrow heads:
 
 ![resizing a sphere](inertia_resize.png)
 
+The `MassMatrix3` class will provide functions for converting
+between the mass and moment of inertia matrix and the size
+of an equivalent box of uniform density.
+This will allow the GUI tools to perform these calculations
+without re-implementing the mathematical solution.
+
 ### Performance Considerations
-This should not affect simulation performance.
+
+The computational performance of the matrix diagonalization method
+can be evaluated, but it is not expected to be used frequently
+in a computational loop, so it should not affect performance.
+If the inertia matrix has no off-diagonal terms, then it is
+already diagonalized and the computation can be skipped,
+so this should be checked by the algorithm.
 
 ### Tests
 
@@ -114,6 +163,11 @@ This should not affect simulation performance.
        create swinging pendulum and measure its oscillation frequency.
        Increase the moment of inertia and verify that its oscillation
        frequency decreases.
+1. Unit tests for MassMatrix3 and Inertial classes
+    1. Test Accessors and Modifiers.
+    1. Test matrix diagonalization with diagonal matrices.
+    1. Test matrix diagonalization with non-diagonal matrices.
+    1. Test conversion functions for equivalent box of uniform density.
 1. GUI tests in Simulation:
     1. Check that the visuals are updated after a `~/model/modify`
        message is published.
@@ -129,6 +183,8 @@ This should not affect simulation performance.
 
 * Create tests for modifying inertial parameters with `~/model/modify`
   and fix any physics engines that don't support this properly.
+  * [pull request 1909](https://bitbucket.org/osrf/gazebo/pull-requests/1909)
+  * [pull request 1984](https://bitbucket.org/osrf/gazebo/pull-requests/1984)
 * Add methods for diagonalizing a symmetric positive definite matrix to ign-math
   based on discussion in
   [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
