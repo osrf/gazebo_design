@@ -188,5 +188,7 @@ so this should be checked by the algorithm.
 * Add methods for diagonalizing a symmetric positive definite matrix to ign-math
   based on discussion in
   [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
+  * [ign-math pull request 77](https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/77)
+  * [ign-math pull request 79](https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/79)
 * Correct inertia visualization to account for off-diagonal terms.
 * Add GUI tests and features.
