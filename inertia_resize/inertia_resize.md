@@ -85,7 +85,8 @@ over the `~/model/modify` topic.
 This is a proven interface, it simply needs tests to be added for
 inertia parameter modification.
 
-Additionally, the `gazebo::physics::Inertial` class will be moved
+Additionally, the mathematical operators in
+the `gazebo::physics::Inertial` class will be moved
 to the Ignition Math library.
 This class stores and allows computation about the mass,
 moment of inertia, and center of mass location.
