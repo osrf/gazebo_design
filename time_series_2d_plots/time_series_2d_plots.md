@@ -36,6 +36,7 @@ Only numerical fields in messages can be plotted
 
 **Model**
   - pose
+
   - **Link**
     - pose
     - angular acceleration
@@ -93,7 +94,7 @@ Expanding the `time` field will reveal more fields:
 
 ~~~
 gazebo.msgs.PosesStamped
-  + time
+  - time
       - sec
       - nsec
   + pose
