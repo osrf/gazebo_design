@@ -67,7 +67,7 @@ Only numerical fields in messages can be plotted
 
   - wall time
 
-  - iteraions
+  - iterations
 
   - real time factor
 
@@ -128,7 +128,9 @@ gazebo.msgs.PosesStamped
 ~~~
 
 Clicking on an index number within the [] bracket will highlight it and expose
-the fields of the `gazebo.msgs.Pose` message.
+the fields of the `gazebo.msgs.Pose` message. The `name` field could be
+filled with its string value while the numerical fields could be dragged
+over to the plotting area to begin the plot.
 
 **Model**
 
