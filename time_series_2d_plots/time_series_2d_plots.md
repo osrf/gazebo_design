@@ -35,6 +35,7 @@ tool.
 Only numerical fields in messages can be plotted
 
 **Model**
+
   - pose
 
   - **Link**
@@ -61,9 +62,13 @@ Only numerical fields in messages can be plotted
     - ...
 
 **Simulation**
+
   - sim time
+
   - wall time
+
   - iteraions
+
   - real time factor
 
 The three different categories of data shown above correspond to the those in
