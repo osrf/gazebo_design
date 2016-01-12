@@ -162,23 +162,23 @@ message structure:
 ~~~
 gazebo.msgs.JointState
   required string name
-  optional unit32 id
+  optional uint32 id
   optional Pose pose
-  optional Pose angle
+  repeated double angle
 
 gazebo.msgs.CollisionState
   required string name
-  optional unit32 id
+  optional uint32 id
   optional Pose pose
 
 gazebo.msgs.VisualState
   required string name
-  optional unit32 id
+  optional uint32 id
   optional Pose pose
 
 gazebo.msgs.LinkState
   required string name
-  optional unit32 id
+  optional uint32 id
   optional Pose pose
   optional Pose velocity
   optional Pose acceleration
@@ -188,7 +188,7 @@ gazebo.msgs.LinkState
 
 gazebo.msgs.ModelState
   required string name
-  optional unit32 id
+  optional uint32 id
   optional Pose pose
   repeated LinkState link
   repeated JointState joint
