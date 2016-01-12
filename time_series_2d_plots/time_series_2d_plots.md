@@ -44,7 +44,7 @@ Only numerical fields in messages can be plotted
     - angular acceleration
     - anular velocity
     - linear acceleration
-    - linear veloicty
+    - linear velocity
     - force
     - torque
 
