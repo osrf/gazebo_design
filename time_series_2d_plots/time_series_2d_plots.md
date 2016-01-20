@@ -43,7 +43,7 @@ Only numerical fields in messages can be plotted
   - **Link**
     - pose
     - angular acceleration
-    - anular velocity
+    - angular velocity
     - linear acceleration
     - linear velocity
     - force
