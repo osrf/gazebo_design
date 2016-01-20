@@ -9,12 +9,13 @@ Gazebo simulations can generate a lot of useful data. It would be useful to be
 
 ### Requirements
 
-1. Be able to identify useful numerical data source and make them available
+1. Identify useful numerical data source and make them available
  for plotting.
-1. Be able to configure plots (min, max, colors, sampling rate, data buffer size).
-1. Be able to save the plot and or the data
-1. (Nice to have) Be able to specify derived values (like combining
- X, Y ,Z positions to plot a distance).
+1. Configure plots (min, max, colors, sampling rate, data buffer size).
+1. Save the plot and or the data
+1. (Nice to have) Specify derived values (like combining X, Y, Z positions to plot a distance).
+1. Compare plots between runs
+1. Compute difference in value between two points on a plot
 
 ### User Interaction
 
@@ -59,6 +60,7 @@ Only numerical fields in messages can be plotted
     - angle
     - force
     - torque
+    - velocity
 
   - **Model**
     - ...
