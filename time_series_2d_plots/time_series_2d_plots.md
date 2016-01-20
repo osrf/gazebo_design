@@ -49,6 +49,13 @@ Only numerical fields in messages can be plotted
     - force
     - torque
 
+    - **Inertial**
+        - pose
+        - angular acceleration
+        - angular velocity
+        - linear acceleration
+        - linear velocity
+
     - **Collision**
         - pose
 
