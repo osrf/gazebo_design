@@ -167,7 +167,7 @@ model "unit_box_0" and the linear velocity of "unit_cylinder_0"). A single
 message will be sent for each custom update requested in each simulation update.
  Each request will be received through ts own topic.
 
-We can use [this message definition](https://bitbucket.org/osrf/gazebo_design/src/f864f029fdd15347e6bbb4e2e46c6ce84e56a9ec/physics_params/physics_params.md?at=default&fileviewer=file-view-default) for specifying the filters used in
+We can use the `Param` message definition designed [here]](https://bitbucket.org/osrf/gazebo_design/src/f864f029fdd15347e6bbb4e2e46c6ce84e56a9ec/physics_params/physics_params.md?at=default&fileviewer=file-view-default) for specifying the filters used in
 the services requests, as well as for the messages containing the custom
 updates.
 
