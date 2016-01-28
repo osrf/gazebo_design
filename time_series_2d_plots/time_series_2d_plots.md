@@ -198,11 +198,8 @@ be supported.
 The introspection manager will also provide the following Ignition Transport
 services targeted to the data consumers:
 
-~~~
-/introspection/<manager_id>/items
-~~~
-
-  Service that will return the list of available items and their types.
+* `/introspection/<manager_id>/items` : Service that will return the list of
+available items and their types.
 
 ~~~
 /introspection/<manager_id>/set_filter
