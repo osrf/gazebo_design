@@ -200,28 +200,14 @@ services targeted to the data consumers:
 
 * `/introspection/<manager_id>/items` : Service that will return the list of
 available items and their types.
-
-~~~
-/introspection/<manager_id>/set_filter
-~~~
-
-    Service that will be used by a client to set a new filter containing a list of
-    items of interest. This service will create a new topic and the items will be
-    periodically sent through that channel. We can also use this service for
-    updating an existing filter.
-
-~~~
-/introspection/<manager_id>/remove_fiter
-~~~
-
-    Service that will allow a client to remove a filter when not needed anymore.
-
-~~~
-/introspection/<manager_id>/get_filter
-~~~
-
-    Service that will allow a client to get the list of items contained in a
-    previously created filter.
+* `/introspection/<manager_id>/set_filter` : Service that will be used by a
+client to set a new filter containing a list of items of interest. This service
+will create a new topic and the items will be periodically sent through that
+channel. We can also use this service for updating an existing filter.
+* `/introspection/<manager_id>/remove_fiter` : Service that will allow a client
+to remove a filter when not needed anymore.
+* `/introspection/<manager_id>/get_filter` : Service that will allow a client to
+get the list of items contained in a previously created filter.
 
 The plotting tool will query the introspection manager for knowing the list of
 items available and displaying the list to our users.
