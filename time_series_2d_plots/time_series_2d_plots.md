@@ -186,7 +186,7 @@ register a new item:
 
   auto introspection = gazebo::utils::Introspection::Instance();
 
-  introspection.Register(newModel->GetName() + "::pose",
+  introspection->Register(newModel->GetName() + "::pose",
       std::bind(&Entity::IntrospectionUpdatePose, newModel));
 ~~~
 
