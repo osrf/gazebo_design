@@ -84,8 +84,7 @@ Only numerical fields in messages can be plotted
 
 The three different categories of data shown above correspond to the those in
 the left panel of the plotting tool as shown in the
-[plotting v3](https://bitbucket.org/osrf/gazebo_design/raw/db9782356501878b0df60b396f9d54860cc7d28c/time_series_2d_plots/Plotting_v3.pdf)
-design document.
+[plotting design document](https://bitbucket.org/osrf/gazebo_design/raw/default/time_series_2d_plots/plotting-v5.pdf).
 
 ### Implementation
 
@@ -116,6 +115,11 @@ gazebo.msgs.PosesStamped
   + pose
 ~~~
 
+The `time` field consists of two fields inside, seconds and nanoseconds.
+We can optionally provide conversions for specific messages like this and
+create a single floating point value for plotting.
+
+
 Since `pose` is a repeated field in the `gazebo.msgs.PosesStamped` message,
 expanding the pose field will show an array of elements in `pose`.
 
@@ -123,24 +127,24 @@ expanding the pose field will show an array of elements in `pose`.
 gazebo.msgs.PosesStamped
   + time
   - pose
-      - [0] [1] [2] [3] [4] [5]
-      - name
-      - id
-      - position
-        - x
-        - y
-        - z
-      - orientation
-        - x
-        - y
-        - z
-        - w
+      - [name01]
+          - name
+          - id
+          - position
+            - x
+            - y
+            - z
+          - orientation
+            - x
+            - y
+            - z
+            - w
+      - [name02]
+          - ...
 ~~~
 
-Clicking on an index number within the [x] bracket will highlight it and expose
-the fields of the `gazebo.msgs.Pose` message. The string value of the `name`
-field could be displayed next to the label but it will not be plottable. The
-numerical fields can be dragged over to the plotting area to begin plotting.
+Similar to the `time` field, the orientation field could also be converted from
+Quaternions to Euler angles for plotting.
 
 **Model**
 
