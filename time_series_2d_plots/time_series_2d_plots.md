@@ -214,7 +214,7 @@ managerID where the filter should be created and the list of items of interest.
 The function returns the ID of the new filter, as well as the topic where the
 updates will be received. Note that this is a blocking function.
 
-* bool NewFilter(const std::string &_managerId,
+* `bool NewFilter(const std::string &_managerId,
                  const std::set< std::string> &_newItems,
                  const std::function <void(
                      const std::string &_filterId,
@@ -253,18 +253,18 @@ the proposed approach:
 
 `data://world/default/model/unit_box_0/link/link`.
 
-The syntax change follows the rules described in [URI][https://en.wikipedia.org/wiki/Uniform_Resource_Identifier], where we have three parts:
+The syntax of follows the rules described in [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier):
 
-* Scheme: We can use different schemes to show the nature of the entity that we
-are describing. `data` is our first example but we can create more as needed.
+* Scheme: Shows the nature of the entity that we are describing. `data` is our first example but we can create more as needed.
 
 * Path: We'll use the `path` to express the hierarchy. The path will consist on
 a secuence of pairs separated by `/`. The first element of the pair is a keyword
 that declares the type of the entity. `world`, `link`, `joint` are some
 examples. The second element of the pair is the entity name. `default`,
-`model_0`, `joint_0` are some examples.
+`model_0`, `joint_0` are some examples. The first pair should always be
+`world/<world_name>/`.
 
-* Query: Optional section that can be used to express properties of one entity.
+* Query: Optional part that can be used to express properties of one entity.
 `?p=pose`, `?p=linear_velocity`, `?p=linear_acceleration` are some examples.
 
 By combining all these elements we can express an entity preserving its
