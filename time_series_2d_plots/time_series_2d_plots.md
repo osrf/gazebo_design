@@ -164,68 +164,113 @@ We'll write a new singleton-based IntrospectionManager class that will expose
 the following C++ interface to be used by the data providers:
 
 ~~~
-bool Register(const std::string &_item, const std::function <bool (gazebo::msgs::GzAny &_msg)> &_cb);
+bool Register(const std::string &_item, std::function<T()> &_msg)> &_cb);
 bool Unregister(const std::string &_item);
+void Clear();
 ~~~
 
 As an example, Physics will use introspection in the following way:
 
 ~~~
-// Introspection callback.
-bool gazebo::physics::Entity::IntrospectionUpdatePose(gazebo::msgs::GzAny &_msg)
+void World::RegisterIntrospectionItems()
 {
-  // Copy into the message the variable[s] that you want to introspect.
-  auto pose = this->GetWorldPose();
-  _msg.set_xxx(pose);
+  auto uri = this->URI();
 
-  return true;
+  common::URI timeURI(uri);
+  timeURI.Query().Insert("p", "time/sim_time");
+  // Add here all the items that might be introspected.
+  gazebo::util::IntrospectionManager::Instance()->Register<common::Time>(
+      timeURI.Str(), std::bind(&World::GetSimTime, this));
 }
 ~~~
 
-Now, in the World class, each time a new model is inserted in the world, we
-register a new item:
-~~~
-  // Model creation.
-  gazebo::physics::ModelPtr newModel = ...;
-
-  auto introspection = gazebo::utils::Introspection::Instance();
-
-  introspection->Register(newModel->GetName() + "::pose",
-      std::bind(&Entity::IntrospectionUpdatePose, newModel));
-~~~
-
 Notice that World needs to instantiate an IntrospectionManager object and
-register the item with a callback. `GzAny` will be a
-protobuf Message similar to the `Param` message definition designed [here](https://bitbucket.org/osrf/gazebo_design/src/f864f029fdd15347e6bbb4e2e46c6ce84e56a9ec/physics_params/physics_params.md?at=default&fileviewer=file-view-default). The most common Gazebo types will
-be supported.
+register the item with a callback. For the first time, we'll also start using a
+`common::URI` class (see URI section below).
 
-The introspection manager will also provide the following Ignition Transport
+The introspection manager provides the following Ignition Transport
 services targeted to the data consumers:
 
 * `/introspection/<manager_id>/items` : Service that will return the list of
 available items and their types.
-* `/introspection/<manager_id>/set_filter` : Service that will be used by a
-client to set a new filter containing a list of items of interest. This service
+* `/introspection/<manager_id>/filter_new` : Service that will be used by a
+client to create a new filter containing a list of items of interest. This service
 will create a new topic and the items will be periodically sent through that
 channel. We can also use this service for updating an existing filter.
-* `/introspection/<manager_id>/remove_fiter` : Service that will allow a client
+* `/introspection/<manager_id>/filter_update` : Service that will be used by a
+client to update an existing filter with a new list of items of interest.
+* `/introspection/<manager_id>/fiter_remove` : Service that will allow a client
 to remove a filter when not needed anymore.
-* `/introspection/<manager_id>/get_filter` : Service that will allow a client to
-get the list of items contained in a previously created filter.
 
-The plotting tool will query the introspection manager for knowing the list of
-items available and displaying the list to our users.
+To simplify the interaction with the introspection manager, we'll create an
+introspection client class, that will expose a simplified interface to the
+data consumers. As an example, next is the API for creating a new filter:
+
+* `bool NewFilter(const std::string &_managerId,
+                        const std::set<std::string> &_newItems,
+                        std::string &_filterId,
+                        std::string &_newTopic):` The user specifies the
+managerID where the filter should be created and the list of items of interest.
+The function returns the ID of the new filter, as well as the topic where the
+updates will be received. Note that this is a blocking function.
+
+* bool NewFilter(const std::string &_managerId,
+                 const std::set< std::string> &_newItems,
+                 const std::function <void(
+                     const std::string &_filterId,
+                     const std::string &_newTopic,
+                     const bool _result)> &_cb):` Alternative non-blocking
+version of the previous function, where the filter ID and the topic are
+received as parameters in a callback.
+
+The plotting tool will use the introspection client class for knowing the list
+of items available and displaying the list to our users.
 
 The tool will also create a new filter containing the specific items of
 interest. E.g.: A filter for the items "unit_box_0::position" and
 "unit_cylinder_0::linear_vel".
 
 At the end of each world update, the InstrospectionManager will iterate through
-the list of custom requests and populate messages calling the appropriate
+the list of custom filters and populate messages calling the appropriate
 registered callbacks (e.g.: get the world pose of the model "unit_box_0" and the
 linear velocity of "unit_cylinder_0"). A single message will be sent for each
 custom update requested in each simulation update. Each request will be received
 through ts own topic.
+
+*** common::URI class ***
+
+Right now Gazebo uses a custom naming scheme for uniquely identify entities in
+simulation. This custom naming scheme is a combination of strings separated
+with `::` expressing the hierarchy of the entity. For example,
+`unit_box_0::link_0` declares `link_0` as a child of `unit_box_0`. One of the
+problems of this approach is the inability to distinguish the entity type by its
+name. We can suppose that `unit_box_0` is a model and `link_0` is a link inside
+the model but there's no guarantee that this is always true.
+
+We are proposing a new `URI` class for expressing entities in a more concise
+way, where its type can always infere without ambiguity. Here's an example of
+the proposed approach:
+
+`data://world/default/model/unit_box_0/link/link`.
+
+The syntax change follows the rules described in [URI][https://en.wikipedia.org/wiki/Uniform_Resource_Identifier], where we have three parts:
+
+* Scheme: We can use different schemes to show the nature of the entity that we
+are describing. `data` is our first example but we can create more as needed.
+
+* Path: We'll use the `path` to express the hierarchy. The path will consist on
+a secuence of pairs separated by `/`. The first element of the pair is a keyword
+that declares the type of the entity. `world`, `link`, `joint` are some
+examples. The second element of the pair is the entity name. `default`,
+`model_0`, `joint_0` are some examples.
+
+* Query: Optional section that can be used to express properties of one entity.
+`?p=pose`, `?p=linear_velocity`, `?p=linear_acceleration` are some examples.
+
+By combining all these elements we can express an entity preserving its
+hierarchy without ambiguity and also with the ability to express one or more
+of its properties. An additional advantage could be the use of third party
+libraries for parsing URIs.
 
 **Simulation**
 
