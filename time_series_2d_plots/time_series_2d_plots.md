@@ -227,8 +227,8 @@ The plotting tool will use the introspection client class for knowing the list
 of items available and displaying the list to our users.
 
 The tool will also create a new filter containing the specific items of
-interest. E.g.: A filter for the items "unit_box_0::position" and
-"unit_cylinder_0::linear_vel".
+interest. E.g.: A filter for the items `data://world/default/model/unit_box_0?p=vector3d/world_position` and
+`data://world/default/model/unit_cylinder_0?p=vector3d/world_linear_velocity`.
 
 At the end of each world update, the InstrospectionManager will iterate through
 the list of custom filters and populate messages calling the appropriate
@@ -265,7 +265,8 @@ examples. The second element of the pair is the entity name. `default`,
 `world/<world_name>/`.
 
 * Query: Optional part that can be used to express properties of one entity.
-`?p=pose`, `?p=linear_velocity`, `?p=linear_acceleration` are some examples.
+`?p=world_pose`, `?p=world_linear_velocity`, `?p=world_linear_acceleration`
+are some examples.
 
 By combining all these elements we can express an entity preserving its
 hierarchy without ambiguity and also with the ability to express one or more
