@@ -36,6 +36,10 @@ class is waiting for the other to be destroyed first.
 
 1. Smart[er] pointers
 
+    A. `unique_ptr` + raw pointers
+
+    B. `shared_ptr` + `weak_ptr`
+
 ### 1. Hacky `Fini`
 
 One way to resolve circular dependencies while keeping shared pointers is
@@ -60,11 +64,11 @@ This approach started being implemented in a
 which checks that all `boost::shared_ptr<World>` were indeed released after
 the `physics::remove_worlds()` call.
 
-#### Advantages
+##### Advantages
 
 No drastic changes to API or architecture.
 
-#### Drawbacks
+##### Drawbacks
 
 * Perpetuates a bad use of shared pointers. If an object is not supposed to
 have multiple ownership, it shouldn't be shared.
@@ -85,11 +89,11 @@ The
 class for example has a dozen calls to `get_world` instead of keeping
 pointers.
 
-#### Advantages
+##### Advantages
 
 No drastic changes to API or architecture.
 
-#### Drawbacks
+##### Drawbacks
 
 Possible impact on performance due to string comparisons.
 
