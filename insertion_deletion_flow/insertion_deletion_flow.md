@@ -7,15 +7,16 @@ implementation.
 
 ## Problems with current approach
 
-* `entity_delete` requests are being sent back and forth with different
-intentions. This opens way for several issues, including cyclic calls and the
-misinterpretation of the messages.
+* `gazebo::transport::requestNoReply(<node>, "entity_delete", <name>)` requests
+are being sent back and forth with different intentions. This opens way for
+several issues, including cyclic calls and the message misinterpretation.
 
 > For example, `gui::ModelRightClickMenu` sends a
 > [request](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/gui/ModelRightMenu.cc?fileviewer=file-view-default#ModelRightMenu.cc-330)
 > to delete an entity, then once it is deleted,
-> [`Entity::Fini`](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/physics/Entity.cc?fileviewer=file-view-default)
-> sends the same request to notify everyone that it has been deleted.
+> `physics::Entity::Fini`
+> [sends](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/physics/Entity.cc?fileviewer=file-view-default)
+> the same request to notify everyone that it has been deleted.
 
 * We're not respecting the order in which insertion and deletion requests are
 made.
@@ -36,12 +37,13 @@ wrong behaviour in case entities of different types have overlapped names.
 > [deleted](https://bitbucket.org/osrf/gazebo/src/0cc955fdbe127572a5355c67f103f6d39d3e3350/gazebo/physics/World.cc?fileviewer=file-view-default#World.cc-2574).
 
 * Several classes in `gzclient` are handling deletion independently, which means
-there are several points of entry to maintain.
+there are several points of entry to maintain. That's not really a problem, but
+something we should be aware of.
 
 > [rendering::Scene](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/rendering/Scene.cc?fileviewer=file-view-default#Scene.cc-2503),
 > [gui::ModelListWidget](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/gui/ModelListWidget.cc?fileviewer=file-view-default#ModelListWidget.cc-2594) and
 > [gui::GLWidget](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/gui/GLWidget.cc?fileviewer=file-view-default#GLWidget.cc-1267)
-> are listening to `entity_delete`. Is there a problem here?
+> are listening to `entity_delete`.
 
 ## Desired flow
 
@@ -51,7 +53,7 @@ running in the server, standalone programs, etc.
 * All requests should be handled the same way, going through the same pipeline.
 (i.e. share a common point of entry and exit in the server)
 
-* The targeted entity should be clear, despite its type (model, light, link...).
+* It should be clear which entity is targeted, no matter its type (model, light, link...).
 
 * Requests should be handled in the order they arrive. This is not limited to
 insertion/deletion, but also includes things like pose change.
@@ -65,13 +67,16 @@ The flow is captured in this image:
 
 ## Proposal
 
-### Requests to the server
+### Requests to the server (blue arrows)
+
+#### Block A
 
 For deletion, `physics::World` will advertise an entity delete service which
-takes the entity's unique `common::URI`. For example:
+takes the entity's unique `common::URI`. We could use a simple string message or
+create a URI message. For example:
 
     void World::EntityDeleteService(const example::msgs::StringMsg &_req,
-      example::msgs::StringMsg &/*_rep*/, bool &_result)
+        example::msgs::StringMsg &/*_rep*/, bool &_result)
     {
       // Handle deletion internally
       _result = AddDeletionToQueue(_req.entity_uri());
@@ -81,15 +86,16 @@ takes the entity's unique `common::URI`. For example:
     }
 
     ignition::transport::Node node;
-    std::string service = "/entity_delete";
+    std::string service = "/request/deletion";
 
     node.Advertise(service, EntityDeleteService))
 
 For insertion, `physics::World` advertises a factory service, which takes an
-SDF string. For example:
+SDF string. We could use a simple string message or use factory messages.
+For example:
 
     void World::FactoryService(const example::msgs::StringMsg &_req,
-      example::msgs::StringMsg &/*_rep*/, bool &_result)
+        example::msgs::StringMsg &/*_rep*/, bool &_result)
     {
       // Handle insertion internally
       _result = AddInsertionToQueue(_req.entity_sdf());
@@ -99,13 +105,15 @@ SDF string. For example:
     }
 
     ignition::transport::Node node;
-    std::string service = "/factory";
+    std::string service = "/request/factory";
 
     node.Advertise(service, FactoryService))
 
-Internally, all requests, independently of type, are placed in a queue. They
-could be stored as protobuf messages for example. The queue is processed in
+Internally, all requests, independently of type, are placed in a single queue.
+They could be stored as protobuf messages for example. The queue is processed in
 order at each `World::Step`.
+
+#### Block B
 
 Clients can perform requests as follows:
 
@@ -113,12 +121,17 @@ Clients can perform requests as follows:
     ignition::transport::Node node;
     example::msgs::StringMsg req;
     req.set_entity_uri(uri);
-    node.Request("/entity_delete", req, <no callback>);
+    node.Request("/request/deletion", req, <no callback>);
 
-### Response to clients
+To keep things modular, different widgets in the client can send the requests
+directly, without needing to pass through a common channel.
 
-If deletion is successfully completed, the server notifies everyone else through
-a normal topic:
+### Notification to clients (red arrows)
+
+#### Block C
+
+If deletion / insertion is successfully completed, the server notifies everyone
+else through a normal topic:
 
     // Notify deletion is complete
     ignition::transport::Node node;
@@ -140,10 +153,10 @@ The same goes for insertion:
     msg.set_entity_sdf(sdf);
     node.Publish(topic, msg);
 
-Each client has the responsibility of handling these in order. For `gzclient`,
-it might be interesting to have one point of entry for the notifications
-coming from the server, and from there, events are fired notifying each
-individual widget. Or each widget can independently subscribe to the topics.
+#### Block D
+
+Each client has the responsibility of handling these in order. In `gzclient` for
+example, each widget can independently subscribe to the topics.
 
 This is how they subscribe to notifications:
 
@@ -159,10 +172,11 @@ This is how they subscribe to notifications:
 
 ### Deprecations
 
-* `entity_delete` used as a request will be deprecated in Gazebo 8 and removed
-in Gazebo 9.
+* `gazebo::transport::requestNoReply(<node>, "entity_delete", <name>)` used as
+a request will be deprecated in Gazebo 8 and removed in Gazebo 9.
 
-* `entity_delete` used as a notification will be removed in Gazebo 8.
+* `gazebo::transport::requestNoReply(<node>, "entity_delete", <name>)` used as
+a notification will be removed in Gazebo 8.
 
 ### Pull requests
 
