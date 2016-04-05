@@ -107,11 +107,20 @@ Internally, all requests, independently of type, are placed in a queue. They
 could be stored as protobuf messages for example. The queue is processed in
 order at each `World::Step`.
 
+Clients can perform requests as follows:
+
+    // Request deletion
+    ignition::transport::Node node;
+    example::msgs::StringMsg req;
+    req.set_entity_uri(uri);
+    node.Request("/entity_delete", req, <no callback>);
+
 ### Response to clients
 
 If deletion is successfully completed, the server notifies everyone else through
 a normal topic:
 
+    // Notify deletion is complete
     ignition::transport::Node node;
     std::string topic = "/notify/deletion";
     node.Advertise<example::msgs::StringMsg>(topic);
@@ -122,6 +131,7 @@ a normal topic:
 
 The same goes for insertion:
 
+    // Notify insertion is complete
     ignition::transport::Node node;
     std::string topic = "/notify/factory";
     node.Advertise<example::msgs::StringMsg>(topic);
@@ -135,6 +145,18 @@ it might be interesting to have one point of entry for the notifications
 coming from the server, and from there, events are fired notifying each
 individual widget. Or each widget can independently subscribe to the topics.
 
+This is how they subscribe to notifications:
+
+    void OnDeletionNotification(const example::msgs::StringMsg &_msg)
+    {
+      // Handle deletion now that we have confirmation, not when it was
+      // requested
+    }
+
+    ignition::transport::Node node;
+    std::string topic = "/notify/deletion";
+    node.Subscribe(topic, OnDeletionNotification);
+
 ### Deprecations
 
 * `entity_delete` used as a request will be deprecated in Gazebo 8 and removed
@@ -144,6 +166,8 @@ in Gazebo 9.
 
 ### Pull requests
 
+(The order and grouping might change)
+
 1. Deletion request service and notification topic.
 
 2. Insertion request service and notification topic.
@@ -151,8 +175,4 @@ in Gazebo 9.
 3. Rearranging queue in server.
 
 4. Rearranging queue in client.
-
-
-
-
 
