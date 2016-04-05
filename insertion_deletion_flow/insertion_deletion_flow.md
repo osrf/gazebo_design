@@ -61,7 +61,7 @@ in a unified way.
 
 The flow is captured in this image:
 
-![Flow](https://bytebucket.org/osrf/gazebo_design/raw/insertion_deletion_flow/flow.png)
+![Flow](https://bitbucket.org/osrf/gazebo_design/raw/insertion_deletion_flow/insertion_deletion_flow/flow.png)
 
 ## Proposal
 
