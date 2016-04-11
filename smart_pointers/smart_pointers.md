@@ -22,9 +22,9 @@ is not needed.
 
 Consider the case of classes `physics::World` and `physics::PhysicsEngine`.
 Both these classes store a shared pointer of each other, see
-[here](https://bitbucket.org/osrf/gazebo/src/d3b06088be22a15a25025a952414bffb8ff6aa2b/gazebo/physics/WorldPrivate.hh?fileviewer=file-view-default#WorldPrivate.hh-49)
+[here](https://bitbucket.org/osrf/gazebo/src/d3b06088be22a15/gazebo/physics/WorldPrivate.hh#WorldPrivate.hh-49)
 and
-[here](https://bitbucket.org/osrf/gazebo/src/d3b06088be22a15a25025a952414bffb8ff6aa2b/gazebo/physics/PhysicsEngine.hh?fileviewer=file-view-default#PhysicsEngine.hh-246).
+[here](https://bitbucket.org/osrf/gazebo/src/d3b06088be22a15/gazebo/physics/PhysicsEngine.hh#PhysicsEngine.hh-246).
 This results in neither of their destructors ever being called, because one
 class is waiting for the other to be destroyed first.
 
