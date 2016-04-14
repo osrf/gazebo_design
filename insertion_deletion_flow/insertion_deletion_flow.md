@@ -110,9 +110,15 @@ For example:
 
     node.Advertise(service, FactoryService))
 
-Internally, all requests, independently of type, are placed in a single queue.
-They could be stored as protobuf messages for example. The queue is processed in
-order at each `World::Step`.
+Internally, all requests, independently of type, are placed in a single queue:
+
+* They could be stored as general protobuf messages for example.
+
+* The queue is processed in order at each `World::Step`.
+
+* As part of the model destruction, some events might be triggered (which result
+  in work to do in other threads, such as the sensor thread). This might need
+  better synchronization or not.
 
 #### Block B
 
@@ -143,7 +149,13 @@ else through a normal topic:
     msg.set_entity_uri(uri);
     node.Publish(topic, msg);
 
-The same goes for insertion:
+Notifications about deletion can be sent from the `Entity::Fini` method, so
+every entity deleted, independently of type (models, links, lights...) will
+notify the same way. (Using `Fini` is safer than destructors, because by the
+time we reach the destructor, the object's internal state might have already
+been cleaned up, so transport for example might not be available anymore).
+
+The notification for insertion can be as follows:
 
     // Notify insertion is complete
     ignition::transport::Node node;
@@ -153,6 +165,13 @@ The same goes for insertion:
     example::msgs::StringMsg msg;
     msg.set_entity_sdf(sdf);
     node.Publish(topic, msg);
+
+These can be sent in the end of each `<Entity>::Load` method (i.e.
+`Model::Load`, `Link::Load`, etc), which is when we're sure the entity was
+completely loaded without issues.
+
+For all notifications, we could have a common function such as 
+`Entity::NotifyUpdate(UpdateInfo _info)`, which publishes the messages.
 
 #### Block D
 
