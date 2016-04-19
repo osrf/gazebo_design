@@ -62,8 +62,10 @@ These variables remain in scope for the duration of the program.
 A list of global variables can be extracted from ELF files using the `nm` tool.
 For example, consider the gazebo math library:
 
+### gazebo_math library
+
 ~~~
-$ nm -C gazebo/math/libgazebo_math.so | grep ' B '
+$ nm -C gazebo/math/libgazebo_math.so | grep ' [BRu] '
 000000000023b710 B __bss_start
 000000000023baa8 B _end
 000000000023b980 B gazebo::math::Pose::Zero
@@ -98,12 +100,16 @@ The `randGenerator` variable is a pointer, so it will not be cleaned up
 (see [ign-math issue 44](https://bitbucket.org/ignitionrobotics/ign-math/issues/44)
 to discuss a fix for this).
 
+### gazebo_common library
+
 The gazebo common library has more of these variables:
 
 ~~~
-$ nm -C -l gazebo/common/libgazebo_common.so | grep ' B '
+$ nm -C -l gazebo/common/libgazebo_common.so | grep ' [BRu] '
 00000000002d1da0 B __bss_start
 00000000002d2fd0 B _end
+00000000002d2190 u guard variable for SingletonT<gazebo::common::SystemPaths>::GetInstance()::t
+00000000002d2dc0 u guard variable for SingletonT<gazebo::common::ModelDatabase>::GetInstance()::t
 00000000002d2820 B gazebo::event::Events::postRender
 00000000002d28a0 B gazebo::event::Events::worldReset
 00000000002d27a0 B gazebo::event::Events::createSensor
@@ -131,7 +137,9 @@ $ nm -C -l gazebo/common/libgazebo_common.so | grep ' B '
 00000000002d2f00 B gazebo::common::Time::clockResolution
 00000000002d2ed0 B gazebo::common::Time::Hour
 00000000002d2ef0 B gazebo::common::Time::Zero
+00000000000ad284 R gazebo::common::Time::nsInMs
 00000000002d2ee0 B gazebo::common::Time::Second
+00000000000ad288 R gazebo::common::Time::nsInSec
 00000000002d2f20 B gazebo::common::Time::wallTime
 00000000002d2060 B gazebo::common::Color::Red
 00000000002d2020 B gazebo::common::Color::Blue
@@ -149,5 +157,69 @@ $ nm -C -l gazebo/common/libgazebo_common.so | grep ' B '
 00000000002d2c40 B gazebo::common::Material::ShadeModeStr
 00000000002d2c60 B gazebo::common::Material::counter
 00000000002d2cd0 B gazebo::common::EnumIface<gazebo::common::MaterialType>::names
+00000000002d2100 u SingletonT<gazebo::common::SystemPaths>::GetInstance()::t
+00000000002d2db0 u SingletonT<gazebo::common::ModelDatabase>::GetInstance()::t
 ~~~
 
+The static variables in
+`Color`, `EnumIface`, `Image`, `Material`, `MaterialDensity`, and `Time`
+are `const` or simple types.
+The remaining variables will be addressed in the following subsections.
+
+#### common::Console
+
+~~~
+00000000002d22c0 B gazebo::common::Console::dbg
+00000000002d23e0 B gazebo::common::Console::err
+00000000002d2620 B gazebo::common::Console::log
+00000000002d2500 B gazebo::common::Console::msg
+00000000002d21a0 B gazebo::common::Console::warn
+~~~
+
+The `dbg`, `err`, `msg` and `warn` variables are of type
+`Console::Logger`, which inherits from `std::ostream`.
+The `log` variable is of type `Console::FileLogger`, which also
+inherits from `std::ostream`.
+These variables exist for the duration of the program
+and neither hold smart pointers nor provide smart pointers
+to themselves.
+
+#### common::Events
+
+~~~
+00000000002d2820 B gazebo::event::Events::postRender
+00000000002d28a0 B gazebo::event::Events::worldReset
+00000000002d27a0 B gazebo::event::Events::createSensor
+00000000002d2920 B gazebo::event::Events::deleteEntity
+00000000002d27c0 B gazebo::event::Events::removeSensor
+00000000002d29a0 B gazebo::event::Events::worldCreated
+00000000002d27e0 B gazebo::event::Events::diagTimerStop
+00000000002d2980 B gazebo::event::Events::entityCreated
+00000000002d2800 B gazebo::event::Events::diagTimerStart
+00000000002d28c0 B gazebo::event::Events::worldUpdateEnd
+00000000002d2900 B gazebo::event::Events::worldUpdateBegin
+00000000002d2960 B gazebo::event::Events::setSelectedEntity
+00000000002d28e0 B gazebo::event::Events::beforePhysicsUpdate
+00000000002d2a00 B gazebo::event::Events::step
+00000000002d29e0 B gazebo::event::Events::stop
+00000000002d2a20 B gazebo::event::Events::pause
+00000000002d2840 B gazebo::event::Events::render
+00000000002d29c0 B gazebo::event::Events::sigInt
+00000000002d2940 B gazebo::event::Events::addEntity
+00000000002d2860 B gazebo::event::Events::preRender
+00000000002d2880 B gazebo::event::Events::timeReset
+~~~
+
+#### common::SingletonT
+
+This leaves the `SingletonT` types `ModelDatabase` and `SystemPaths`.
+A third `SingletonT` type `MeshManager` is included in this library though it
+didn't appear in the output from `nm`.
+
+~~~
+00000000002d2190 u guard variable for SingletonT<gazebo::common::SystemPaths>::GetInstance()::t
+00000000002d2dc0 u guard variable for SingletonT<gazebo::common::ModelDatabase>::GetInstance()::t
+00000000002d2d80 B gazebo::common::ModelDatabase::myself
+00000000002d2100 u SingletonT<gazebo::common::SystemPaths>::GetInstance()::t
+00000000002d2db0 u SingletonT<gazebo::common::ModelDatabase>::GetInstance()::t
+~~~
