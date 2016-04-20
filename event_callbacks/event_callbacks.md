@@ -28,10 +28,11 @@ but should all return `void`.
 ### Architecture
 
 A cartoon diagram of an event is shown below.
-The event is drawn as a box with a slot for inserting function pointers,
-a trap door for removing them,
+The event is drawn as a box with a slot for inserting function pointers
+(the `Connect` interface),
+a trap door for removing them (the `Disconnect` interface),
 and a button at the top that will execute all the callbacks in the box
-when it is pushed.
+when it is pushed (the `Signal` interface).
 When a callback is added using `Connect`, an `id` is returned.
 This `id` is needed to remove the callback using `Disconnect`.
 
