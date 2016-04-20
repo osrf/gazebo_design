@@ -84,7 +84,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -99,28 +99,40 @@
        width="345.76141"
        height="339.7005"
        x="340.83881"
-       y="566.10864" />
+       y="566.10864"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        transform="matrix(0.30162193,0,0,0.30162193,369.56843,803.05315)"
-       d="m 369.71583,342.73001 a 25.75889,25.75889 0 1 1 -51.51778,0 25.75889,25.75889 0 1 1 51.51778,0 z"
+       d="m 369.71583,342.73001 c 0,14.22624 -11.53265,25.75889 -25.75889,25.75889 -14.22624,0 -25.75889,-11.53265 -25.75889,-25.75889 0,-14.22624 11.53265,-25.75889 25.75889,-25.75889 14.22624,0 25.75889,11.53265 25.75889,25.75889 z"
        sodipodi:ry="25.75889"
        sodipodi:rx="25.75889"
        sodipodi:cy="342.73001"
        sodipodi:cx="343.95694"
        id="path3765"
        style="fill:#ffffff;stroke:#000000;stroke-width:6.63081741;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       sodipodi:type="arc" />
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        sodipodi:nodetypes="ccc"
        inkscape:connector-curvature="0"
        id="path4397"
        d="m 24.081691,719.92059 c 60.060348,-23.52284 141.715379,-23.09515 141.715379,-23.09515 0,0 76.25639,-1.28309 132.26773,21.81203"
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow1Lend)" />
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow1Lend)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <flowRoot
        transform="translate(-5.9680997,402.92533)"
        style="font-size:24px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot4440"
-       xml:space="preserve"><flowRegion
+       xml:space="preserve"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4442"><rect
            style="text-align:center;text-anchor:middle"
            y="253.79076"
@@ -133,7 +145,10 @@
        xml:space="preserve"
        id="flowRoot4448"
        style="font-size:24px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="translate(348.59545,182.0768)"><flowRegion
+       transform="translate(348.59545,182.0768)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4450"><rect
            id="rect4452"
            width="192.85715"
@@ -148,19 +163,28 @@
        height="24.15921"
        width="57.80933"
        id="rect3201"
-       style="fill:#ffffff;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+       style="fill:#ffffff;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
        style="fill:#ffffff;stroke:#000000;stroke-width:2.84409332;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none"
        id="rect3989"
        width="56.965237"
        height="49.579082"
        x="314.05011"
-       y="705.33997" />
+       y="705.33997"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <flowRoot
        transform="translate(255.01891,616.32493)"
        style="font-size:20px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot4456"
-       xml:space="preserve"><flowRegion
+       xml:space="preserve"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4458"><rect
            style="font-size:20px;text-align:center;text-anchor:middle"
            y="253.79076"
@@ -174,10 +198,16 @@
        width="161.01895"
        height="31.719435"
        x="347.7952"
-       y="866.79681" />
+       y="866.79681"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <g
        transform="matrix(0.94976006,0.31297896,-0.31297896,0.94976006,350.55538,321.54201)"
-       id="g4014">
+       id="g4014"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <flowRoot
          transform="translate(191.3793,181.95934)"
          style="font-size:20px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -200,7 +230,10 @@
     </g>
     <g
        id="g4026"
-       transform="matrix(0.99970394,0.02433164,-0.02433164,0.99970394,28.188223,273.09238)">
+       transform="matrix(0.99970394,0.02433164,-0.02433164,0.99970394,28.188223,273.09238)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <flowRoot
          xml:space="preserve"
          id="flowRoot4028"
@@ -225,7 +258,10 @@
        xml:space="preserve"
        id="flowRoot4045"
        style="font-size:20px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="translate(342.90218,287.0152)"><flowRegion
+       transform="translate(342.90218,287.0152)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4047"><rect
            id="rect4049"
            width="192.85715"
@@ -238,18 +274,24 @@
        inkscape:connector-curvature="0"
        id="path4053"
        d="m 521.64739,480.86673 c 0.0976,13.29014 0.0959,31.35876 0.0959,31.35876 0,0 0.005,16.874 -0.0905,29.26818"
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow1Lend)" />
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow1Lend)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="491.94431"
-       y="630.11841"
+       x="426.28439"
+       y="658.40271"
        id="text4055"
-       sodipodi:linespacing="125%"><tspan
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
          id="tspan4057"
-         x="491.94431"
-         y="630.11841"
+         x="426.28439"
+         y="658.40271"
          style="font-size:64px">Event</tspan></text>
     <rect
        y="901.50714"
@@ -257,13 +299,19 @@
        height="6.7575092"
        width="76.773125"
        id="rect4059"
-       style="fill:#ffffff;stroke:#000000;stroke-width:1.21895468;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none" />
+       style="fill:#ffffff;stroke:#000000;stroke-width:1.21895468;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:none"
        d="m 482.4857,909.31177 c 16.31043,1.21652 38.46382,2.97053 38.46382,2.97053 0,0 20.68975,1.63313 35.87084,2.90655"
        id="path4061"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        sodipodi:type="arc"
        style="fill:#ffffff;stroke:#000000;stroke-width:6.63081741;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
@@ -272,19 +320,28 @@
        sodipodi:cy="342.73001"
        sodipodi:rx="25.75889"
        sodipodi:ry="25.75889"
-       d="m 369.71583,342.73001 a 25.75889,25.75889 0 1 1 -51.51778,0 25.75889,25.75889 0 1 1 51.51778,0 z"
-       transform="matrix(0.30162193,0,0,0.30162193,457.4517,811.13437)" />
+       d="m 369.71583,342.73001 c 0,14.22624 -11.53265,25.75889 -25.75889,25.75889 -14.22624,0 -25.75889,-11.53265 -25.75889,-25.75889 0,-14.22624 11.53265,-25.75889 25.75889,-25.75889 14.22624,0 25.75889,11.53265 25.75889,25.75889 z"
+       transform="matrix(0.30162193,0,0,0.30162193,457.4517,811.13437)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow1Lend)"
        d="m 302.10541,744.28978 c -60.06035,23.52284 -141.71538,23.09515 -141.71538,23.09515 0,0 -76.256389,1.28309 -132.267729,-21.81203"
        id="path4251"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot4253"
        style="font-size:24px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="translate(-10.00871,484.74768)"><flowRegion
+       transform="translate(-10.00871,484.74768)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4255"><rect
            id="rect4257"
            width="192.85715"
@@ -297,7 +354,10 @@
        transform="translate(-10.00871,515.05226)"
        style="font-size:24px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot4261"
-       xml:space="preserve"><flowRegion
+       xml:space="preserve"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4263"><rect
            style="text-align:center;text-anchor:middle"
            y="253.79076"
@@ -311,12 +371,18 @@
        d="m 521.65284,969.75541 c 0.0969,-11.72125 0.0951,-27.65688 0.0951,-27.65688 0,0 0.005,-14.88201 -0.0898,-25.81308"
        id="path4269"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <flowRoot
        transform="translate(350.61576,717.45765)"
        style="font-size:24px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot4271"
-       xml:space="preserve"><flowRegion
+       xml:space="preserve"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4273"><rect
            style="text-align:center;text-anchor:middle"
            y="253.79076"
@@ -329,7 +395,10 @@
        xml:space="preserve"
        id="flowRoot4279"
        style="font-size:24px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="translate(369.80865,692.83911)"><flowRegion
+       transform="translate(369.80865,692.83911)"
+       inkscape:export-filename="/home/scpeters/osrf/gazebo_design/event_callbacks/event_callbacks.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
          id="flowRegion4281"><rect
            id="rect4283"
            width="192.85715"
