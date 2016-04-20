@@ -29,6 +29,12 @@ Plot proto message: A message that carries plot data will be created to transmit
 
 Include any UX design drawings.
 
+### Lifecycle and Ownership
+Describe the intended lifecycle of new objects.
+Based on the lifecycle, suggest an ownership model.
+These characteristics should motivate the types of pointers, smart pointers,
+and/or references that are used in the interfaces.
+
 ### Performance Considerations
 Will this project cause changes to performance?
 If so, describe how.
