@@ -10,21 +10,55 @@ to determine if the current pointer types are appropriate.
 
 ### Requirements
 
-1. A set of classes that allow functions with arbitrary
-input parameters to be registered as callback functions that will
-be called when an event is signaled.
+1. A set of classes that allow functions to be registered as callback functions
+that will be called when an event is signaled.
 These classes should include a mechanism for un-registering callbacks.
 
 2. An set of events relevant to Gazebo's functionality with
-callback arguments defined.
+callback arguments should be defined.
 It should be possible to define other events as well.
 
+3. Callbacks should be able to be registered from different threads.
+Signalling the event will block until all the callback functions
+have been executed.
+
+4. The callbacks can have arbitrary input parameters
+but should all return `void`.
+
 ### Architecture
-Include a system architecture diagram.
-This should be a conceptual diagram that describes what components of Gazebo will be utilized or changed, the flow of information, new classes, etc.
+
+A cartoon diagram of an event is shown below.
+The event is drawn as a box with a slot for inserting function pointers,
+a trap door for removing them,
+and a button at the top that will execute all the callbacks in the box
+when it is pushed.
+When a callback is added using `Connect`, an `id` is returned.
+This `id` is needed to remove the callback using `Disconnect`.
+
+![event interface diagram](event_callbacks.png)
 
 ### Interfaces
-Describe any new interfaces or modifications to interfaces, where interfaces are protobuf messages, function API changes, SDF changes, and GUI changes. These changes can be notional.
+
+There are numerous classes currently involved in the interface
+for registering and signaling event callbacks.
+There is a base class `Event` and a derived class `EventT`
+that is templated on the callback function signature,
+which includes input paramters.
+The `Connection` class is used as the return type of the
+`EventT::Connect` interface.
+The callback can then be removed by passing this object to the
+`Event::Disconnect` interface
+or by deleting the `Connection` object.
+
+~~~
+class Event
+{
+  public: Event();
+  public: virtual ~Event();
+  public: virtual void Disconnect(ConnectionPtr _c) = 0;
+  public: virtual void Disconnect(int _id) = 0;
+};
+~~~
 
 For example:
 Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
