@@ -70,51 +70,73 @@ The flow is captured in this image:
 
 ### Requests to the server (blue arrows)
 
+A new message type will be created, which can be used for all kinds of requests
+and notifications. For example:
+
+    package gazebo.msgs;
+
+    import "factory.proto";
+
+    /// \ingroup gazebo_msgs
+    /// \interface Operation
+    /// \brief A message containing a single operation, specified by type.
+    /// The operation data will be contained in another field.
+    /// It can be used to request that an operation is performed, or to
+    /// notify it has been performed, for example. For example:
+    ///
+    /// if (msg.type() == DELETE_ENTITY)
+    /// {
+    ///   if (msg.has_uri())
+    ///     <perform deletion>
+    ///   else
+    ///     gzwarn << "Message does not contain URI, which is required for deletion operation.\n";
+    /// }
+
+    message Operation
+    {
+      /// \brief Types of operations.
+      enum Type
+      {
+        /// \brief Deleting an entity.
+        DELETE_ENTITY = 1;
+
+        /// \brief Inserting an entity.
+        INSERT_ENTITY = 2;
+      }
+
+      /// \brief Type of operation.
+      required Type type = 1;
+
+      /// \brief Entity URI in string format, for delete operations for example.
+      optional string uri = 2;
+
+      /// \brief Factory message, for insert operations.
+      optional Factory factory = 3;
+    }
+
 #### Block A
 
-For deletion, `physics::World` will advertise an entity delete service which
-takes the entity's unique `common::URI`. We could use a simple string message or
-create a URI message. For example:
+`physics::World` will advertise a `/request` service which takes an `Operation`
+message. For example:
 
-    void World::EntityDeleteService(const example::msgs::StringMsg &_req,
-        example::msgs::StringMsg &/*_rep*/, bool &_result)
+    ignition::transport::Node ignNode;
+    std::string service = "/request";
+
+    ignNode.Advertise("/request", &World::RequestService, this);
+
+    void World::RequestService(const gazebo::msgs::Operation &_req,
+        gazebo::msgs::Empty &/*_rep*/, bool &/*_result*/)
     {
-      // Handle deletion internally
-      _result = AddDeletionToQueue(_req.entity_uri());
+      // Add request to queue
+      std::lock_guard<std::mutex> lock(this->dataPtr->requestsMutex);
+      this->dataPtr->requests.push_back(msg);
 
       // No response is sent here, otherwise only the requester would be
       // notified.
     }
 
-    ignition::transport::Node node;
-    std::string service = "/request/deletion";
-
-    node.Advertise(service, EntityDeleteService))
-
-For insertion, `physics::World` advertises a factory service, which takes an
-SDF string. We could use a simple string message or use factory messages.
-For example:
-
-    void World::FactoryService(const example::msgs::StringMsg &_req,
-        example::msgs::StringMsg &/*_rep*/, bool &_result)
-    {
-      // Handle insertion internally
-      _result = AddInsertionToQueue(_req.entity_sdf());
-
-      // No response is sent here, otherwise only the requester would be
-      // notified.
-    }
-
-    ignition::transport::Node node;
-    std::string service = "/request/factory";
-
-    node.Advertise(service, FactoryService))
-
-Internally, all requests, independently of type, are placed in a single queue:
-
-* They could be stored as general protobuf messages for example.
-
-* The queue is processed in order at each `World::Step`.
+Internally, all requests, independently of type, are placed in a single queue.
+The queue is processed in order at each `World::Step`.
 
 * As part of the model destruction, some events might be triggered (which result
   in work to do in other threads, such as the sensor thread). This might need
@@ -124,14 +146,53 @@ Internally, all requests, independently of type, are placed in a single queue:
 
 Clients can perform requests as follows:
 
-    // Request deletion
-    ignition::transport::Node node;
-    example::msgs::StringMsg req;
-    req.set_entity_uri(uri);
-    node.Request("/request/deletion", req, <no callback>);
+    std::function<void(const gazebo::msgs::Empty &, const bool)> unused =
+      [](const gazebo::msgs::Empty &, const bool &)
+    {
+    };
 
-To keep things modular, different widgets in the client can send the requests
-directly, without needing to pass through a common channel.
+    msgs::Operation req;
+    req.set_type(msgs::IgnRequest::DELETE_ENTITY);
+    req.set_uri(<entity uri>);
+
+    ignition::transport::Node ignNode;
+    ignNode.Request("/request", req, unused);
+
+Requests can be sent directly from any widget in the client.
+
+##### Request helpers
+
+Due to the nature of ignition services, every request must provide a response
+callback function, even if we don't care about the reply. That's why we needed
+the `unused` lambda in the example above.
+
+None of the requests proposed in this design require responses. So every
+request would need to create a function which won't be used. That can become
+quite cumbersome and repetitive, especially compared to the current
+single-lined `gazebo::transport::requestNoReply()`.
+
+Possible solutions:
+
+* Add a feature to Ignition Transport: the possibility of making requests which
+don't require responses to
+
+* Add helper functions to Gazebo, for example:
+
+  void transport::ignRequestEntityDelete(const std::string &_uri)
+  {
+    // Unused callback
+    std::function<void(const gazebo::msgs::Empty &, const bool)> unused =
+      [](const gazebo::msgs::Empty &, const bool &)
+    {
+    };
+
+    msgs::IgnRequest req;
+    req.set_type(msgs::IgnRequest::DELETE_ENTITY);
+    req.set_uri(_uri);
+
+    ignition::transport::Node ignNode;
+    ignNode.Request("/request", req, unused);
+  }
 
 ### Notification to clients (red arrows)
 
@@ -141,54 +202,39 @@ If deletion / insertion is successfully completed, the server notifies everyone
 else through a normal topic:
 
     // Notify deletion is complete
-    ignition::transport::Node node;
-    std::string topic = "/notify/deletion";
-    node.Advertise<example::msgs::StringMsg>(topic);
+    ignition::transport::Node ignNode;
+    std::string topic = "/notification";
+    ignNode.Advertise<gazebo::msgs::StringMsg>(topic);
 
-    example::msgs::StringMsg msg;
-    msg.set_entity_uri(uri);
-    node.Publish(topic, msg);
+    gazebo::msgs::Operation msg;
+    req.set_type(msgs::IgnRequest::DELETE_ENTITY);
+    msg.set_uri(<entity uri>);
+    ignNode.Publish(topic, msg);
 
-Notifications about deletion can be sent from the `Entity::Fini` method, so
+* Notifications about deletion can be sent from the `Entity::Fini` method, so
 every entity deleted, independently of type (models, links, lights...) will
 notify the same way. (Using `Fini` is safer than destructors, because by the
 time we reach the destructor, the object's internal state might have already
 been cleaned up, so transport for example might not be available anymore).
 
-The notification for insertion can be as follows:
-
-    // Notify insertion is complete
-    ignition::transport::Node node;
-    std::string topic = "/notify/factory";
-    node.Advertise<example::msgs::StringMsg>(topic);
-
-    example::msgs::StringMsg msg;
-    msg.set_entity_sdf(sdf);
-    node.Publish(topic, msg);
-
-These can be sent in the end of each `<Entity>::Load` method (i.e.
-`Model::Load`, `Link::Load`, etc), which is when we're sure the entity was
-completely loaded without issues.
-
-For all notifications, we could have a common function such as 
-`Entity::NotifyUpdate(UpdateInfo _info)`, which publishes the messages.
+* Notification about insertion can be sent in the end of each `<Entity>::Load`
+method (i.e. `Model::Load`, `Link::Load`, etc), which is when we're sure the
+entity has been completely loaded without issues.
 
 #### Block D
 
 Each client has the responsibility of handling these in order. In `gzclient` for
-example, each widget can independently subscribe to the topics.
+example, each widget can independently subscribe to the `/notification` topic.
+For example:
 
-This is how they subscribe to notifications:
-
-    void OnDeletionNotification(const example::msgs::StringMsg &_msg)
+    void OnNotification(const gazebo::msgs::Operation &_msg)
     {
-      // Handle deletion now that we have confirmation, not when it was
-      // requested
+      // Handle deletion/insertion/moving now that we have confirmation, not
+      // when it was requested
     }
 
-    ignition::transport::Node node;
-    std::string topic = "/notify/deletion";
-    node.Subscribe(topic, OnDeletionNotification);
+    ignition::transport::Node ignNode;
+    ignNode.Subscribe("/notification", OnNotification);
 
 ### Deprecations
 
