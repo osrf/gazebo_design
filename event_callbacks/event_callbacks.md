@@ -43,28 +43,99 @@ This `id` is needed to remove the callback using `Disconnect`.
 There are numerous classes currently involved in the interface
 for registering and signaling event callbacks.
 There is a base class `Event` and a derived class `EventT`
-that is templated on the callback function signature,
-which includes input paramters.
-The `Connection` class is used as the return type of the
-`EventT::Connect` interface.
-The callback can then be removed by passing this object to the
+that is templated on the callback function input paramters.
+The `Connect` interface in the diagram returns an `id`,
+which is encapsulated in the `Connection`.
+The callback can then be removed by passing the Connection object to the
 `Event::Disconnect` interface
 or by deleting the `Connection` object.
+Internally, the event stores each callback as an `EventConnection` instance
+in a `std::map` indexed by an `int` id.
 
 ~~~
 class Event
 {
-  public: Event();
   public: virtual ~Event();
-  public: virtual void Disconnect(ConnectionPtr _c) = 0;
   public: virtual void Disconnect(int _id) = 0;
 };
 ~~~
 
-For example:
-Plot proto message: A message that carries plot data will be created to transmit data from the server to the client.
+~~~
+class Connection
+{
+  public: Connection(Event *_e, int _id);
+  public: virtual ~Connection();
+  public: int GetId() const;
+  private: int id;
+  private: Event *event;
+};
+typedef boost::shared_ptr<Connection> ConnectionPtr;
+~~~
 
-Include any UX design drawings.
+~~~
+template<typename T>
+class EventConnection
+{
+  public: EventConnection(const bool _on, boost::function<T> *_cb)
+  public: std::atomic_bool on;
+  public: std::shared_ptr<boost::function<T> > callback;
+};
+~~~
+
+~~~
+template<typename T>
+class EventT : public Event
+{
+  public: EventT();
+  public: virtual ~EventT();
+  public: ConnectionPtr Connect(const boost::function<T> &_subscriber);
+  public: virtual void Disconnect(int _id);
+  public: template<typename P1, ..., typename PN>
+          void Signal(const P1 &_p1, ..., const PN &_pN);
+  private: std::map<int, std::shared_ptr<EventConnection<T>>> connections;
+};
+~~~
+
+This is just a summary of the interface classes.
+The are some additional classes for implementing the PIMPL idiom
+and some components for synchronization and thread safety.
+
+### Lifecycle and Ownership
+
+The `EventT` instances should be available through a public interface
+and should be long-lasting.
+Currently the instances in `Events.hh` and `GuiEvents.hh`
+are implemented as static class variables, so they should last the
+full duration of the program.
+
+The `Connection` instances are created during `EventT::Connect`
+and returned with ownership transferred to the caller.
+When the `Connection` instances are destroyed, the callback is
+de-registered.
+Classes that store `Connection` instances should destroy these instances
+before destroying other private variables that are accessed
+by the callback function (see
+[gazebo pull request 2250](https://bitbucket.org/osrf/gazebo/pull-requests/2250)
+for an example of this type of error).
+
+Since the function pointers are passed as `const` references in
+`EventT::Connect`, they must be copied and then stored in the
+map of `EventConnection`s.
+They will be destroyed when disconnected.
+
+Based on this analysis, the pointer usage could be tightened in a few places:
+
+1. Return `std::unique_ptr<Connection>` from `EventT::Connect`
+to emphasize the transfer of ownership.
+
+2. Use an event reference (`Event&`) instead of pointer (`Event*`)
+in the `Connection` constructor and private member variable.
+
+3. Store the `boost::function` (or `std::function`) as an object in
+`EventConnection` rather than as a smart pointer to the object.
+
+4. Store `EventConnection` objects directly in the `EventT::connections` map
+instead of storing smart pointers.
 
 ### Performance Considerations
 Will this project cause changes to performance?
