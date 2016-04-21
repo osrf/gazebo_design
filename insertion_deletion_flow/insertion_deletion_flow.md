@@ -152,7 +152,7 @@ Clients can perform requests as follows:
     };
 
     msgs::Operation req;
-    req.set_type(msgs::IgnRequest::DELETE_ENTITY);
+    req.set_type(msgs::Operation::DELETE_ENTITY);
     req.set_uri(<entity uri>);
 
     ignition::transport::Node ignNode;
@@ -186,8 +186,8 @@ don't require responses to
     {
     };
 
-    msgs::IgnRequest req;
-    req.set_type(msgs::IgnRequest::DELETE_ENTITY);
+    msgs::Operation req;
+    req.set_type(msgs::Operation::DELETE_ENTITY);
     req.set_uri(_uri);
 
     ignition::transport::Node ignNode;
@@ -207,7 +207,8 @@ else through a normal topic:
     ignNode.Advertise<gazebo::msgs::StringMsg>(topic);
 
     gazebo::msgs::Operation msg;
-    req.set_type(msgs::IgnRequest::DELETE_ENTITY);
+    req.set_type(msgs::Operation::DELETE_ENTITY);
+    /// \param[in] _service
     msg.set_uri(<entity uri>);
     ignNode.Publish(topic, msg);
 
