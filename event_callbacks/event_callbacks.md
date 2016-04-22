@@ -177,6 +177,10 @@ which should be the preferred cleanup strategy.
 3. Store `EventConnection` objects in the `EventT::connections` map
 as unique instead of shared pointers.
 
+4. Disconnecting callbacks via `~Connection` is so effective that
+I would propose deprecating the `Disconnect(ConnectionPtr)` API
+and its wrappers in the `Events` classes.
+
 ### Performance Considerations
 Will this project cause changes to performance?
 If so, describe how.
