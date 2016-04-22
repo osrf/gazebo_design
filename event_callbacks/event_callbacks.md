@@ -51,7 +51,7 @@ static EventT<void ()> timeReset;
 The `Events` class also provides functions that wrap
 the `Connect` and `Disconnect` methods.
 
-![event interface diagram](event_callbacks.png)
+![events interface diagram](events_gazebo.png)
 
 ### Interfaces
 
