@@ -181,9 +181,9 @@ and its wrappers in the `Events` classes.
 Note that this is possible since `~Connection` uses `Event::Disconnect(int)`.
 
 ### Performance Considerations
-Will this project cause changes to performance?
-If so, describe how.
-One or more performance tests may be required.
+
+I have not studied aspects of performance, though reducing pointer indirection
+may help.
 
 ### Tests
 List and describe the tests that will be created. For example:
@@ -193,14 +193,20 @@ uses of the private `connections` data.
     1. case:
 1. Proper destruction order: there can be errors if the `Connection`
 is destroyed after one of the variables accessed in the callback function.
-    1. case:
+    1. This can be especially tricky with inheritance.
+    Consider `Joint` and `ODEJoint`: the `applyDamping` connection
+    is stored in the parent class, but is connected by the derived class.
+    It happens to use variables defined in the child class, but it will not
+    be deleted automatically until after the child class destructor.
+    Thus [manual disconnect statements](https://bitbucket.org/osrf/gazebo/src/ae8ed0e546/gazebo/physics/ode/ODEJoint.cc#ODEJoint.cc-65)
+    are added to ensure the callback is disconnected before other variables
+    are deleted.
 
 ### Pull Requests
-List and describe the pull requests that will be created to merge this project.
-Consider separating large refactoring operations from additions of new code.
-For example, the physics::SurfaceParams class was refactored in
-[pull request #891](https://bitbucket.org/osrf/gazebo/pull-request/891/refactor)
-so that a new FrictionPyramid class could be added in
-[pull request #935](https://bitbucket.org/osrf/gazebo/pull-request/935/create).
 
-Keep in mind that smaller, atomic pull requests are easier to review.
+The `Event` classes were last refactored in
+[pull request 1790](https://bitbucket.org/osrf/gazebo/pull-request/1790),
+which fixed some segfault problems.
+Some changes proposed in this document are included in the following:
+
+* [pull request 2277](https://bitbucket.org/osrf/gazebo/pull-request/2277)
