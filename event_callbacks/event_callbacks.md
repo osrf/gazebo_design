@@ -174,10 +174,11 @@ Based on this analysis, the pointer usage could be tightened in a few places:
 3. Store `EventConnection` objects in the `EventT::connections` map
 as unique instead of shared pointers.
 
-4. `Event::Disconnect(int)` is used by the destructor `~Connection`
-and is so effective that
+4. Disconnecting callbacks via the destructor `~Connection`
+is so effective that
 I would propose deprecating the `Disconnect(ConnectionPtr)` API
 and its wrappers in the `Events` classes.
+Note that this is possible since `~Connection` uses `Event::Disconnect(int)`.
 
 ### Performance Considerations
 Will this project cause changes to performance?
@@ -190,7 +191,8 @@ List and describe the tests that will be created. For example:
 1. Thread safety: there is one mutex in `EventT`, but it does not protect all
 uses of the private `connections` data.
     1. case:
-1. Test 2
+1. Proper destruction order: there can be errors if the `Connection`
+is destroyed after one of the variables accessed in the callback function.
     1. case:
 
 ### Pull Requests
