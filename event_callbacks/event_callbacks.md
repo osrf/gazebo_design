@@ -38,7 +38,24 @@ This `id` is needed to remove the callback using `Disconnect`.
 
 ![event interface diagram](event_callbacks.png)
 
+A collection of events relevant to gazebo simulations are defined
+as static members of the `gazebo::event::Events` class,
+such as the following:
+
+~~~
+static EventT<void (bool)> pause;
+static EventT<void ()> step;
+static EventT<void ()> timeReset;
+~~~
+
+The `Events` class also provides functions that wrap
+the `Connect` and `Disconnect` methods.
+
+![event interface diagram](event_callbacks.png)
+
 ### Interfaces
+
+#### `Event` and `EventT`
 
 There are numerous classes currently involved in the interface
 for registering and signaling event callbacks.
@@ -53,14 +70,6 @@ Internally, the event stores each callback as an `EventConnection` instance
 in a `std::map` indexed by an `int` id.
 
 ~~~
-class Event
-{
-  public: virtual ~Event();
-  public: virtual void Disconnect(int _id) = 0;
-};
-~~~
-
-~~~
 class Connection
 {
   public: Connection(Event *_e, int _id);
@@ -70,6 +79,15 @@ class Connection
   private: Event *event;
 };
 typedef boost::shared_ptr<Connection> ConnectionPtr;
+~~~
+
+~~~
+class Event
+{
+  public: virtual ~Event();
+  public: virtual void Disconnect(int _id) = 0;
+  public: virtual void Disconnect(ConnectionPtr _c) = 0;
+};
 ~~~
 
 ~~~
@@ -125,17 +143,17 @@ They will be destroyed when disconnected.
 
 Based on this analysis, the pointer usage could be tightened in a few places:
 
-1. Return `std::unique_ptr<Connection>` from `EventT::Connect`
-to emphasize the transfer of ownership.
+1. Change `ConnectionPtr` from `boost::shared_ptr` to
+`std::unique_ptr<Connection>` since ownership doesn't need to be shared.
+Deprecate `Event::Disconnect(ConnectionPtr&)` since
+`Event::Disconnect(int)` is used by the destructor,
+which should be the preferred cleanup strategy.
 
-2. Use an event reference (`Event&`) instead of pointer (`Event*`)
-in the `Connection` constructor and private member variable.
-
-3. Store the `boost::function` (or `std::function`) as an object in
+2. Store the `boost::function` (or `std::function`) as an object in
 `EventConnection` rather than as a smart pointer to the object.
 
-4. Store `EventConnection` objects directly in the `EventT::connections` map
-instead of storing smart pointers.
+3. Store `EventConnection` objects in the `EventT::connections` map
+as unique instead of shared pointers.
 
 ### Performance Considerations
 Will this project cause changes to performance?
@@ -145,12 +163,11 @@ One or more performance tests may be required.
 ### Tests
 List and describe the tests that will be created. For example:
 
-1. Test: Plot View
-    1. case: Plot window should appear when signaled by QT.
-    1. case: Plot simulation time should produce correct results when save to CSV
-    1. case: Signalling a close should close the plotting window.
-1. Test: Multiple plots
-    1. case: Create two plots with identical data. Saved CSV data from each should be identical
+1. Thread safety: there is one mutex in `EventT`, but it does not protect all
+uses of the private `connections` data.
+    1. case:
+1. Test 2
+    1. case:
 
 ### Pull Requests
 List and describe the pull requests that will be created to merge this project.
