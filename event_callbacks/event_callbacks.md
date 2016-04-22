@@ -167,9 +167,6 @@ Based on this analysis, the pointer usage could be tightened in a few places:
 
 1. Change `ConnectionPtr` from `boost::shared_ptr` to
 `std::unique_ptr<Connection>` since ownership doesn't need to be shared.
-Deprecate `Event::Disconnect(ConnectionPtr&)` since
-`Event::Disconnect(int)` is used by the destructor,
-which should be the preferred cleanup strategy.
 
 2. Store the `boost::function` (or `std::function`) as an object in
 `EventConnection` rather than as a smart pointer to the object.
@@ -177,7 +174,8 @@ which should be the preferred cleanup strategy.
 3. Store `EventConnection` objects in the `EventT::connections` map
 as unique instead of shared pointers.
 
-4. Disconnecting callbacks via `~Connection` is so effective that
+4. `Event::Disconnect(int)` is used by the destructor `~Connection`
+and is so effective that
 I would propose deprecating the `Disconnect(ConnectionPtr)` API
 and its wrappers in the `Events` classes.
 
