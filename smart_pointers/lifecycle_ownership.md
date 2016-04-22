@@ -210,6 +210,16 @@ to themselves.
 00000000002d2880 B gazebo::event::Events::timeReset
 ~~~
 
+The `Events` class holds many `EventT` instances as static
+class variables.
+When connecting to an `EventT`, external code receives
+a `ConnectionPtr` that automatically disconnects upon destruction.
+The `ConnectionPtr` must not outlive the parent `EventT`,
+which shouldn't be a problem for the static class variables.
+Note that additional documentation of the `Event` classes
+is given in
+[a separate design doc](https://bitbucket.org/osrf/gazebo_design/src/event_callbacks/event_callbacks/event_callbacks.md).
+
 #### common::SingletonT
 
 This leaves the `SingletonT` types `ModelDatabase` and `SystemPaths`.
