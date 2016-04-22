@@ -55,8 +55,6 @@ the `Connect` and `Disconnect` methods.
 
 ### Interfaces
 
-#### `Event` and `EventT`
-
 There are numerous classes currently involved in the interface
 for registering and signaling event callbacks.
 There is a base class `Event` and a derived class `EventT`
@@ -114,9 +112,32 @@ class EventT : public Event
 };
 ~~~
 
-This is just a summary of the interface classes.
+This is just a summary of the interface classes for an individual Event.
 The are some additional classes for implementing the PIMPL idiom
 and some components for synchronization and thread safety.
+
+The collection of events defined in `gazebo::event::Events`
+are declared as static public class members.
+There are also public wrappers for the `Connect` and `Disconnect`
+methods for each event, such as the following:
+
+~~~
+static EventT<void (bool)> pause;
+template<typename T> static ConnectionPtr ConnectPause(T _subscriber);
+static void DisconnectPause(ConnectionPtr &_subscriber);
+~~~
+
+~~~
+static EventT<void ()> step;
+template<typename T> static ConnectionPtr ConnectStep(T _subscriber);
+static void DisconnectStep(ConnectionPtr &_subscriber);
+~~~
+
+~~~
+static EventT<void ()> timeReset;
+template<typename T> static ConnectionPtr ConnectTimeReset(T _subscriber);
+static void DisconnectTimeReset(ConnectionPtr &_subscriber);
+~~~
 
 ### Lifecycle and Ownership
 
@@ -130,6 +151,7 @@ The `Connection` instances are created during `EventT::Connect`
 and returned with ownership transferred to the caller.
 When the `Connection` instances are destroyed, the callback is
 de-registered.
+The `Connection` must not outlive the `EventT` that created it.
 Classes that store `Connection` instances should destroy these instances
 before destroying other private variables that are accessed
 by the callback function (see
