@@ -62,6 +62,10 @@ insertion/deletion, but also includes things like pose change.
 * After a request has been fulfilled, the server notifies everyone else about it
 in a unified way.
 
+* The server also sends specific feedback to the requester, which is especially
+useful in case of failure to fulfill the request. (for example, if the request
+was to delete something which doesn't exist).
+
 The flow is captured in this image:
 
 ![Flow](https://bitbucket.org/osrf/gazebo_design/raw/insertion_deletion_flow/insertion_deletion_flow/flow.png)
@@ -82,7 +86,7 @@ and notifications. For example:
     /// \brief A message containing a single operation, specified by type.
     /// The operation data will be contained in another field.
     /// It can be used to request that an operation is performed, or to
-    /// notify it has been performed, for example. For example:
+    /// notify it has been performed. For example:
     ///
     /// if (msg.type() == DELETE_ENTITY)
     /// {
@@ -107,11 +111,20 @@ and notifications. For example:
       /// \brief Type of operation.
       required Type type = 1;
 
+      /// \brief Unique ID of operation.
+      optional uint32 id = 2;
+
+      /// \brief When notifying, this can be used to tell whether it was a success.
+      optional bool success = 3;
+
+      /// \brief Optional message about operation.
+      optional string msg = 4;
+
       /// \brief Entity URI in string format, for delete operations for example.
-      optional string uri = 2;
+      optional string uri = 5;
 
       /// \brief Factory message, for insert operations.
-      optional Factory factory = 3;
+      optional Factory factory = 6;
     }
 
 #### Block A
@@ -138,9 +151,9 @@ message. For example:
 Internally, all requests, independently of type, are placed in a single queue.
 The queue is processed in order at each `World::Step`.
 
-* As part of the model destruction, some events might be triggered (which result
-  in work to do in other threads, such as the sensor thread). This might need
-  better synchronization or not.
+* For certain operationsm, events might be triggered and result
+  in work to do in other threads, such as the sensor thread. This might require
+  better synchronization.
 
 #### Block B
 
@@ -162,37 +175,23 @@ Requests can be sent directly from any widget in the client.
 
 ##### Request helpers
 
-Due to the nature of ignition services, every request must provide a response
-callback function, even if we don't care about the reply. That's why we needed
-the `unused` lambda in the example above.
+The snippet above can become cumbersome and repetitive, especially compared
+to the current single-lined `gazebo::transport::requestNoReply()`. For requests
+which will be used often, a new header `gazebo/transport/Request.hh`, will be
+provided, with functions such as:
 
-None of the requests proposed in this design require responses. So every
-request would need to create a function which won't be used. That can become
-quite cumbersome and repetitive, especially compared to the current
-single-lined `gazebo::transport::requestNoReply()`.
+    /// \brief Helper function to create entity delete requests using ignition
+    /// transport.
+    /// \param[in] _uri URI of entity to be deleted.
+    GZ_TRANSPORT_VISIBLE
+    size_t RequestEntityDelete(const std::string &_uri);
 
-Possible solutions:
+### Response to requester (dashed blue lines)
 
-* Add a feature to Ignition Transport: the possibility of making requests which
-don't require responses to
-
-* Add helper functions to Gazebo, for example:
-
-  void transport::ignRequestEntityDelete(const std::string &_uri)
-  {
-    // Unused callback
-    std::function<void(const gazebo::msgs::Empty &, const bool)> unused =
-      [](const gazebo::msgs::Empty &, const bool &)
-    {
-    };
-
-    msgs::Operation req;
-    req.set_type(msgs::Operation::DELETE_ENTITY);
-    req.set_uri(_uri);
-
-    ignition::transport::Node ignNode;
-    ignNode.Request("/request", req, unused);
-  }
+Each request will be given a unique id. Once the request has been processed,
+the server will send a notification through the normal notification topic,
+containing the same id as the request, contaning a message about success or
+failure.
 
 ### Notification to clients (red arrows)
 
@@ -221,6 +220,9 @@ been cleaned up, so transport for example might not be available anymore).
 * Notification about insertion can be sent in the end of each `<Entity>::Load`
 method (i.e. `Model::Load`, `Link::Load`, etc), which is when we're sure the
 entity has been completely loaded without issues.
+
+* These notifications are sent far from where the request was received, and
+won't contain the request id.
 
 #### Block D
 
