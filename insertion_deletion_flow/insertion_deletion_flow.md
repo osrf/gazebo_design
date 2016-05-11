@@ -46,7 +46,7 @@ something we should be aware of.
     > [gui::GLWidget](https://bitbucket.org/osrf/gazebo/src/0a567e9285875359108a15f3be678dea8f8fb5bc/gazebo/gui/GLWidget.cc?fileviewer=file-view-default#GLWidget.cc-1267)
     > are listening to `entity_delete`.
 
-## Desired flow
+## Requirements
 
 * Anyone can request a deletion / insertion: the server itself, clients, plugins
 running in the server, standalone programs, etc.
@@ -62,9 +62,11 @@ insertion/deletion, but also includes things like pose change.
 * After a request has been fulfilled, the server notifies everyone else about it
 in a unified way.
 
-* The server also sends specific feedback to the requester, which is especially
-useful in case of failure to fulfill the request. (for example, if the request
-was to delete something which doesn't exist).
+* The server also sends specific feedback to the requester. That's useful in
+case of failure to fulfill the request (for example, if the request
+was to delete something which doesn't exist) or if the request had to be adapted
+(for example, if the name of the entity inserted had to be changed to avoid
+overlap with existing entities).
 
 The flow is captured in this image:
 
@@ -74,8 +76,17 @@ The flow is captured in this image:
 
 ### Requests to the server (blue arrows)
 
-A new message type will be created, which can be used for all kinds of requests
-and notifications. For example:
+* All requests will use the same service (`<world_name>/request`)
+
+* Request types will be identified by an `operation_type` field in the message.
+
+* The type of entity which the operation applies to will be given by an
+`entity_type` field in the message.
+
+* A new message type will be created, which can be used for all kinds of requests
+and notifications.
+
+The message definition will be as follows:
 
     package gazebo.msgs;
 
@@ -90,10 +101,10 @@ and notifications. For example:
     ///
     /// if (msg.type() == DELETE_ENTITY)
     /// {
-    ///   if (msg.has_uri())
+    ///   if (msg.has_entity_name())
     ///     <perform deletion>
     ///   else
-    ///     gzwarn << "Message does not contain URI, which is required for deletion operation.\n";
+    ///     gzwarn << "Message does not contain entity name, which is required for deletion operation.\n";
     /// }
 
     message Operation
@@ -120,8 +131,8 @@ and notifications. For example:
       /// \brief Optional message about operation.
       optional string msg = 4;
 
-      /// \brief Entity URI in string format, for delete operations for example.
-      optional string uri = 5;
+      /// \brief Name of entity invilved in the operation.
+      optional string name = 5;
 
       /// \brief Factory message, for insert operations.
       optional Factory factory = 6;
@@ -166,7 +177,7 @@ Clients can perform requests as follows:
 
     msgs::Operation req;
     req.set_type(msgs::Operation::DELETE_ENTITY);
-    req.set_uri(<entity uri>);
+    req.set_name(<entity name>);
 
     ignition::transport::Node ignNode;
     ignNode.Request("/request", req, unused);
@@ -182,9 +193,9 @@ provided, with functions such as:
 
     /// \brief Helper function to create entity delete requests using ignition
     /// transport.
-    /// \param[in] _uri URI of entity to be deleted.
+    /// \param[in] _name Name of entity to be deleted.
     GZ_TRANSPORT_VISIBLE
-    size_t RequestEntityDelete(const std::string &_uri);
+    size_t RequestEntityDelete(const std::string &_name);
 
 ### Response to requester (dashed blue lines)
 
@@ -208,7 +219,7 @@ else through a normal topic:
     gazebo::msgs::Operation msg;
     req.set_type(msgs::Operation::DELETE_ENTITY);
     /// \param[in] _service
-    msg.set_uri(<entity uri>);
+    msg.set_name(<entity name>);
     ignNode.Publish(topic, msg);
 
 * Notifications about deletion can be sent from the `Entity::Fini` method, so
