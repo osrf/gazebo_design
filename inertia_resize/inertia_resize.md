@@ -40,7 +40,9 @@ and scaled in a similar manner to the other resize tool.
 4. Properly account for off-diagonal inertia terms.
 This requires the ability to diagonalize a 3x3 symmetric
 positive definite matrix.
-(see [issue 880](https://bitbucket.org/osrf/gazebo/issues/880)).
+This is discussed in [issue 880](https://bitbucket.org/osrf/gazebo/issues/880)
+and has been implemented in
+[ign-math pull request 82](https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/82).
 
 ### Box of equivalent inertia
 
@@ -191,5 +193,6 @@ so this should be checked by the algorithm.
   [issue 880](https://bitbucket.org/osrf/gazebo/issues/880).
   * [ign-math pull request 77](https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/77)
   * [ign-math pull request 79](https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/79)
+  * [ign-math pull request 82](https://bitbucket.org/ignitionrobotics/ign-math/pull-requests/82)
 * Correct inertia visualization to account for off-diagonal terms.
 * Add GUI tests and features.
