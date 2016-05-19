@@ -169,7 +169,9 @@ Based on this analysis, the pointer usage could be tightened in a few places:
 `std::unique_ptr<Connection>` since ownership doesn't need to be shared.
 
 2. Store the `boost::function` (or `std::function`) as an object in
-`EventConnection` rather than as a smart pointer to the object.
+`EventConnection` rather than as a smart pointer to the object
+(implemented in
+[pull request 2277](https://bitbucket.org/osrf/gazebo/pull-request/2277)).
 
 3. Store `EventConnection` objects in the `EventT::connections` map
 as unique instead of shared pointers.
