@@ -39,7 +39,52 @@ the models cache, and the online database).
 
 ### Interfaces
 
-model.config file
+Models can be included in world files
+or nested within other models using
+`<include>` tags such as the following:
+
+~~~
+<include>
+  <uri>model://ground_plane</uri>
+  <name>different_model_name</name>
+  <static>false</static>
+  <pose>10 0 0 0 0 0</pose>
+</include>
+~~~
+
+model:// in uri tag means look for model with that name
+
+Metadata about each model is stored in the `model.config` file.
+It includes a model name suitable for display
+(typically with capital letters and spaces),
+the name of the sdf files for specific sdf versions,
+author information
+and a description.
+An [example](https://bitbucket.org/osrf/gazebo_models/raw/default/cordless_drill/model.config)
+is shown below:
+
+~~~
+<?xml version="1.0"?>
+
+<model>
+  <name>Cordless Drill</name>
+  <version>1.0</version>
+  <sdf version="1.2">model-1_2.sdf</sdf>
+  <sdf version="1.3">model-1_3.sdf</sdf>
+  <sdf version="1.4">model-1_4.sdf</sdf>
+  <sdf version="1.5">model.sdf</sdf>
+
+  <author>
+    <name>John Hsu</name>
+    <email>hsu@osrfoundation.org</email>
+  </author>
+
+  <description>
+    A cordless drill..
+  </description>
+</model>
+~~~
+
 
 `GAZEBO_*_PATH` environment variables
 Describe any new interfaces or modifications to interfaces, where interfaces are protobuf messages, function API changes, SDF changes, and GUI changes. These changes can be notional.
