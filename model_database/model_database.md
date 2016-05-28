@@ -52,7 +52,12 @@ or nested within other models using
 </include>
 ~~~
 
-model:// in uri tag means look for model with that name
+The `model://` prefix in the `<uri>` tag indicates that the
+gazebo model paths should be searched for a resource matching
+the supplied value (`ground_plane` in the example above).
+Gazebo maintains a list of model paths that includes
+`$HOME/.gazebo/models` and the contents of the `:` delimited
+environment variable `GAZEBO_MODEL_PATHS`.
 
 Metadata about each model is stored in the `model.config` file.
 It includes a model name suitable for display
