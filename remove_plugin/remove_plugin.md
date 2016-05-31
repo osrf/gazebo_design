@@ -9,16 +9,16 @@ in simulation.
 ### Requirements
 
 1. There should be a GUI element (button, context menu) for each currently
-loaded plugin, which when clicked, requests the server to remove the plugin.
+loaded plugin, which when clicked, sends a command to remove the plugin.
 
-1. There must be a way to uniquely identify each plugin so it is clear to the server
+1. There must be a way to uniquely identify each plugin so it is clear
 which plugin is supposed to be removed.
 
-1. Once the server receives the request, it should completely unload the
+1. Once the plugin owner receives the request, it should completely unload the
 plugin and clear all memory related to it.
 
-1. Once the plugin is removed, server notifies all clients so they can remove
-the plugin from their lists.
+1. Once the plugin is removed, a notification is sent to all clients so they
+can remove the plugin from their lists.
 
 1. It should be possible to undo the command to delete a plugin, to the effect
 that the plugin is reloaded and the simulation state is sent back to the way it
@@ -71,14 +71,18 @@ URIs for plugins could look like this:
 * Model plugin: `data://world/default/model/submarine_buoyant/plugin/buoyancy`
 * World plugin: `data://world/default/plugin/wind`
 * GUI plugin: `data://client/default/plugin/timer`
+* TODO: add others...
 
 ### Unloading plugins
 
 * It should be possible to unload a plugin without ending the whole process.
 * Plugins can be unloaded on their destructors.
-* TODO: We need an API to remove plugins: who should trigger the plugin deletion?
-Do models own model plugins? Does the world own world plugins?
-Does the plugin itself receive a command to remove it?
+* All memory related to that plugin must be freed (including all smart pointers).
+* TODO: We need an API to remove plugins:
+    * Who should trigger the plugin deletion? Who is the plugin "owner"?
+    * Do models own model plugins?
+    * Does the world own world plugins?
+    * Does the plugin own itself, so it directly receives a command to remove it?
 
 ### GUI
 
@@ -92,6 +96,8 @@ It would be interesting to add performance tests.
 
 ### Pull Requests and tests
 
+Implementation could be broken into the following pull requests, in this order:
+
 1. Implement URI for plugins:
     * Add `Plugin::URI()` function and implement it for each derived class
       `ModelPlugin::URI`, `GUIPlugin::URI`, etc.
@@ -101,6 +107,7 @@ It would be interesting to add performance tests.
     * Uncomment the call to `dlclose` on the destructor.
     * Add unit test creating and destroying a plugin to make sure it is closed.
     * Make other modifications to make sure the test passes for all platforms.
+    * Add performance test?
 
 1. Add API for removing plugins
     * Implement API for removing plugins (still TBD)
