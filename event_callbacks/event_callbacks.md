@@ -174,7 +174,8 @@ Based on this analysis, the pointer usage could be tightened in a few places:
 [pull request 2277](https://bitbucket.org/osrf/gazebo/pull-request/2277)).
 
 3. Store `EventConnection` objects in the `EventT::connections` map
-as unique instead of shared pointers.
+as unique instead of shared pointers (implemented in
+[pull request 2317](https://bitbucket.org/osrf/gazebo/pull-request/2317)).
 
 4. Disconnecting callbacks via the destructor `~Connection`
 is so effective that
@@ -212,3 +213,4 @@ which fixed some segfault problems.
 Some changes proposed in this document are included in the following:
 
 * [pull request 2277](https://bitbucket.org/osrf/gazebo/pull-request/2277)
+* [pull request 2317](https://bitbucket.org/osrf/gazebo/pull-request/2317)
