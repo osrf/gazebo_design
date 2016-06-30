@@ -41,7 +41,7 @@ the models cache, and the online database).
 
 Models can be included in world files
 or nested within other models using
-`<include>` tags such as the following:
+`<include><uri>` tags such as the following:
 
 ~~~
 <include>
