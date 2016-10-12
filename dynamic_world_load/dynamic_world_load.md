@@ -27,7 +27,7 @@ The data type for the `world_models` must be one that allows to organize the mod
 
 The Model Handler class is also able to pre load models based on the velocity and position of the robot or robots, these models are stored in the list `pre_loaded_models`.
 
-Finally, based on the position given, the Hadler Model class keeps track of the current loaded models in the world_loaded_model`list. Every time that the method update is invoked it updates this list, determinating which models must go back to the `world_model` and which must be loaded.
+Finally, based on the position given, the Hadler Model class keeps track of the current loaded models in the `world_loaded_model` list. Every time that the method update is invoked it updates this list, determinating which models must go back to the `world_model` and which must be loaded.
 
 ### Interfaces
 
